@@ -31,6 +31,5 @@ Project doctrine is **not** duplicated under `.claude/`:
 - **`high-level-architecture.md`** — three-tier narrative, capability composition, SKU compositions, open-core split, Family-product framing.
 - **`b2b-technical-whitepaper.md`** — buyer-facing summary + roadmap.
 - **`templates/`** — `ADR-TEMPLATE.md`, `RFC-TEMPLATE.md`, `RESEARCH-TEMPLATE.md` + `README.md` (template usage rules).
-- **`execution-plan-whitepaper-hla-restructure.md`** — historical trail behind major restructures (don't silently delete plan content; mark as historical).
 
 When skills/agents need policy context, they reference these — they do not restate them.

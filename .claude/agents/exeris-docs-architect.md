@@ -31,7 +31,6 @@ Architect/reviewer for the central documentation hub. Prioritise three-tier narr
 - Read `high-level-architecture.md` for three-tier narrative.
 - Read `b2b-technical-whitepaper.md` for buyer-facing roadmap.
 - Read `adr-index.md` for ADR namespace; `business-adr-index.md` for BUS namespace.
-- Read `execution-plan-whitepaper-hla-restructure.md` § 6 for reconciliation log.
 - For subsystem-specific questions, read the owning repo's subsystem doc (e.g. `~/exeris-systems/exeris-kernel/docs/subsystems/bootstrap.md`).
 
 ## Hard Constraints

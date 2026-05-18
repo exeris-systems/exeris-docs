@@ -11,7 +11,7 @@ model: inherit
 Delivery agent for editing the large central docs without re-litigating architecture unless a violation is detected.
 
 ## Primary Responsibilities
-- Apply edits to `high-level-architecture.md`, `b2b-technical-whitepaper.md`, `execution-plan-whitepaper-hla-restructure.md`, templates, ADR content files.
+- Apply edits to `high-level-architecture.md`, `b2b-technical-whitepaper.md`, templates, ADR content files.
 - Follow the editing discipline (per `CLAUDE.md`):
   1. **Targeted grep before any edit** (`grep -nE '<pattern>' <file>`) to find every site that needs the same correction — single-edit changes leave inconsistencies.
   2. **After a non-trivial edit, sweep for drift patterns** on the edited file (use `exeris-docs-drift-pattern-sweep-review` skill).
