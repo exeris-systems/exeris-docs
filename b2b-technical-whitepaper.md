@@ -161,13 +161,29 @@ Three representative rows. Full results, including JFR profiles and reproducibil
 
 #### 4.1 Infrastructure Density — Distributed Sagas (ADR-013)
 
-Matched-contract comparison for distributed orchestration; identical payload, 3% failure rate, same hardware.
+Saga frameworks make three guarantees, not one: **forward progress**, **compensation under failure**, and **termination**. Most published saga benchmarks measure only forward progress, and then call the framework "correct" if the happy path completes. Exeris evaluates all three on every comparative run, because the failure-path behaviour is what determines the operational shape of the deployment.
 
-| Stack | RSS | Threads | CPU-seconds |
+The reference scenario `e2e-shop-order-saga` (five-step order saga: register customer → recommend products → add to cart → get cart → create order, payment failure injected at a configured 3% rate, compensation must roll back stock reservation and release the order) is published in `exeris-benchmarks` under matched-contract fairness gating, with raw artefacts and JFR profiles for every run. The dev-laptop run on 2026-05-05 (AMD Ryzen 5 5600, 32 GB DDR4, JDK 26, loopback HTTP/1.1, 180 s window) reports the following — the table separates the *correctness asymmetry* from the *density asymmetry* because they tell two different parts of the same story:
+
+| Stack                                | App RSS  | App threads | App CPU-s | Saga success | Compensation (cfg: 3%) | Saga unresolved |
+|---|---|---|---|---|---|---|
+| **Exeris (Community)**               | 459 MB   | 66          | 24.7 s    | 96.7%        | **3.32% ✓ (matched)** | **0% ✓**        |
+| Quarkus 3 + Axon Framework + Neo4j   | 752 MB   | 94          | 22.3 s    | 98.2%        | **0% ✗**              | **1.82% ✗**     |
+| Spring Boot 3 + Axon Framework + Neo4j | 1,312 MB | 81          | 33.3 s    | 98.8%        | **0% ✗**              | **1.22% ✗**     |
+
+Two unrelated host runtimes (Quarkus 3 and Spring Boot 3) carrying the same Axon-Framework saga model both report **0% compensations** under a *configured* 3% failure rate. The injected failures did not disappear — they surface as `saga_unresolved` (1.82% Quarkus, 1.22% Spring): sagas dispatched into Axon Server that did not reach a terminal state before the benchmark window closed. This is not a runtime quirk; it is the structural signature of **async event-sourced dispatch returning before the work is done**. The order endpoint replies `202 Accepted` as soon as the event is published; the saga continues in a separate process with no one waiting on the request path, and a finite window cannot guarantee compensation observability.
+
+Exeris's native `Flow` engine runs the saga state machine inline on the request virtual thread, persisting off-heap state before the HTTP response. When the response says "saga compensated", the compensation has executed. The 3.32% compensation rate matches the 3% configured injection within statistical noise; the saga-unresolved column is structurally 0% because no work is left outstanding when the request returns. The full-system density numbers compound this:
+
+| Resource           | Exeris (in-process) | Spring + Axon (app + Axon Server)  | Quarkus + Axon (app + Axon Server) |
 |---|---|---|---|
-| Exeris (Community) | 459 MB | 66 | 24.7 |
-| Standard Java (Spring + Reactor) | ~1.54 GB | ~215 | ~48 |
-| **Ratio** | **3.3× lower memory** | **3.3× fewer threads** | **~2× lower CPU** |
+| Memory             | **459 MB**          | ~1.31 GB + ~0.85 GB = **~2.16 GB** | ~0.75 GB + ~0.79 GB = **~1.54 GB** |
+| Threads            | **66**              | 81 + ~140 = **~221**               | 94 + ~123 = **~217**               |
+| CPU-seconds        | **24.7 s**          | 33.3 + ~52 = **~85 s**             | 22.3 + ~26 = **~48 s**             |
+
+Drawing the boundary tightly around the application JVM hides the Axon Server cost (separate process, ~787 MB / ~850 MB RSS, 120–148 PIDs). Drawing it around "what does it take to run a saga end-to-end?" — the Exeris in-process path is **3.3× lower memory, 3.3× fewer threads, ~2× lower CPU** versus Spring + Axon, with the additional fact that the Exeris path also compensates correctly.
+
+These numbers are published as `claim_scope: exploratory` on `hardware_profile: dev-laptop` — the comparative-eligible re-run on `perf-box-amd64` (baremetal, WAN between load generator and target) is on the public benchmark roadmap, and the data above will either hold up or fall apart under that re-run. The compensation correctness asymmetry, however, is reproducible end-to-end today via `scripts/run-e2e-shop-order-saga-campaign.sh` in `exeris-benchmarks`, and is mechanically explained: a framework that returns before work is done will always show both the "fast" latency and the missing compensations.
 
 #### 4.2 Extreme Throughput — TLS Record Path
 
