@@ -16,7 +16,6 @@ When sources disagree, prefer in this order:
 2. **The ADR registry** ([`adr-index.md`](adr-index.md)) and the ADR file it points at. ADRs are the long-lived architectural intent.
 3. **High-Level Architecture** ([`high-level-architecture.md`](high-level-architecture.md)) for the ecosystem-wide structural narrative (C4 model, three-tier architecture, capability composition model, SKU compositions, open-core split, telemetry path, Family-product framing).
 4. **B2B technical whitepaper** ([`b2b-technical-whitepaper.md`](b2b-technical-whitepaper.md)) for the buyer-facing summary and roadmap.
-5. **Execution plans** (e.g. [`execution-plan-whitepaper-hla-restructure.md`](execution-plan-whitepaper-hla-restructure.md)) for the historical trail and post-execution reconciliation behind major restructures.
 
 If a higher-precedence source contradicts a lower one, the higher source wins and the lower source is a doc-drift task. Never the reverse.
 
@@ -107,7 +106,6 @@ The whitepaper and HLA each cleared 5,000+ words after the 2026-05-12 restructur
 
 - Run a targeted grep before any edit (`grep -nE '<pattern>' high-level-architecture.md` etc.) to find every site that needs the same correction. Single-edit changes leave inconsistencies.
 - After a non-trivial edit, sweep for the drift-patterns list above on the edited file.
-- The execution plan ([`execution-plan-whitepaper-hla-restructure.md`](execution-plan-whitepaper-hla-restructure.md)) carries a §6 Post-Execution Reconciliation section that documents 13 deviations from the original plan. When a new architectural correction surfaces, add it as §6.N to keep the historical trail intact.
 - Don't silently delete plan content — mark superseded plan paragraphs as historical-intent in the reconciliation, don't rewrite them in place.
 
 ## Language
