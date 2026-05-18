@@ -25,7 +25,6 @@ The platform is structured in three tiers, detailed in `high-level-architecture.
 | [`adr/`](adr/) | Platform-scope tech ADRs that live in this repo (ADR-001, ADR-002, ADR-004, ADR-006, ADR-020). Per-repo ADRs live next to their owning code. |
 | [`business-adr/`](business-adr/) | Platform-scope business ADRs (BUS-001 R&D Cooperation Model, BUS-002 R&D Infrastructure Model). |
 | [`templates/`](templates/) | Decision-document templates: `RESEARCH-TEMPLATE.md`, `RFC-TEMPLATE.md`, `ADR-TEMPLATE.md`. See lifecycle notes in [`templates/README.md`](templates/README.md). |
-| [`execution-plan-whitepaper-hla-restructure.md`](execution-plan-whitepaper-hla-restructure.md) | The execution plan and post-execution reconciliation behind the 2026-05-12 whitepaper/HLA restructure. |
 
 ## ADR registry conventions
 

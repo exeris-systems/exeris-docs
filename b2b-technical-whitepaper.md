@@ -317,4 +317,4 @@ The result is measurable — in RSS, threads, CPU-seconds, SKU benchmark numbers
 
 ---
 
-**Further reading.** [`high-level-architecture.md`](high-level-architecture.md) — C4 model, capability composition model, SKU compositions, and Family product architecture. [`exeris-kernel/docs/whitepaper.md`](../exeris-kernel/docs/whitepaper.md) — substrate technical pillars, SLA/SLO baseline, operational mantras. [`adr-index.md`](adr-index.md) — full decision registry. [`execution-plan-whitepaper-hla-restructure.md`](execution-plan-whitepaper-hla-restructure.md) — the restructure plan this document was authored against.
+**Further reading.** [`high-level-architecture.md`](high-level-architecture.md) — C4 model, capability composition model, SKU compositions, and Family product architecture. [`exeris-kernel/docs/whitepaper.md`](../exeris-kernel/docs/whitepaper.md) — substrate technical pillars, SLA/SLO baseline, operational mantras. [`adr-index.md`](adr-index.md) — full decision registry.
