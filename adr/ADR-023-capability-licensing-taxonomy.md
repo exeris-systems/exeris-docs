@@ -73,7 +73,7 @@ The 2026-05-12 cap inventory established the per-layer distribution: **3 `commun
 ### 📋 What is NOT in scope
 
 - **The text of the Exeris Commercial License itself.** This ADR commits to the BSL-style source-available shape; the canonical licence document lives outside this ADR (typically a `LICENSE-COMMERCIAL.md` file at the repository root of every `commercial`-licensed cap repo).
-- **Per-cap pricing or SKU bundling.** This ADR is silent on commercial terms. The SKU pricing model lives in business strategy documents (BUS-NNN namespace) and in customer-facing pricing pages.
+- **Per-cap pricing or SKU bundling.** This ADR is silent on commercial terms. The SKU pricing model lives in Exeris's internal business strategy registry (maintained outside this repository) and in customer-facing pricing pages.
 - **License changes for kernel-tier code.** `exeris-kernel`, `exeris-kernel-enterprise`, `exeris-spring-runtime`, `exeris-sdk`, `exeris-tooling`, and other Tier 1 substrate repositories continue to ship under their existing licence terms per ADR-008 (Open-Core Strategy & Commoditization of Off-Heap TLS). This ADR does not retroactively re-licence those repositories.
 - **Family product repository licensing.** `budgetHQ/` and any future Family product repositories are proprietary independent SaaS — they sit outside this taxonomy entirely per HLA §6.4.
 
@@ -118,7 +118,7 @@ Bot Blocker is closed not because Exeris Systems is being cagey about commercial
 
 ### Pricing-model framing (referenced, not normative here)
 
-This ADR is silent on pricing. The pricing model that maps cleanly onto the three-tier architecture + source-availability posture is documented separately under the BUS-NNN namespace. The intended shape, captured here only as a forward reference, is:
+This ADR is silent on pricing. The pricing model that maps cleanly onto the three-tier architecture + source-availability posture is documented separately in Exeris's internal business strategy registry (maintained outside this repository). The intended shape, captured here only as a forward reference, is:
 
 - **Free tier** — Community kernel + community-licensed caps, self-operated, any use. Ecosystem adoption surface.
 - **Platform — Community subscription** — SKU compositions on Community kernel with operational guarantees, support, security updates, SLA. SMB and mid-market.
@@ -126,7 +126,7 @@ This ADR is silent on pricing. The pricing model that maps cleanly onto the thre
 - **Managed cloud** — Exeris Systems operates the SKU as a managed service. Highest-tier hosted offering, usage-based pricing.
 - **Code Detachment Fee** — one-time licence for perpetual ownership of the deployed SKU version, orthogonal to subscription tier, scoped per obligation 9 above based on the SKU's source-visibility value.
 
-Comparable revenue models in source-available B2B infrastructure (GitLab, Confluent, Elastic, Hashicorp, MongoDB, Grafana Labs) demonstrate that source visibility does not constrain commercial revenue — operational guarantees, Enterprise-tier features, and managed hosting carry the revenue independently of source-licence terms. The pricing-model ADR (BUS-NNN, drafted separately) will incorporate the specific tier pricing.
+Comparable revenue models in source-available B2B infrastructure (GitLab, Confluent, Elastic, Hashicorp, MongoDB, Grafana Labs) demonstrate that source visibility does not constrain commercial revenue — operational guarantees, Enterprise-tier features, and managed hosting carry the revenue independently of source-licence terms. The pricing-model decision, drafted separately in Exeris's internal business strategy registry, will incorporate the specific tier pricing.
 
 ### Cross-references for this amendment
 

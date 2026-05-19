@@ -6,7 +6,7 @@ argument-hint: ADR PR / new ADR file / index update to audit
 Audit this ADR change against registry discipline.
 
 ADR registry rules (per repo `CLAUDE.md` + `adr/ADR-020-open-core-documentation-mirror-policy.md`):
-- **Reserve the number first.** A new ADR adds its row to `adr-index.md` (or `business-adr-index.md` for BUS-NNN) BEFORE the ADR-content file lands.
+- **Reserve the number first.** A new ADR adds its row to `adr-index.md` BEFORE the ADR-content file lands.
 - **Filename pattern**: `ADR-NNN-<lowercase-kebab-title>.md` — 3-digit zero-padded; replace `&` with `and`; drop other punctuation.
 - **Authoritative location per scope**:
   - Platform-scope → `exeris-docs/adr/`
@@ -22,7 +22,7 @@ Change:
 $ARGUMENTS
 
 Please review:
-1. Is the ADR number reserved in `adr-index.md` (or `business-adr-index.md`) BEFORE the content file is added?
+1. Is the ADR number reserved in `adr-index.md` BEFORE the content file is added?
 2. Does the filename match `ADR-NNN-<lowercase-kebab-title>.md` exactly?
 3. Does the file location match the scope (platform / per-repo / cross-repo / enterprise-private)?
 4. For cross-repo: are `ADR-NNN.link.md` stubs in every affected repo?

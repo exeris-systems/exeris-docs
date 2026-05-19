@@ -30,7 +30,7 @@ Architect/reviewer for the central documentation hub. Prioritise three-tier narr
 - Read `CLAUDE.md` for the full drift-pattern list and editing discipline.
 - Read `high-level-architecture.md` for three-tier narrative.
 - Read `b2b-technical-whitepaper.md` for buyer-facing roadmap.
-- Read `adr-index.md` for ADR namespace; `business-adr-index.md` for BUS namespace.
+- Read `adr-index.md` for the ADR namespace.
 - For subsystem-specific questions, read the owning repo's subsystem doc (e.g. `~/exeris-systems/exeris-kernel/docs/subsystems/bootstrap.md`).
 
 ## Hard Constraints
@@ -49,7 +49,7 @@ For each finding: drift pattern / framing issue → why (which precedence layer 
 `<ALLOW | ALLOW WITH CONDITIONS | REFUSE>`
 
 ### Scope
-`<HLA | whitepaper | adr-index | business-adr-index | execution-plan | template | platform-scope ADR | cross-repo ADR>`
+`<HLA | whitepaper | adr-index | execution-plan | template | platform-scope ADR | cross-repo ADR>`
 
 ### Why
 `<short rationale grounded in CLAUDE.md doc precedence / three-tier narrative / drift-pattern list>`

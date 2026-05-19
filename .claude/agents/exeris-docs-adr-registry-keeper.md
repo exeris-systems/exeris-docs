@@ -11,7 +11,7 @@ model: inherit
 Owner of the single ADR numbering namespace and the discipline that keeps it usable.
 
 ## Primary Responsibilities
-- Reserve ADR numbers in `adr-index.md` (and `BUS-NNN` in `business-adr-index.md`) BEFORE the ADR-content file lands.
+- Reserve ADR numbers in `adr-index.md` BEFORE the ADR-content file lands.
 - Enforce filename pattern: `ADR-NNN-<lowercase-kebab-title>.md` — 3-digit zero-padded; replace `&` with `and`; drop other punctuation. Examples: `ADR-023-capability-licensing-taxonomy.md`, `ADR-024-capability-composition-model.md`.
 - Enforce authoritative location per scope:
   - Platform-scope ADRs → `exeris-docs/adr/`.
@@ -26,7 +26,6 @@ Owner of the single ADR numbering namespace and the discipline that keeps it usa
 
 ## Preflight
 - Read `adr-index.md` for the canonical numbering.
-- Read `business-adr-index.md` for the BUS namespace.
 - Read `adr/ADR-020-open-core-documentation-mirror-policy.md` for the visibility taxonomy authoritative source.
 - Read `adr/ADR-023-capability-licensing-taxonomy.md` for license taxonomy.
 - Read `templates/README.md` for template selection rules.
@@ -52,7 +51,7 @@ For each ADR action: scope → location → number → filename → visibility �
 `<platform | per-repo: <repo> | cross-repo: <repos> | enterprise-private: <repo>>`
 
 ### Proposed Number
-`ADR-NNN` (or `BUS-NNN`) — next free in `adr-index.md` (or `business-adr-index.md`)
+`ADR-NNN` — next free in `adr-index.md`
 
 ### Filename
 `ADR-NNN-<lowercase-kebab-title>.md`

@@ -512,7 +512,7 @@ The Family product pattern is extensible — additional Family products may emer
 
 ## 10. References
 
-- **Decision registries.** Tech ADRs: [`adr-index.md`](adr-index.md). Business ADRs (`BUS-NNN`): [`business-adr-index.md`](business-adr-index.md). Templates and lifecycle: [`templates/README.md`](templates/README.md).
+- **Decision registries.** Tech ADRs: [`adr-index.md`](adr-index.md). Business decisions (legal / IP / financial / procurement) are kept in a separate, private decision registry maintained outside this repository. Templates and lifecycle: [`templates/README.md`](templates/README.md).
 - **Kernel whitepaper.** [`exeris-kernel/docs/whitepaper.md`](../exeris-kernel/docs/whitepaper.md) — long-form substrate technical pillars, SLA/SLO baseline table, TCK-enforced performance contract.
 - **B2B technical whitepaper.** [`b2b-technical-whitepaper.md`](b2b-technical-whitepaper.md) — buyer-facing summary of evidence, three-tier architecture, SKU inventory, and adoption paths.
 - **Source-of-truth subsystem docs.** Bootstrap DAG: [`exeris-kernel/docs/subsystems/bootstrap.md`](../exeris-kernel/docs/subsystems/bootstrap.md). Crypto + TLS engine placement: [`exeris-kernel/docs/subsystems/crypto.md`](../exeris-kernel/docs/subsystems/crypto.md) and [`exeris-kernel-enterprise/docs/subsystems/crypto.md`](../exeris-kernel-enterprise/docs/subsystems/crypto.md). NUMA: [`exeris-kernel-enterprise/docs/subsystems/memory.md`](../exeris-kernel-enterprise/docs/subsystems/memory.md) §"NUMA-Aware Allocation".

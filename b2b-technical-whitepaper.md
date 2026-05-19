@@ -258,10 +258,7 @@ The Family Product Hosting model establishes a structural fact: the platform is 
 
 ### 6. Sovereignty & IP Ownership
 
-Two contractual frames govern the IP boundary, both recorded in the business ADR registry:
-
-- **R&D Cooperation Model (BUS-001).** Customer-funded work on the Exeris stack is **B2B subcontracting**, not joint IP. Exeris retains ownership of platform code; customers retain ownership of their domain implementations. Any FENG / Horizon / Eureka framing reads as subcontracting only, never as shared IP.
-- **R&D Infrastructure Model (BUS-002).** Virtual-lab infrastructure for reproducible benchmark and conformance work, governed by the matched-contract fairness rules in `exeris-benchmarks`.
+The IP boundary between Exeris Systems and its customers is governed by internal commercial policy that is maintained in Exeris's private decision registry and made available to counterparties under NDA during commercial discussions. The substrate-level mechanics described below — code detachment and the open-core split — are the technical guarantees that flow from those contracts and that any reader can verify against the public open-core code.
 
 Operationally at the substrate layer:
 

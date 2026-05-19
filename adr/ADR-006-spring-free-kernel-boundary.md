@@ -18,7 +18,7 @@ That model was abandoned. Three forces drove the abandonment:
 
 1. **No Waste Compute is incompatible with Spring's hot-path overhead.** Spring Web's request DTO churn, reactive bridge wrapping, and reflection-heavy ApplicationContext lookups are the exact costs the platform exists to eliminate.
 2. **Open-core distribution requires a Spring-free kernel.** The kernel ships as `exeris-kernel-spi`, `exeris-kernel-core`, `exeris-kernel-community`, and `exeris-kernel-enterprise`. None of these can transitively pull `org.springframework:*` into a customer's classpath — that would inflate jar sizes by ~30 MB and lock the customer into Spring's release cadence.
-3. **Code Detachment (the IP business model — see ADR-001 + BUS-001) requires a kernel that is not Spring-shaped.** Customers must be able to "take the code" without inheriting a framework dependency they didn't choose.
+3. **Code Detachment (the IP business model — see ADR-001 and the underlying commercial policy) requires a kernel that is not Spring-shaped.** Customers must be able to "take the code" without inheriting a framework dependency they didn't choose.
 
 Without a hard boundary, even well-intentioned PRs leak Spring concerns into the kernel: a `@Service` annotation here, a `BeanFactoryAware` reference there, and within months the Spring-free goal is unreachable. The boundary needs an architectural rule, not just a coding convention.
 
@@ -45,7 +45,7 @@ This is The Wall, expressed as architectural law.
 ### ✅ Positive Outcomes
 
 - **[+] Open-core distribution viable.** Kernel jars ship without Spring. Customers using Quarkus, Micronaut, plain `main()`, or no framework at all consume `exeris-kernel-*` directly.
-- **[+] Code Detachment legally clean.** When a Code Detachment event triggers (per BUS-001), the kernel source has no framework lock-in; customers inherit pure runtime code, not a framework adapter.
+- **[+] Code Detachment legally clean.** When a Code Detachment event triggers under the IP-detachment commercial policy, the kernel source has no framework lock-in; customers inherit pure runtime code, not a framework adapter.
 - **[+] Performance contract intact.** Spring's request-path overhead never enters the kernel hot path. The kernel's < 5 µs PAQS shed decision and zero-allocation TLS path are protected from accidental Spring-DTO wrapping.
 - **[+] Compile-time enforcement.** "Did this PR violate the Wall?" is a build outcome, not a review judgment call.
 
@@ -67,7 +67,6 @@ This is The Wall, expressed as architectural law.
 - ADR-008 (Open-Core Strategy) — depends on the kernel being Spring-free for the open-core / enterprise split to work.
 - ADR-010 (Host Runtime Model) — describes how Exeris owns the runtime when Spring is the application framework on top.
 - ADR-011 (Pure Mode vs Compatibility Mode) — defines where ThreadLocal-based Spring features (e.g., `SecurityContextHolder`) may be bridged.
-- BUS-001 (R&D Cooperation Model / Clean IP) — the IP-side reason the Wall must hold.
 - `exeris-kernel/CLAUDE.md` — operationalises the Wall from the kernel side ("No framework DI in runtime kernel code").
 - `exeris-spring-runtime/CLAUDE.md` — operationalises the Wall from the Spring-runtime side ("Spring is the application framework. Exeris is the runtime owner.").
 

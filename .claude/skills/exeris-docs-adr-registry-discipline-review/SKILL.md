@@ -11,7 +11,7 @@ Enforce the single-namespace ADR discipline: number reserved first; filename pat
 ## When to Use
 - Any PR adding a new ADR.
 - Any PR amending an existing ADR.
-- Any PR adding / changing rows in `adr-index.md` or `business-adr-index.md`.
+- Any PR adding / changing rows in `adr-index.md`.
 - Any PR adding / removing `ADR-NNN.link.md` stubs.
 
 ## Required Inputs

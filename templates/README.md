@@ -71,9 +71,8 @@ A single Research effort or RFC may produce multiple ADRs.
 
 ## Conventions
 
-- **Filenames.** Lowercase kebab-case for the title slug; the `ADR-NNN` / `BUS-NNN` / `RFC-YYYY-MM-DD` prefix keeps its original casing.
+- **Filenames.** Lowercase kebab-case for the title slug; the `ADR-NNN` / `RFC-YYYY-MM-DD` prefix keeps its original casing.
   - ADR: `ADR-NNN-<lowercase-kebab-title>.md` (3-digit zero-padded; e.g. `ADR-001-cloud-native-and-agnostic-infrastructure-strategy.md`).
-  - BUS: `BUS-NNN-<lowercase-kebab-title>.md` (same convention as ADR; e.g. `BUS-001-rd-cooperation-model.md`).
   - RFC: `RFC-YYYY-MM-DD-<lowercase-kebab-title>.md` (date prefix; same kebab title rule).
   - Research: `<short-slug>.md` on a `research/<slug>` branch.
   - **Title slug rules.** Replace `&` with `and`. Drop other punctuation (`+`, `:`, `(`, `)`, `,`, etc.). Collapse runs of whitespace/hyphens to a single `-`. The slug should be machine-grep-able and copy-paste-safe in URLs (no `%20`, no `%26`).
@@ -84,6 +83,5 @@ A single Research effort or RFC may produce multiple ADRs.
 ## Cross-references
 
 - [`../adr-index.md`](../adr-index.md) — central tech ADR registry.
-- [`../business-adr-index.md`](../business-adr-index.md) — separate `BUS-NNN` namespace for business / legal / financial decisions.
 - [ADR-020](../adr/ADR-020-open-core-documentation-mirror-policy.md) — where ADRs live across the open-core / enterprise repo split.
 - `exeris-kernel/docs/research/RESEARCH.md` — kernel research framework (when, how, branch lifecycle, current portfolio).

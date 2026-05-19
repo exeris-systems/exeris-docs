@@ -27,7 +27,6 @@ Project doctrine is **not** duplicated under `.claude/`:
 
 - **`/CLAUDE.md`** (repo root) — load-bearing facts, doc precedence, three-tier architecture summary, capability layer rules (ADR-023, ADR-024), Graph subsystem dual-engine, Bootstrap DAG canonical reference, ADR registry conventions, common drift patterns, editing discipline.
 - **`adr-index.md`** — single ADR numbering namespace across the ecosystem.
-- **`business-adr-index.md`** — business ADR namespace (BUS-NNN).
 - **`high-level-architecture.md`** — three-tier narrative, capability composition, SKU compositions, open-core split, Family-product framing.
 - **`b2b-technical-whitepaper.md`** — buyer-facing summary + roadmap.
 - **`templates/`** — `ADR-TEMPLATE.md`, `RFC-TEMPLATE.md`, `RESEARCH-TEMPLATE.md` + `README.md` (template usage rules).
