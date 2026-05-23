@@ -20,23 +20,24 @@ The same kernel underpins Edge/IoT, container, and on-prem deployments. Telemetr
 C4Context
     title System Context — Exeris Platform
 
-    Person(developer, "Developer / Architect", "Defines @ExerisDomain types and @Action handlers (Exeris-native); optionally Spring beans (brownfield migration only).")
-    System(exeris, "Exeris Platform", "Zero-copy runtime, capability ecosystem, vertical SKUs, build-time tooling, visual studio; ships an independent Spring Runtime overlay for brownfield customer migration.")
+    Person(developer, "Developer / Architect", "Defines @ExerisDomain types and @Action handlers (Exeris-native);<br/>optionally Spring beans (brownfield migration only).")
+    System(exeris, "Exeris Platform", "Zero-copy runtime, capability ecosystem, vertical SKUs,<br/>build-time tooling, visual studio; ships an independent<br/>Spring Runtime overlay for brownfield migration.")
 
-    System_Ext(db, "PostgreSQL 18 (PGQ) / Neo4j / Memgraph / FalkorDB", "Pluggable persistence + graph backends — kernel is DB-agnostic at SPI; ADR-002 covers the default platform stack only.")
+    System_Ext(db, "PostgreSQL 18 / Neo4j / Memgraph / FalkorDB", "Pluggable persistence + graph backends —<br/>kernel is DB-agnostic at SPI.<br/>ADR-002 covers the default platform stack only.")
     System_Ext(cache, "Redis (optional)", "Forecast / cache layer.")
-    System_Ext(broker, "Kafka / Redpanda", "First-class Community Events driver (exeris-kernel-community-kafka, v0.7+); optional for deployments that do not use event sourcing.")
+    System_Ext(broker, "Kafka / Redpanda", "First-class Community Events driver<br/>(exeris-kernel-community-kafka, v0.7+).")
     System_Ext(iot, "Edge / IoT devices", "Constrained deployment targets.")
     System_Ext(cloud, "Cloud (K8s, bare metal)", "High-density compute environment.")
-    System_Ext(user, "End user / API client", "Consumes business services over HTTP/1.1, HTTP/2, HTTP/3.")
+    System_Ext(user, "End user / API client", "Consumes business services over<br/>HTTP/1.1, HTTP/2, HTTP/3.")
 
-    Rel(developer, exeris, "Designs and deploys via Studio / SDK / IDE")
-    Rel(exeris, db, "Zero-copy data transfer")
-    Rel(exeris, cache, "Cache lookups")
-    Rel(exeris, broker, "Event sourcing (kernel L3, optional)")
-    Rel(exeris, iot, "Low-footprint execution")
-    Rel(exeris, cloud, "High-density scaling")
-    Rel(user, exeris, "Ultra-low-latency API")
+    %% Krótkie opisy na relacjach zapobiegają nakładaniu się tekstu
+    Rel(developer, exeris, "Designs & deploys")
+    Rel(exeris, db, "Zero-copy I/O")
+    Rel(exeris, cache, "Cache")
+    Rel(exeris, broker, "Events")
+    Rel(exeris, iot, "Low-footprint")
+    Rel(exeris, cloud, "Scales")
+    Rel(user, exeris, "API calls")
 ```
 
 ADR-002 specifies **PostgreSQL 18 as the platform-recommended default stack** for new applications — it is explicitly *not* a kernel mandate. The kernel itself remains database-agnostic at the runtime SPI layer (per ADR-002 §"Kernel relationship"). The Community graph driver supports **both** SQL:2023 PGQ on Postgres **and** Cypher on Neo4j / Memgraph / FalkorDB via a unified `MATCH` DSL; the same business code works on either backend because the codegen pipeline (ADR-015) transpiles intent into the active driver's dialect at build time. The Enterprise tier adds a native PG wire protocol driver (via the Enterprise persistence subsystem) and a planned FFM-native Bolt v5 driver for Neo4j (TRL-4 — not yet shipping). Kafka 3.x is a **first-class Community Events driver** (`exeris-kernel-community-kafka` since v0.7 Sprint 5b2), not just an adjunct — but it is optional, since the default Community Events driver uses the Postgres Outbox pattern + JVM-heap pub/sub. Redis is an optional cache adjunct only.
@@ -50,54 +51,55 @@ C4Container
     title Container Diagram — Exeris Platform
 
     Container_Boundary(design_time, "Design & Build Time") {
-        Container(studio, "Exeris Studio", "Angular shell + embedded React editor", "Bidirectional visual domain editor; lives in exeris-platform.")
-        Container(lsp, "LSP Server", "Java 26", "Synchronizes Studio and IDEs with on-disk @ExerisDomain Java sources.")
-        Container(tooling, "Exeris Tooling", "Maven annotation processor + Java/TS codegen", "Generates kernel handlers, OpenAPI, sagas, Flyway, and Angular components (ADR-015). Validates cap composition manifests at build time.")
+        Container(studio, "Exeris Studio", "Angular shell + embedded React", "Bidirectional visual domain editor;<br/>lives in exeris-platform.")
+        Container(lsp, "LSP Server", "Java 26", "Synchronizes Studio and IDEs with<br/>on-disk @ExerisDomain Java sources.")
+        Container(tooling, "Exeris Tooling", "Maven annotation processor + codegen", "Generates kernel handlers, OpenAPI, sagas,<br/>Flyway, and Angular components (ADR-015).")
     }
 
-    Container_Boundary(substrate, "Tier 1 — Substrate Runtime (driver swap happens here)") {
-        Container(kernel_spi, "Exeris Kernel SPI + Core", "Java 26 + Panama FFM + Loom", "Zero-copy off-heap execution engine — SPI contracts + Core orchestration (ADR-007). Driver-agnostic.")
-        Container(kernel_community, "Community Driver", "exeris-kernel-community (Maven module inside exeris-kernel)", "Custom NIO H1/H2 transport + portable Off-Heap TLS (OpenSSL 3.x via Panama FFM on standard TCP). Open-core baseline.")
-        Container(kernel_enterprise, "Enterprise Driver", "exeris-kernel-enterprise", "io_uring (Linux) / IOCP (Windows) transport, EnterpriseQuicTlsEngine, HTTP/3 codec, slab-pool memory, libnuma NUMA-aware allocation.")
+    Container_Boundary(substrate, "Tier 1 — Substrate Runtime") {
+        Container(kernel_spi, "Exeris Kernel SPI + Core", "Java 26 + Panama FFM + Loom", "Zero-copy off-heap execution engine.")
+        Container(kernel_community, "Community Driver", "exeris-kernel-community", "Custom NIO H1/H2 transport +<br/>portable Off-Heap TLS. Open-core baseline.")
+        Container(kernel_enterprise, "Enterprise Driver", "exeris-kernel-enterprise", "io_uring / IOCP transport, HTTP/3 codec,<br/>slab-pool memory, NUMA allocation.")
     }
 
-    Container_Boundary(spring_overlay, "Tier 1 — Spring-on-Exeris Host Runtime (independent product)") {
-        Container(spring_rt, "Exeris Spring Runtime", "Java 26 — independent repository", "Independent Tier 1 product that hosts Spring application code on the Exeris kernel. Used by: (a) customers with existing Spring apps doing brownfield migration; (b) BudgetHQ as the Family-product dogfooding case for the Spring-on-Exeris combination. The platform itself (kernel + caps + SKUs) does NOT depend on this. Showcase that Exeris is a runtime, not a framework (ADR-010, ADR-011).")
+    Container_Boundary(spring_overlay, "Tier 1 — Spring-on-Exeris") {
+        Container(spring_rt, "Exeris Spring Runtime", "Java 26", "Independent Tier 1 product hosting Spring apps<br/>on the Exeris kernel.")
     }
 
-    Container_Boundary(caps, "Tier 2 — Capability Ecosystem (driver-agnostic)") {
-        Container(cap_substrate, "Substrate caps", "exeris-caps-gateway-core, exeris-caps-service-boundary-core", "Family-level substrate caps that downstream policy caps require.")
-        Container(cap_policy, "Policy + SB platform + domain primitive + AI caps", "rate-limiting, jwt-validation, multi-tenancy, contact-graph, product-catalog, ai-llm-abstraction, …", "Decomposed into ~50 caps across seven layers (§3.2). All reference kernel SPIs only — never driver-specific code.")
+    Container_Boundary(caps, "Tier 2 — Capability Ecosystem") {
+        Container(cap_substrate, "Substrate caps", "gateway-core, service-boundary-core", "Family-level substrate caps.")
+        Container(cap_policy, "Policy + SB platform + AI caps", "rate-limiting, jwt-validation, etc.", "Decomposed into ~50 caps across seven layers.<br/>References SPIs only.")
     }
 
-    Container_Boundary(skus, "Tier 3 — Vertical SaaS SKUs (Platform SKUs)") {
-        Container(sku_gateway, "Gateway family", "exeris-sku-api-gateway, exeris-sku-edge-proxy, exeris-sku-bot-blocker", "Kernel-level SKUs; no Spring dependency in data plane.")
-        Container(sku_sb, "Service Boundary family", "exeris-sku-idp, exeris-sku-pim, exeris-sku-oms, exeris-sku-headless-cms", "Kernel-direct API surface via @ExerisDomain + @Action + rest-emission codegen; Spring-free like Gateway SKUs.")
+    Container_Boundary(skus, "Tier 3 — Platform SKUs") {
+        Container(sku_gateway, "Gateway family", "api-gateway, edge-proxy, bot-blocker", "Kernel-level SKUs.")
+        Container(sku_sb, "Service Boundary family", "idp, pim, oms, headless-cms", "Kernel-direct API surface via codegen.")
     }
 
-    Container_Boundary(family, "Family products (independent SaaS, dashed boundary — not a Platform SKU)") {
-        Container(budgethq, "BudgetHQ", "Independent SaaS on Spring Runtime Pure Mode", "First Family product. Dogfoods bank-aggregator, IDP, OAuth/OIDC, billing caps before they are promoted to platform.")
+    Container_Boundary(family, "Family products") {
+        Container(budgethq, "BudgetHQ", "Spring Runtime Pure Mode", "First Family product. Dogfoods IDP,<br/>OAuth/OIDC, billing, and bank-aggregator caps.")
     }
 
     Container_Boundary(telemetry, "Telemetry & Observability") {
-        Container(telemetry_spec, "Telemetry Wire Spec", "Java 21¹", "Open binary wire format — Repo C in the ADR-018 split.")
-        Container(observability, "Enterprise Observability", "Java 26 CLI + decoder", "Crash-ring decoder, live-stream client, forensics — Repo B in ADR-018.")
+        Container(telemetry_spec, "Telemetry Wire Spec", "Java 21", "Open binary wire format (Repo C).")
+        Container(observability, "Enterprise Observability", "Java 26 CLI + decoder", "Crash-ring decoder, live-stream client (Repo B).")
     }
 
-    Rel(studio, lsp, "JSON-RPC / WebSocket bidirectional sync")
-    Rel(lsp, tooling, "Triggers code generation + cap manifest validation")
-    Rel(tooling, kernel_spi, "Emits optimized Java")
-    Rel(kernel_community, kernel_spi, "Implements SPIs (default)")
-    Rel(kernel_enterprise, kernel_spi, "Implements SPIs (swap target — Enterprise license)")
-    Rel(cap_substrate, kernel_spi, "Composed against kernel SPI (driver-agnostic)")
-    Rel(cap_policy, cap_substrate, "Requires substrate caps")
-    Rel(sku_gateway, cap_substrate, "Cap composition manifest")
-    Rel(sku_gateway, cap_policy, "Cap composition manifest")
-    Rel(sku_sb, cap_substrate, "Cap composition manifest (kernel-direct, Spring-free)")
-    Rel(budgethq, spring_rt, "Pure Mode, no special privileges")
-    Rel(budgethq, cap_policy, "Composes platform caps as a regular consumer")
-    Rel(kernel_spi, telemetry_spec, "Emits binary frames per wire spec")
-    Rel(observability, telemetry_spec, "Decodes frames per wire spec")
+    %% Zredukowane teksty relacji
+    Rel(studio, lsp, "Syncs")
+    Rel(lsp, tooling, "Triggers")
+    Rel(tooling, kernel_spi, "Generates code")
+    Rel(kernel_community, kernel_spi, "Implements")
+    Rel(kernel_enterprise, kernel_spi, "Implements")
+    Rel(cap_substrate, kernel_spi, "Uses SPI")
+    Rel(cap_policy, cap_substrate, "Requires")
+    Rel(sku_gateway, cap_substrate, "Composes")
+    Rel(sku_gateway, cap_policy, "Composes")
+    Rel(sku_sb, cap_substrate, "Composes")
+    Rel(budgethq, spring_rt, "Hosted by")
+    Rel(budgethq, cap_policy, "Composes")
+    Rel(kernel_spi, telemetry_spec, "Emits")
+    Rel(observability, telemetry_spec, "Decodes")
 ```
 
 > **¹ Footnote on telemetry-spec Java version.** `exeris-telemetry-spec` deliberately targets Java 21 (not Java 26) to maximise third-party decoder portability per ADR-018. All other repositories in this diagram target Java 26 with `--enable-preview`.
@@ -112,28 +114,30 @@ The kernel enforces physical separation across two orthogonal axes: **trust tier
 C4Component
     title Component Diagram — Exeris Kernel
 
-    Component(spi, "SPI (The Constitution)", "Records + Interfaces", "Immutable contracts, implementation-blind, Spring-free (ADR-006).")
+    Component(spi, "SPI (The Constitution)", "Records + Interfaces", "Immutable contracts, implementation-blind,<br/>Spring-free (ADR-006).")
     Component(core, "Core (The Brain)", "Java 26 / ScopedValue / StructuredTaskScope", "Bootstrap DAG, orchestration, KernelProviders.")
 
-    Container_Boundary(subsystems, "Subsystem Layers — L0 mandatory, L1–L2 standard, L3–L4 optional") {
-        Component(l0, "L0 — Foundation", "Memory (LoanedBuffer, Arenas), JFR Telemetry", "Mandatory. Config is resolved by KernelBootstrap via ServiceLoader before the orchestrator runs and is not a Subsystem; Exceptions is not a Subsystem layer.")
-        Component(l1, "L1 — Data & Integrity", "Security (ScopedValue, RLS), Persistence, Crypto/TLS (OffHeapTlsEngine)", "Standard.")
-        Component(l2, "L2 — Data Synthesis", "Transport (I/O, scheduler), Graph (PGQ DSL), HTTP Codec (ADR-009)", "Standard.")
+    Container_Boundary(subsystems, "Subsystem Layers") {
+        Component(l0, "L0 — Foundation", "Memory (LoanedBuffer, Arenas), JFR Telemetry", "Mandatory base.")
+        Component(l1, "L1 — Data & Integrity", "Security, Persistence, Crypto/TLS", "Standard.")
+        Component(l2, "L2 — Data Synthesis", "Transport, Graph (PGQ DSL), HTTP Codec", "Standard.")
         Component(l3, "L3 — Logic Engines", "Events (sourcing, outbox)", "Optional.")
-        Component(l4, "L4 — Orchestration", "Flow (Sagas, off-heap state per ADR-013)", "Optional.")
+        Component(l4, "L4 — Orchestration", "Flow (Sagas, off-heap state)", "Optional.")
     }
 
     Container_Boundary(drivers, "Execution Drivers") {
-        Component(community, "Community Driver", "NIO.2 / TCP / JDBC / Portable Off-Heap TLS (OpenSSL 3.x via Panama FFM)", "Standard high-performance Java implementation. Ships OffHeapTlsEngine from Core.")
-        Component(enterprise, "Enterprise Driver", "io_uring / QUIC / EnterpriseQuicTlsEngine (ADR-019)", "Native-bypass, NUMA-aware via libnuma mbind() (see exeris-kernel-enterprise/docs/subsystems/memory.md), high-density.")
+        Component(community, "Community Driver", "NIO.2 / TCP / JDBC / Off-Heap TLS", "Standard high-performance implementation.")
+        Component(enterprise, "Enterprise Driver", "io_uring / QUIC / EnterpriseQuicTlsEngine", "Native-bypass, NUMA-aware, high-density.")
     }
 
+    %% Bardzo zwięzłe strzałki
     Rel(core, spi, "Implements")
-    Rel(core, subsystems, "Orchestrates")
     Rel(community, spi, "Implements")
     Rel(enterprise, spi, "Implements")
-    Rel(community, subsystems, "Provides for")
-    Rel(enterprise, subsystems, "Provides for")
+
+    Rel(core, l0, "Orchestrates")
+    Rel(community, l2, "Provides")
+    Rel(enterprise, l2, "Provides")
 ```
 
 > **Telemetry layer placement note.** This diagram follows `exeris-kernel/docs/architecture.md` and places Telemetry under L0 Foundation. The kernel-side subsystem document `exeris-kernel/docs/subsystems/telemetry.md` currently classifies Telemetry as L1 Observability — that documentation drift is tracked for a kernel-docs pass and is not introduced by this HLA. The functional behaviour is identical either way: Telemetry attaches after Memory init completes, providing the Glass-Box visibility for all higher subsystems.
