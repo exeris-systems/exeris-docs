@@ -209,7 +209,7 @@ The matched-contract methodology extends to the SKU layer. Exeris commits to pub
 
 #### 4.4 Reference hardware and provenance
 
-All Tier 1 measurements: AWS `c6i.4xlarge` (16 vCPU, 32 GB RAM), Linux 5.15, Java 26 GA, fixed JVM heap. Publishable JMH rows use `-wi 5 -i 10 -f 3` minimum. TCK-enforced limits — request P99 latency, allocation budgets, bootstrap cold start budget, saga state-transition budget — are documented in [`exeris-kernel/docs/whitepaper.md`](../exeris-kernel/docs/whitepaper.md) §5 and tested by `Abstract*Tck` suites in every driver implementation. SKU benchmarks (§4.3) inherit the same fairness gating and publication harness.
+All Tier 1 measurements: AWS `c6i.4xlarge` (16 vCPU, 32 GB RAM), Linux 5.15, Java 26 GA, fixed JVM heap. Publishable JMH rows use `-wi 5 -i 10 -f 3` minimum. TCK-enforced limits — request P99 latency, allocation budgets, bootstrap cold start budget, saga state-transition budget — are documented in [`exeris-kernel/docs/whitepaper.md`](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/whitepaper.md) §5 and tested by `Abstract*Tck` suites in every driver implementation. SKU benchmarks (§4.3) inherit the same fairness gating and publication harness.
 
 ### 5. Deployment Models & Adoption Paths
 
@@ -330,4 +330,4 @@ The result is measurable — in RSS, threads, CPU-seconds, SKU benchmark numbers
 
 ---
 
-**Further reading.** [`high-level-architecture.md`](high-level-architecture.md) — C4 model, capability composition model, SKU compositions, and Family product architecture. [`exeris-kernel/docs/whitepaper.md`](../exeris-kernel/docs/whitepaper.md) — substrate technical pillars, SLA/SLO baseline, operational mantras. [`adr-index.md`](adr-index.md) — full decision registry.
+**Further reading.** [`high-level-architecture.md`](high-level-architecture.md) — C4 model, capability composition model, SKU compositions, and Family product architecture. [`exeris-kernel/docs/whitepaper.md`](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/whitepaper.md) — substrate technical pillars, SLA/SLO baseline, operational mantras. [`adr-index.md`](adr-index.md) — full decision registry.
