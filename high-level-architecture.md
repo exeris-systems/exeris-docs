@@ -499,7 +499,7 @@ A **Family product** is built and operated by Exeris Systems itself, on the Exer
 
 ### 9.1 BudgetHQ — the HLA case study
 
-BudgetHQ is the first Family product. It is an independent SaaS in the personal finance management category, positioned in Europe as "holistic net-worth tracking for the mass affluent segment." Architecturally:
+BudgetHQ is the first Family product. It is an independent SaaS spanning both B2C and B2B finance through workspace types (Personal / Family / Business — an axis orthogonal to subscription tier): consumer-side it is positioned in Europe as "holistic net-worth tracking for the mass affluent segment"; business-side a Business workspace serves freelancer and small-business finance — VAT invoicing, vendor invoices, and multi-member workspaces with role-scoped access. Architecturally:
 
 - **Application stack.** Exeris Spring Runtime in Pure Mode for the entire stack. Spring `@RestController` paths on Exeris-owned ingress with ScopedValue context propagation. No Compatibility Mode shims in production.
 - **Bank-aggregator capability.** Tink and Salt Edge SPI adapters, with the platform-level bank-aggregator SPI abstraction designed first inside BudgetHQ. The abstraction is on the promotion path to a reusable Service Boundary capability that any Service Boundary SKU (especially IDP and OMS) can compose.
@@ -512,7 +512,7 @@ Each prototyped capability lands in the platform's capability ecosystem **after*
 
 ### 9.2 Family product pattern extensibility
 
-The Family product pattern is extensible — additional Family products may emerge in other B2C SaaS verticals over time. **All future Family products will be built pure-Exeris** on `exeris-sdk` + `exeris-tooling` (with the Tier 2 cap ecosystem providing reusable functionality), not on `exeris-spring-runtime`. BudgetHQ is the singular Spring-on-Exeris Family product because its dogfooding role is to validate the Spring Runtime as a product; once that role is filled, the pattern for new Family products is pure Exeris by default. The HLA deliberately does not commit to specific future Family products beyond BudgetHQ — premature commitment to a long Family-product roadmap weakens the platform's focus claim, and any future Family product earns its place by being a real commercial bet rather than a roadmap entry.
+The Family product pattern is extensible — additional Family products may emerge in other SaaS verticals (B2C or B2B) over time. **All future Family products will be built pure-Exeris** on `exeris-sdk` + `exeris-tooling` (with the Tier 2 cap ecosystem providing reusable functionality), not on `exeris-spring-runtime`. BudgetHQ is the singular Spring-on-Exeris Family product because its dogfooding role is to validate the Spring Runtime as a product; once that role is filled, the pattern for new Family products is pure Exeris by default. The HLA deliberately does not commit to specific future Family products beyond BudgetHQ — premature commitment to a long Family-product roadmap weakens the platform's focus claim, and any future Family product earns its place by being a real commercial bet rather than a roadmap entry.
 
 ## 10. References
 
