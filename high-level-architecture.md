@@ -508,7 +508,7 @@ BudgetHQ is the first Family product. It is an independent SaaS in the personal 
 - **OAuth/OIDC B2C identity capability.** Prototyped inside BudgetHQ for end-user authentication.
 - **Telemetry.** BudgetHQ composes `exeris-caps-observability-bridge` and emits to a Repo B consumer running in BudgetHQ's own infrastructure — same wire format as a platform subscriber's telemetry, distinct consumer instance.
 
-Each prototyped capability lands in the platform's capability ecosystem **after** BudgetHQ has stabilized it in production, never before. This inverts the "demo product" framing of earlier strategic documents: BudgetHQ is not built to validate the platform; the platform is structurally sound enough that BudgetHQ can run on it from day one, and that is the validation. The capability development pipeline replaces the "Trojan horse" lead-generation framing from earlier Corelio strategy materials.
+Each prototyped capability lands in the platform's capability ecosystem **after** BudgetHQ has stabilized it in production, never before. This inverts the "demo product" framing of earlier strategic documents: BudgetHQ is not built to validate the platform; the platform is structurally sound enough that BudgetHQ can run on it from day one, and that is the validation. The capability development pipeline replaces the "Trojan horse" lead-generation framing from earlier internal strategy documents.
 
 ### 9.2 Family product pattern extensibility
 

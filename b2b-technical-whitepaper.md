@@ -181,18 +181,21 @@ Exeris's native `Flow` engine runs the saga state machine inline on the request 
 | Threads            | **66**              | 81 + ~140 = **~221**               | 94 + ~123 = **~217**               |
 | CPU-seconds        | **24.7 s**          | 33.3 + ~52 = **~85 s**             | 22.3 + ~26 = **~48 s**             |
 
-Drawing the boundary tightly around the application JVM hides the Axon Server cost (separate process, ~787 MB / ~850 MB RSS, 120–148 PIDs). Drawing it around "what does it take to run a saga end-to-end?" — the Exeris in-process path is **3.3× lower memory, 3.3× fewer threads, ~2× lower CPU** versus Spring + Axon, with the additional fact that the Exeris path also compensates correctly.
+Drawing the boundary tightly around the application JVM hides the Axon Server cost (separate process, ~787 MB / ~850 MB RSS, 120–148 PIDs). Drawing it around "what does it take to run a saga end-to-end?" — the Exeris in-process path is **3.4× lower memory, 3.3× fewer threads, ~1.9× lower CPU** versus Quarkus + Axon, and **4.7× lower memory, 3.3× fewer threads, ~3.4× lower CPU** versus Spring + Axon, with the additional fact that the Exeris path also compensates correctly.
 
 These numbers are published as `claim_scope: exploratory` on `hardware_profile: dev-laptop` — the comparative-eligible re-run on `perf-box-amd64` (baremetal, WAN between load generator and target) is on the public benchmark roadmap, and the data above will either hold up or fall apart under that re-run. The compensation correctness asymmetry, however, is reproducible end-to-end today via `scripts/run-e2e-shop-order-saga-campaign.sh` in `exeris-benchmarks`, and is mechanically explained: a framework that returns before work is done will always show both the "fast" latency and the missing compensations.
 
 #### 4.2 Extreme Throughput — TLS Record Path
 
-Engine-level comparator on the **B5 Memory-BIO harness** (comparator labels and wiring caveats defined in `exeris-benchmarks/docs/tls-zero-copy-benchmark-matrix.md`). The Exeris row exercises `OffHeapTlsEngine` from `eu.exeris.kernel.core.crypto.*`, shipped via the Community driver on standard TCP.
+Engine-level comparator on the **B5 Memory-BIO harness** (comparator labels and wiring caveats defined in `exeris-benchmarks/docs/tls-zero-copy-benchmark-matrix.md`). The Exeris row exercises `OffHeapTlsEngine` from `eu.exeris.kernel.core.crypto.*` — a Core-shared engine; the published report (`20260501-123118-all`) classifies the B5 row as **Enterprise tier**. B5 is an in-process Memory-BIO engine-level lens (no socket, no syscall) and is deliberately not equivalent to the FD-owner socket integration path (B6) — the two are reported as separate rows, never collapsed into one equivalence claim.
 
 | Engine | Harness | Throughput | P99 latency |
 |---|---|---|---|
-| Exeris `OffHeapTlsEngine` (Community) | B5 Memory-BIO | 923,617 ops/s | 2.10 µs |
+| Exeris `OffHeapTlsEngine` (Core engine; Enterprise-tier row) | B5 Memory-BIO | 923,617 ops/s | 2.10 µs |
 | JDK `SSLEngine` baseline | B5 Memory-BIO | 905,854 ops/s | 2.96 µs |
+| Exeris Community FD-owner integration path | B6 FD-owner loopback | 365,375 ops/s | — |
+
+The B6 row carries real loopback-socket and kernel-crossing cost on the Community integration path; the delta versus the engine-level rows combines transport-model and harness effects and cannot be attributed to engine cost alone.
 
 The Enterprise-tier `EnterpriseQuicTlsEngine` (QUIC TLS with OpenSSL `BIO_DGRAM` pair) is a separate comparator track not represented in this row — TCP/Memory-BIO and QUIC are not directly comparable to JDK `SSLEngine`, and conflating them would violate matched-contract gating.
 
@@ -204,12 +207,12 @@ The matched-contract methodology extends to the SKU layer. Exeris commits to pub
 |---|---|---|
 | API Gateway RPS at matched-contract parity | Envoy + Kong | H1 2027 |
 | Edge Proxy P99 latency under multi-region failover | Cloudflare Workers, Fastly Compute | H2 2027 |
-| Bot Blocker JA3/JA4 fingerprinting throughput cost | DataDome, PerimeterX | Q4 2027 |
+| Bot Blocker JA3/JA4 fingerprinting throughput cost | DataDome, PerimeterX | H2 2027 |
 | IDP page-throughput | Azure Document Intelligence, AWS Textract | H1 2028 |
 
 #### 4.4 Reference hardware and provenance
 
-All Tier 1 measurements: AWS `c6i.4xlarge` (16 vCPU, 32 GB RAM), Linux 5.15, Java 26 GA, fixed JVM heap. Publishable JMH rows use `-wi 5 -i 10 -f 3` minimum. TCK-enforced limits — request P99 latency, allocation budgets, bootstrap cold start budget, saga state-transition budget — are documented in [`exeris-kernel/docs/whitepaper.md`](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/whitepaper.md) §5 and tested by `Abstract*Tck` suites in every driver implementation. SKU benchmarks (§4.3) inherit the same fairness gating and publication harness.
+All Tier 1 publishable measurements target the `perf-box-amd64` reference profile: EU-hosted dedicated bare metal (Hetzner AX-class — AMD x86-64, 16 hardware threads, 64 GB RAM; Falkenstein DE / Helsinki FI), Linux, Java 26 GA, fixed JVM heap. Publishable JMH rows use `-wi 5 -i 10 -f 3` minimum. TCK-enforced limits — request P99 latency, allocation budgets, bootstrap cold start budget, saga state-transition budget — are documented in [`exeris-kernel/docs/whitepaper.md`](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/whitepaper.md) §5 and tested by `Abstract*Tck` suites in every driver implementation. SKU benchmarks (§4.3) inherit the same fairness gating and publication harness.
 
 ### 5. Deployment Models & Adoption Paths
 
@@ -241,7 +244,7 @@ Customer subscribes to one or more Platform SKUs from the §3.3 inventory. The c
 
 Customers can elect to upgrade to a **Platform tier** subscription at any time, at which point they gain Studio access to author and modify cap compositions directly. This is the migration path from "consume a SKU" to "compose your own SKU."
 
-The **Code Detachment Fee** from the Corelio framing is reframed at this layer as the one-time license that transfers SKU ownership permanently to the customer's repository fork. For SMB-tier SKUs the fee is in the low five-figure euros, scaling with deployment size and SLA tier. This is the structural realization of the IP sovereignty promise from §6 — paying the fee unlocks not a runtime privilege but a property right.
+The **Code Detachment Fee** from the framing in earlier internal strategy documents is reframed at this layer as the one-time license that transfers SKU ownership permanently to the customer's repository fork. For SMB-tier SKUs the fee is in the low five-figure euros, scaling with deployment size and SLA tier. This is the structural realization of the IP sovereignty promise from §6 — paying the fee unlocks not a runtime privilege but a property right.
 
 **What detachment includes per SKU source-visibility (per ADR-023 §"SKU Repository Source-Visibility Policy"):**
 
@@ -278,9 +281,8 @@ The kernel currently ships at **v0.7.0 (2026-05-10)**; v0.8 sprint is active (qu
 | Horizon | Milestone |
 |---|---|
 | Q3 2026 | Kernel v0.8 GA — quality gates closed; **TRL-4 integration-tested** for kernel subsystem set; first internal Edge/IoT pilot cohorts begin against `exeris-kernel-community` |
-| Q4 2026 | Kernel v0.9 — TRL-5 component validation in relevant environment; SPI freeze candidate; Exeris Studio MVP private beta (read-only inspection + targeted edit surfaces) |
-| H1 2027 | Kernel v0.9-RC SPI lock; Exeris Spring Runtime 1.0 RC (Phases 0–3 feature-complete against the locked SPI; ADR-010, ADR-011, ADR-017); customer pilot cohorts expand |
-| **H2 2027** | **Exeris Kernel 1.0 GA + Exeris Spring Runtime 1.0 GA shipped together** — SPI / Core / TCK stabilization (ADR-007, ADR-008); TRL-6 system prototype demonstrated in operational environment |
+| Q4 2026 | Kernel v0.9 — TRL-5 component validation in relevant environment; SPI freeze candidate hardening into **v0.9-RC SPI lock**; Exeris Spring Runtime 1.0 RC (Phases 0–3 feature-complete against the locked SPI; ADR-010, ADR-011, ADR-017); Exeris Studio MVP private beta (read-only inspection + targeted edit surfaces); customer pilot cohorts expand |
+| **H1 2027** | **Exeris Kernel 1.0 GA + Exeris Spring Runtime 1.0 GA shipped together** — SPI / Core / TCK stabilization (ADR-007, ADR-008); TRL-6 system prototype demonstrated in operational environment |
 | 2027 | Capability composition language formal ADR; **Capability Licensing Taxonomy ADR** (amendment to ADR-020 or standalone) — locks the `community` / `commercial` / `enterprise-private` model from §3.2 |
 | 2028 | `exeris-caps-*` community caps formal Apache 2.0 releases; commercial caps source-available repositories opened to customers |
 
@@ -288,10 +290,8 @@ The kernel currently ships at **v0.7.0 (2026-05-10)**; v0.8 sprint is active (qu
 
 | Horizon | Milestone |
 |---|---|
-| Q1 2027 | Capability composition language formal release; SKU manifest format frozen |
-| Q2 2027 | **API Gateway SKU** — GA |
-| Q3 2027 | **Edge Proxy SKU** — GA |
-| Q4 2027 | **Bot Blocker SKU** — GA (depends on JA3/JA4 kernel proposal landing in `exeris-kernel`) |
+| H1 2027 | Capability composition language formal release; SKU manifest format frozen; **API Gateway SKU** — GA |
+| H2 2027 | **Edge Proxy SKU** — GA; **Bot Blocker SKU** — GA (depends on JA3/JA4 kernel proposal landing in `exeris-kernel`) |
 | H1 2028 | **IDP** and **Headless CMS** SKUs — GA (simplest Service Boundary cap compositions) |
 | H2 2028 | **PIM** and **OMS** SKUs — GA |
 | 2028 | Context-Centric CRM data-model ADR; cross-cutting cap promoted to formal capability |
@@ -316,7 +316,7 @@ A **Family product** is built and operated by Exeris Systems itself, on the Exer
 - the **OAuth/OIDC capability** for B2C identity;
 - the **subscription-billing capability** (Stripe adapter, promotable to a reusable platform cap).
 
-Each of these capabilities lands in the platform's capability ecosystem **after** BudgetHQ has stabilized them in production — never before. This inverts the "demo product" framing from earlier Corelio materials: BudgetHQ is not built to prove the platform works; the platform is structurally sound enough that BudgetHQ can run on it from day one, and that is the proof. The capability development pipeline replaces the "Trojan horse" lead-generation framing of earlier strategic documents.
+Each of these capabilities lands in the platform's capability ecosystem **after** BudgetHQ has stabilized them in production — never before. This inverts the "demo product" framing from earlier internal strategy documents: BudgetHQ is not built to prove the platform works; the platform is structurally sound enough that BudgetHQ can run on it from day one, and that is the proof. The capability development pipeline replaces the "Trojan horse" lead-generation framing of earlier strategic documents.
 
 The Family product pattern is extensible — additional Family products may emerge in other B2C SaaS verticals — but the platform's focus claim is preserved by not pre-committing to a long roadmap of speculative Family products beyond BudgetHQ.
 

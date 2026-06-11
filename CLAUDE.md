@@ -98,7 +98,7 @@ These have been caught across multiple sessions — when editing whitepaper / HL
 7. **Bootstrap DAG with `Config → Memory → Exceptions → {...}`** — deprecated. Replace with the canonical FOUNDATION / SERVICES / RUNTIME shape above.
 8. **"Family products run on Spring Runtime"** — wrong. Only BudgetHQ runs on Spring Runtime (singular dogfooding case). All future Family products are pure-Exeris.
 9. **Spring Runtime described as part of "the platform stack"** — wrong. Independent Tier 1 product.
-10. **TRL-5 or higher claimed for the platform-aggregate state** — currently TRL-3 (Validated Architectural Prototype). Subsystems are ahead (Crypto TRL-4). Per whitepaper §7 roadmap, Q3 2026 = TRL-4 integration-tested; Q4 2026 = TRL-5 component validation; H2 2027 = TRL-6 with Kernel 1.0 GA + Spring Runtime 1.0 GA shipped together.
+10. **TRL-5 or higher claimed for the platform-aggregate state** — currently TRL-3 (Validated Architectural Prototype). Subsystems are ahead (Crypto TRL-4). Per whitepaper §7 roadmap, Q3 2026 = TRL-4 integration-tested; Q4 2026 = TRL-5 component validation + v0.9-RC SPI lock; H1 2027 = TRL-6 with Kernel 1.0 GA + Spring Runtime 1.0 GA shipped together. (2027+ horizons use half-year notation — never quarters; matches the arkstack.dev roadmap canon.)
 
 ## Editing discipline for large docs
 
