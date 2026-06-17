@@ -66,7 +66,7 @@ A composition is **valid** when all four predicates hold:
 3. **No version conflicts.** When multiple caps declare `@Provides(S)`, the composition resolves to exactly one — either by version-range intersection (when all consumers' ranges overlap) or by an explicit `prefers:` directive in the composition. Ambiguity is a build failure.
 4. **No Wall violations.** Per the cap-tier Wall extension below, no cap class imports across forbidden boundaries.
 
-A composition that fails any predicate **fails the build**. The kernel refuses to start any composition lacking a "validated" stamp from the codegen pipeline.
+A composition that fails any predicate **fails the build**. The kernel refuses to start any composition lacking a "validated" stamp from the codegen pipeline. *(Stamp **placement** superseded by the 2026-06-17 amendment "Validation Stamp Lifecycle" below: the boot-time assertion moves to the platform composition runtime and the open kernel stays cap-blind. The build-time-validation contract itself is unchanged.)*
 
 ### The Wall, extended to capabilities
 
@@ -81,7 +81,7 @@ The cap-tier Wall is validated by the same `exeris-tooling` pipeline that perfor
 **Concrete obligations:**
 
 1. **Every `exeris-caps-*` repository declares its contract surface through `@Provides` and `@Requires` annotations on a `@CapabilityModule` class.** Caps without these annotations are not loadable. The annotations are processed by the `exeris-tooling` annotation processor (ADR-015) at build time and emit a `cap-manifest.json` artefact alongside the cap's JAR.
-2. **The kernel refuses to start any composition lacking a "validated" stamp.** The codegen pipeline emits the validation stamp into the composition manifest only when all four predicates of the validation algorithm pass. The kernel bootstrap checks for the stamp during the FOUNDATION phase, before any subsystem initialises.
+2. **The kernel refuses to start any composition lacking a "validated" stamp.** The codegen pipeline emits the validation stamp into the composition manifest only when all four predicates of the validation algorithm pass. The kernel bootstrap checks for the stamp during the FOUNDATION phase, before any subsystem initialises. *(**Superseded by the 2026-06-17 amendment "Validation Stamp Lifecycle" below.** The stamp emission stays at the tooling; the boot-time assertion moves out of the kernel into the platform composition runtime. The kernel acquires no awareness of the stamp, the manifest, or the cap concept. See revised obligations 7–9.)*
 3. **The cap-tier Wall is enforced by build-time ArchUnit-style guards in every cap repository.** A new `exeris-caps-*` repository scaffold ships with the standard guard set; modifying or disabling the guards is a registry violation reported through periodic audits until automated cross-repo CI lands.
 4. **Lifecycle ordering is derived mechanically from `@Requires`; no manual priorities.** A cap that needs to run before another cap declares the dependency explicitly through a (potentially empty-payload) `@Requires` service marker. Priority hacks (`@Order`, integer priorities, alphabetic ordering) are not permitted and fail the build.
 5. **Composition manifests are version-pinned and signed.** An SKU manifest pins every cap to an exact version (no `LATEST`, no version range broader than a single release). Signing detail is delegated to the SKU repository convention (`exeris-sku-*`) — this ADR's obligation is the pinning discipline, not the signature algorithm.
@@ -112,6 +112,46 @@ The cap-tier Wall is validated by the same `exeris-tooling` pipeline that perfor
 - **Cross-SKU cap sharing semantics.** Whether two SKUs deployed in the same JVM can share a single instance of a cap (e.g. one `exeris-caps-observability-bridge` serving both an API Gateway SKU and an IDP SKU co-located on the same node) is delegated to a future deployment-topology ADR. The default this ADR locks in is one cap instance per SKU.
 - **Telemetry of the composition itself.** Capability lifecycle events emit JFR via the `exeris-caps-observability-bridge` (per ADR-018 and HLA §8). Compositional metadata (which caps loaded, manifest version, validation stamp) is exposed through the same surface, but the wire-format details belong to ADR-018, not here.
 
+## Validation Stamp Lifecycle — Emit at Tooling, Assert at Platform (2026-06-17 amendment)
+
+The body of this ADR (obligation 2, the Composition section, and Engineering Protocol trigger 3) located the validation-stamp check **in the kernel** — "the kernel bootstrap checks for the stamp during the FOUNDATION phase, before any subsystem initialises." Re-examination against The Wall (ADR-006) and the licensing-enforcement philosophy of the companion ADR-023 shows this is the wrong layer. This amendment moves the stamp's **boot-time assertion** out of the kernel and into the platform composition runtime. The **build-time validation contract is unchanged** — the four predicates, the DAG, and the stamp emission all stay exactly as the body specifies.
+
+### Why the kernel is the wrong layer
+
+The stamp is a **build-time verdict**, not a runtime computation: the codegen pipeline emits `validated:true` only when the four predicates pass, so by boot time the verdict is already frozen. A boot-time check therefore cannot be an *ordering* concern ("validate before subsystems init") — there is nothing left to compute. It can only be an *integrity* concern: confirming the artefact being booted matches the one that was validated. Three rationales were weighed; none justifies placing that integrity check in the open kernel:
+
+1. **Ordering.** Collapses into integrity, per above — validity is decided at build time.
+2. **Integrity / provenance.** A boot-time check adds security value only across a real trust boundary: a sealed, trusted verifier checking an independently-swappable, potentially-hostile artefact. The open kernel is Apache 2.0 + Commons Clause — source-available, forkable, its binary unsigned and unmeasured. An adversary who can swap the composition manifest can equally recompile the kernel with the check removed. In the open kernel the check is a speed bump, not a gate. A hardened, signature-backed gate — *if ever required* — belongs to a sealed enterprise substrate (`exeris-kernel-enterprise`) with a real signing/attestation chain, never to the open kernel.
+3. **Licensing enforcement.** Reading "the kernel refuses to start an unvalidated composition" as a commercial lock directly contradicts ADR-023, which makes SKU-licence enforcement **contractual, not technical** ("a customer can technically download and run without a subscription; this is a licence violation, not a technical impossibility" — ADR-023 trade-offs and obligation 10). A runtime lock in the open kernel would be both removable and inconsistent with the companion ADR.
+
+The honest conclusion is that the stamp is **not** a tamper-proof lock. It is a **correctness / fail-fast consistency assertion** that catches *honest* mistakes — a stale manifest, a version drift between build and deploy, a partial deploy, or a hand-edited manifest shipped without re-running the pipeline. This is exactly what a "build-time validated, boot-time activated composition" (see "What is NOT in scope") needs: an early, legible refusal instead of a confusing mid-boot crash. Consistency assertions belong with the component that owns the manifest reader and performs the cap wiring — the platform composition runtime — not with the substrate.
+
+### The Decision
+
+**The validation stamp is emitted by the tooling and asserted by the platform. The open kernel acquires no awareness of the stamp, the composition manifest, or the capability concept. It exposes only what it already exposes — the bootstrap DAG lifecycle and the kernel SPIs caps `@Requires`.**
+
+| Layer | Role | Responsibility |
+|:---|:---|:---|
+| **Tooling** (`exeris-tooling`, build-time) | Validation authority | Runs the four predicates, computes the topological order, and emits into the composition manifest: the `validated` stamp, the **composition version**, and a **content binding** — a hash of the resolved cap set (exact artefacts + versions). The binding is what makes the stamp non-transferable: it attests "*this* composition is valid", not "*some* composition is valid". |
+| **Platform** (`exeris-platform` composition runtime, boot-time) | Assertion, not re-validation | At SKU startup, before any cap enters `initialize`: confirms the stamp is present and well-formed, the manifest-pinned versions equal the `cap-manifest.json` versions actually on the classpath, and the content binding matches the loaded artefacts. On mismatch → fail-fast. This is an O(n)-over-caps check with **no DAG re-resolution** — re-deriving validity at boot would duplicate the tooling resolver in the runtime and defeat "composition becomes a build-time concern". |
+| **Kernel** (`exeris-kernel`, open) | None (cap-blind) | Boots its subsystems via the existing bootstrap DAG and exposes its SPIs. It has no `Capability` / `Composition` / `Stamp` type, does not parse the manifest, and does not resolve `@Requires`. The Wall (ADR-006) is preserved: Tier 1 remains blind to Tier 2 abstractions. |
+
+The composition runtime divides into **logic** (a generic, once-tested library in `exeris-platform`, reused across every SKU) and **call site** (the generated SKU bootstrap invokes it during its own startup, before handing control to caps). As of 2026-06-17 this library is greenfield — no prior implementation exists in `exeris-platform`.
+
+A consequence worth stating plainly: because `exeris-platform` is itself source-available, the platform-side assertion inherits the same forkability as the kernel-side one would have had — it is **still not** a security or licensing gate, and is not intended to be. Its value is correctness and operability (catching honest configuration drift early), consistent with ADR-023's contractual-enforcement model.
+
+**Revised obligations (supersede obligation 2):**
+
+7. **The tooling emits `validated` stamp + composition version + content binding when all four predicates pass.** The content binding is a hash over the resolved cap set (artefact coordinates + versions) and is mandatory — a stamp without a binding is rejected by the platform assertion in obligation 8.
+8. **The platform composition runtime asserts stamp consistency at SKU startup, before any cap `initialize`.** The assertion is presence + well-formedness + version-match (manifest vs classpath `cap-manifest.json`) + binding-match (manifest vs loaded artefacts). It performs no DAG re-resolution. A failed assertion aborts SKU startup with a diagnostic naming the specific divergence (missing stamp, version drift, or binding mismatch).
+9. **The open kernel remains cap-blind.** No kernel package gains a stamp check, a manifest reader, or any capability/composition type. A hardened, signature-backed boot gate — should one ever be justified by a concrete threat model — is scoped to a sealed enterprise substrate with a real attestation chain, and would require its own ADR; it is explicitly out of scope for `exeris-kernel`.
+
+### Cross-references for this amendment
+
+- ADR-006 (Spring-Free Kernel Boundary — The Wall) — the substrate-tier boundary this amendment protects by keeping the kernel cap-blind.
+- ADR-023 (Capability Licensing Taxonomy) — its contractual-not-technical enforcement model (trade-offs + obligation 10) is the consistency this amendment restores; the stamp is a correctness assertion, never a licence lock.
+- ADR-015 (Codegen Emission Strategy, `exeris-tooling`) — owns the stamp + version + content-binding emission of revised obligation 7.
+
 ## Cross-references
 
 - ADR-006 (Spring-Free Kernel Boundary — The Wall) — the substrate-tier Wall that this ADR extends to the cap tier.
@@ -130,7 +170,7 @@ This ADR is **descriptive at acceptance**: it codifies the composition model alr
 
 1. The first `exeris-caps-*` repository materialises (target: H1 2027 per whitepaper §7 Track B, "Q1 2027 Capability composition language formal release").
 2. The annotation-processor extension in `exeris-tooling` ships (depends on ADR-015 deliverables; planned alongside the first cap repository).
-3. The kernel bootstrap acquires the "validation stamp" check (target: bundled with the first cap-aware kernel release).
+3. The platform composition runtime acquires the validation-stamp **assertion** (target: bundled with the first SKU bootstrap; greenfield in `exeris-platform` as of 2026-06-17). *(Revised by the 2026-06-17 amendment — the assertion is a platform concern, not a kernel one; the open kernel acquires nothing.)*
 
 Open follow-ups (tracked separately):
 
