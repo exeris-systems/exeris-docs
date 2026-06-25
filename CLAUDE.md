@@ -42,7 +42,7 @@ Caps participate in two orthogonal dimensions:
 - `enterprise-private` (closed-source, Enterprise tier only) — 1 cap: `bot-fingerprinting`
 
 **SKU repository source-visibility** (ADR-023 same-day amendment 2026-05-13):
-- 6/7 Platform SKUs are **source-available** public repositories under Exeris Commercial License (API Gateway, Edge Proxy, IDP, PIM, OMS, Headless CMS)
+- 6/7 Platform SKUs are **source-available** public repositories under Exeris Commercial License (API Gateway, Edge Proxy, IDP, PIM, OMS, Headless CMS API)
 - 1/7 Platform SKU is **closed-source** on anti-abuse-security principle: Bot Blocker (the named exception, principled — published detection logic helps adversaries circumvent the protection)
 
 **Composition model** (ADR-024): caps declare `@Provides(Service, version)`, `@Requires(Service, versionRange, optional?)`, and a four-phase lifecycle (`initialize → ready → drain → terminate`). Compositions are DAGs of caps with no unresolved `@Requires`, no cycles, no version conflicts, no Wall violations. Validated at build time by the codegen pipeline (`exeris-tooling`, ADR-015); the kernel refuses to start a composition without a validation stamp.

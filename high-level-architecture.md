@@ -73,7 +73,7 @@ C4Container
 
     Container_Boundary(skus, "Tier 3 — Platform SKUs") {
         Container(sku_gateway, "Gateway family", "api-gateway, edge-proxy, bot-blocker", "Kernel-level SKUs.")
-        Container(sku_sb, "Service Boundary family", "idp, pim, oms, headless-cms", "Kernel-direct API surface via codegen.")
+        Container(sku_sb, "Service Boundary family", "idp, pim, oms, content-api", "Kernel-direct API surface via codegen.")
     }
 
     Container_Boundary(family, "Family products") {
@@ -306,7 +306,7 @@ The manifests below show the full cap list per SKU. Where a cap is `community`-l
 | **IDP** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `attachment-storage`, `rest-emission`, `openapi-emission`, `workflow-engine`, `document-ingestion`, `ocr-pipeline`, `document-classifier`, `field-extraction`, `form-recognition`, `ai-llm-abstraction`, `ai-prompt-templating`, `observability-bridge` |
 | **PIM** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `i18n`, `attachment-storage`, `asset-management`, `search-index`, `entity-versioning`, `content-versioning`, `product-catalog`, `import-export`, `rest-emission`, `graphql-emission`, `openapi-emission`, `observability-bridge` |
 | **OMS** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `workflow-engine`, `notification-dispatch`, `circuit-breaker`, `product-catalog`, `pricing-engine`, `inventory-tracking`, `order-lifecycle`, `payment-gateway`, `contact-graph`, `rest-emission`, `openapi-emission`, `observability-bridge`. L4 Flow saga engine (ADR-013) consumed via kernel SPI. |
-| **Headless CMS** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `i18n`, `attachment-storage`, `asset-management`, `search-index`, `content-types`, `content-versioning`, `rest-emission`, `graphql-emission`, `openapi-emission`, `observability-bridge` |
+| **Headless CMS API** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `i18n`, `attachment-storage`, `asset-management`, `search-index`, `content-types`, `content-versioning`, `rest-emission`, `graphql-emission`, `openapi-emission`, `observability-bridge` |
 
 The **Context-Centric CRM data model** is `exeris-caps-contact-graph` from §3.2 layer 5. It is a single domain-primitive cap that Service Boundary SKUs may compose; it is not itself a standalone SKU until the 2029 product-form release planned in the whitepaper §7. When that SKU ships, its manifest will combine `contact-graph` with the SB platform layer and any CRM-specific caps that emerge.
 
@@ -381,14 +381,14 @@ SKUs are organized into two families plus one cross-cutting data model. Each fam
 | IDP | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission codegen) + kernel-level (AI Abstraction caps) | NUMA-aware allocation under heavy doc-processing load | Cloud or on-prem; air-gappable |
 | PIM | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission / graphql-emission codegen) | Marginal — Community driver typically sufficient | Cloud or on-prem |
 | OMS | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission codegen) + kernel-level (L4 Flow saga state) | Marginal — Community driver typically sufficient | Cloud; distributed saga state requires Postgres |
-| Headless CMS | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission / graphql-emission codegen) | Marginal — Community driver typically sufficient | Cloud or edge-co-located for read replicas |
+| Headless CMS API | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission / graphql-emission codegen) | Marginal — Community driver typically sufficient | Cloud or edge-co-located for read replicas |
 | Context-Centric CRM data model | Cross-cutting cap | Composed by Service Boundary SKUs; not standalone | N/A (cap-layer, driver-agnostic) | N/A (cap-layer) |
 
 > All SKU compositions are `commercial`-licensed regardless of the row above. The "Enterprise driver benefits" column refers exclusively to **Tier 1 substrate driver swap** (Community `exeris-kernel-community` Maven module → Enterprise `exeris-kernel-enterprise` artifact), not to a separate cap manifest or cap-layer license change.
 
 **Gateway family architecture.** Kernel-level HTTP path with no Spring dependency in the data plane (consistent with the clarified ADR-021). The control plane (admin API, configuration reload) is single-process or distributed depending on cap manifest selection; observability flows through `exeris-caps-observability-bridge` to the ADR-018 wire format. The Enterprise driver swap (custom NIO H1/H2 → `io_uring` + HTTP/3 + QUIC TLS) lives in `exeris-kernel-enterprise` and is activated by Maven coordinate substitution at the substrate layer — Gateway SKU composition manifests are byte-identical across Community and Enterprise deployments. Bot Blocker additionally requires a JA3/JA4 TLS fingerprinting kernel proposal modifying `CoreSslHandles` to expose ClientHello fingerprint material before the request reaches the policy chain — that proposal is on the kernel roadmap; the corresponding `exeris-caps-bot-fingerprinting` cap is the only enterprise-private cap in Tier 2 because it depends on this kernel-tier extension.
 
-**Service Boundary family architecture.** SB-family SKUs run **kernel-direct** — exactly like Gateway-family SKUs, with no Spring dependency anywhere in the data plane. The external API surface is generated at build time from `@ExerisDomain` types and `@Action` methods through `rest-emission` (and `graphql-emission` / `openapi-emission` where relevant) codegen capabilities (ADR-015); the emitted handlers register against `service-boundary-core`'s `ApiSurfaceRegistry` directly through kernel HTTP SPIs. There is no Spring `@RestController` in any first-party SKU. Heavy lifting (off-heap document processing for IDP, graph-attribute traversal for PIM, saga state for OMS, content-as-domain emission for Headless CMS) happens at the kernel level via composed caps. The Spring-on-Exeris brownfield migration path (§7) is a separate offering for *customers* who already have Spring code — it does not sit under any first-party SKU.
+**Service Boundary family architecture.** SB-family SKUs run **kernel-direct** — exactly like Gateway-family SKUs, with no Spring dependency anywhere in the data plane. The external API surface is generated at build time from `@ExerisDomain` types and `@Action` methods through `rest-emission` (and `graphql-emission` / `openapi-emission` where relevant) codegen capabilities (ADR-015); the emitted handlers register against `service-boundary-core`'s `ApiSurfaceRegistry` directly through kernel HTTP SPIs. There is no Spring `@RestController` in any first-party SKU. Heavy lifting (off-heap document processing for IDP, graph-attribute traversal for PIM, saga state for OMS, content-as-domain emission for Headless CMS API) happens at the kernel level via composed caps. The Spring-on-Exeris brownfield migration path (§7) is a separate offering for *customers* who already have Spring code — it does not sit under any first-party SKU.
 
 **Context-Centric CRM data model.** A cross-cutting cap consumed by Service Boundary SKUs. It encodes the anti-account-centric thesis: relationships, not accounts, are the primary key. The data model uses the kernel's stack-portable graph subsystem (unified `MATCH` DSL — transpiles to SQL:2023 PGQ on Postgres or Cypher on Neo4j/Memgraph/FalkorDB depending on the active driver, with Enterprise alternatives) for the underlying traversal; the cap layer adds the relationship-first vocabulary. Standalone product-form release is on the 2029 horizon per whitepaper §7.
 
@@ -437,7 +437,7 @@ Every Platform SKU is a **commercial-licensed composition** of underlying caps. 
 | `exeris-sku-idp` | commercial | Source-available (public) | Includes AI Abstraction caps (all commercial) |
 | `exeris-sku-pim` | commercial | Source-available (public) | |
 | `exeris-sku-oms` | commercial | Source-available (public) | Composes the L4 Flow saga engine via kernel SPI |
-| `exeris-sku-headless-cms` | commercial | Source-available (public) | |
+| `exeris-sku-content-api` | commercial | Source-available (public) | |
 
 ### 6.4 Family products (out of open-core taxonomy)
 

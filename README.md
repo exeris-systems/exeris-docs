@@ -10,7 +10,7 @@ The platform is structured in three tiers, detailed in `high-level-architecture.
 
 - **Tier 1 — Substrate.** The Exeris kernel (SPI + Core + Community/Enterprise drivers, ADR-007) plus `exeris-sdk` and `exeris-tooling` for the build-time pipeline (ADR-015). `exeris-spring-runtime` ships as an **independent Tier 1 product** for customers doing brownfield Spring migration — the platform itself does not use it.
 - **Tier 2 — Capability Ecosystem.** `exeris-caps-*` repositories — composable, build-time-validated modules with `@Provides` / `@Requires` contracts. Spring-free; the cap-tier Wall (extension of ADR-006) is enforced by the codegen pipeline.
-- **Tier 3 — Vertical SaaS SKUs (Platform SKUs).** First-party cap compositions sold as products — API Gateway, Edge Proxy, Bot Blocker, IDP, PIM, OMS, Headless CMS, Context-Centric CRM. Kernel-direct API surface (`@ExerisDomain` + `@Action` + `rest-emission` codegen); no Spring.
+- **Tier 3 — Vertical SaaS SKUs (Platform SKUs).** First-party cap compositions sold as products — API Gateway, Edge Proxy, Bot Blocker, IDP, PIM, OMS, Headless CMS API, Context-Centric CRM. Kernel-direct API surface (`@ExerisDomain` + `@Action` + `rest-emission` codegen); no Spring.
 
 **Family products** (BudgetHQ being the first) are commercially independent SaaS products built by Exeris Systems on the platform; they are structurally distinct from Platform SKUs and are detailed in HLA §9. BudgetHQ is the singular Spring-on-Exeris Family product (dogfooding `exeris-spring-runtime` as a product). All future Family products will be pure-Exeris on SDK + tooling.
 

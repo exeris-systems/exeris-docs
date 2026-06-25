@@ -17,7 +17,7 @@ ADR-020 introduced a two-valued **documentation visibility** taxonomy: `public` 
 It is, however, **insufficient for Tier 2 capability artefacts** — the `exeris-caps-*` repositories introduced by the 2026-05-12 whitepaper/HLA restructure. The cap layer is where most of the platform's commercial value lives:
 
 - ~50 capabilities across seven layers (substrate aggregates, Gateway building blocks, Gateway policies, Service Boundary platform caps, Domain primitives, AI Abstraction Layer, Cross-cutting). See HLA §3.2.
-- First-party Platform SKUs (`exeris-sku-api-gateway`, `exeris-sku-edge-proxy`, `exeris-sku-bot-blocker`, `exeris-sku-idp`, `exeris-sku-pim`, `exeris-sku-oms`, `exeris-sku-headless-cms`) are commercial-licensed compositions of these caps.
+- First-party Platform SKUs (`exeris-sku-api-gateway`, `exeris-sku-edge-proxy`, `exeris-sku-bot-blocker`, `exeris-sku-idp`, `exeris-sku-pim`, `exeris-sku-oms`, `exeris-sku-content-api`) are commercial-licensed compositions of these caps.
 
 Tagging the whole cap layer as ADR-020 `public` would be inconsistent with the SKU monetization model — customers would consume the caps for free under the open-core licence and the SKU subscription would be reduced to a packaging fee. Tagging the whole cap layer as `enterprise-private` would hide the source code from prospective customers and forfeit the engineering-credibility benefit the platform earns by making its code visible. Neither extreme matches the commercial intent.
 
@@ -93,7 +93,7 @@ The body of this ADR formalises the three-value licensing taxonomy at the Tier 2
 | `exeris-sku-idp` | **Source-available** (public repo) | Exeris Commercial License | Same as API Gateway; relevant for EU public-sector buyers under open-government IT mandates |
 | `exeris-sku-pim` | **Source-available** (public repo) | Exeris Commercial License | Same as API Gateway |
 | `exeris-sku-oms` | **Source-available** (public repo) | Exeris Commercial License | Same as API Gateway |
-| `exeris-sku-headless-cms` | **Source-available** (public repo) | Exeris Commercial License | Same as API Gateway |
+| `exeris-sku-content-api` | **Source-available** (public repo) | Exeris Commercial License | Same as API Gateway |
 | Context-Centric CRM | N/A — cross-cutting cap (`exeris-caps-contact-graph`), not a standalone SKU repository | — | Covered by §3.2 cap licensing taxonomy |
 
 ### Rationale
