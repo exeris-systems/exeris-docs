@@ -152,6 +152,59 @@ A consequence worth stating plainly: because `exeris-platform` is itself source-
 - ADR-023 (Capability Licensing Taxonomy) — its contractual-not-technical enforcement model (trade-offs + obligation 10) is the consistency this amendment restores; the stamp is a correctness assertion, never a licence lock.
 - ADR-015 (Codegen Emission Strategy, `exeris-tooling`) — owns the stamp + version + content-binding emission of revised obligation 7.
 
+## Composition Runtime Placement — Boot Conductor at SDK-Runtime, Control Plane at Platform (2026-06-25 amendment)
+
+The 2026-06-17 amendment correctly moved the stamp **assertion** out of the kernel, but it parked the whole composition runtime in `exeris-platform` **by elimination** — the kernel was excluded (obligation 9), `exeris-platform` was the standing repo, so it inherited the work. Realizing obligation 8 there (the `exeris-platform-composition-runtime` module, shipped 2026-06-17) exposed the mistake: the module is **standalone — it has zero dependencies on anything in `exeris-platform`** (Studio, the LSP server, the studio-backend). A runtime library that reads the tooling's `cap-manifest.json`, drives SDK-defined capability hooks, and binds to the kernel bootstrap has **no affinity to a design-time platform**. The 2026-06-17 amendment's rationale — "consistency assertions belong with the component that owns the manifest reader and performs the cap wiring, the platform composition runtime" — is circular: it *names* `exeris-platform` the composition runtime and then derives that the runtime belongs there. Nothing about Studio makes it the manifest reader.
+
+The deeper error was conflating **two orchestrations at two different altitudes** into one word:
+
+1. **The in-jar boot conductor** (runtime, per-SKU). Inside a single deployed SKU artefact, after `KERNEL READY`, something must drive that SKU's caps through `initialize → ready → drain → terminate` in the tooling-computed `initOrder`, then assert the stamp before any cap initializes. This ships **into the SKU jar** and runs wherever that jar is deployed (a k8s pod, a VM, standalone). It is substrate-adjacent runtime glue, not a design-time concern.
+2. **The deploy-time control plane** (design-time + deploy-time, multi-SKU). Composing a complex distributed system out of many SKUs (service-mesh / multi-host), wiring it in Studio from SDK + Tooling + caps + SKUs, integrating with external delivery (git, cloud distributors, Kubernetes), and **deploying** it. **This is the genuine `exeris-platform` role** — the control plane that composes and ships systems, not the in-process runtime that boots one of them.
+
+### Two realizations that sharpen the split
+
+- **The four-phase cap lifecycle is the kernel's three-phase `Subsystem` lifecycle, finer-grained — not a parallel framework.** In `eu.exeris.kernel.spi.bootstrap.Subsystem`, `start()` ("activates the subsystem and begins accepting work") is `ready`; `stop()` ("graceful shutdown — flushes in-flight work and releases resources") is `drain` **+** `terminate` fused. The cap contract splits `stop` into two phases only to add a configurable drain deadline and an all-caps-drained barrier before terminate. The whole cap layer hangs off the kernel at **one seam** — a single opaque `Subsystem` (phase `RUNTIME`, after `KERNEL READY`) whose internals run a thin `initOrder` loop. The kernel still sees one subsystem, not N caps (obligation 9 preserved). There is no second bootstrap engine; there is one substrate lifecycle and a nested, tooling-ordered cap loop.
+- **The content-binding algorithm is currently a byte-verbatim port** (`exeris-tooling`'s `CompositionStamp#computeBinding` ↔ the runtime's re-implementation), pinned by a golden test vector — any silent drift false-fails every deploy. A single **shared composition-spec** (manifest schema + the one canonical binding implementation), depended on by both the tooling emitter and the runtime asserter, eliminates the duplication **without** dragging the build-time pipeline onto the SKU classpath (the spec carries no codegen dependencies). The golden vector survives as a cross-module conformance pin.
+
+### The Decision
+
+**The composition runtime — the boot conductor and the stamp assertion — moves to an SDK-side runtime module shipped into each SKU artefact, not to `exeris-platform`. The manifest schema and content-binding algorithm are defined once in a shared composition-spec. `exeris-platform` is re-cast as what it actually is: the deploy-time control plane that *composes and deploys* multi-SKU distributed systems and *consumes* the composition library, never hosting the in-jar runtime. The open kernel remains cap-blind.**
+
+| Altitude | Component | Home | Role |
+|:---|:---|:---|:---|
+| Build-time | Validation + emission | `exeris-tooling` | Validate the `@Requires`/`@Provides` DAG, compute `initOrder`, emit stamp + version + content binding (obligation 7, unchanged). |
+| Shared contract | Composition-spec | `exeris-sdk-composition-spec` (small SDK module, no codegen deps) | The `cap-manifest.json` schema + the **one** canonical content-binding implementation, depended on by both the tooling emitter and the runtime asserter. Retires the verbatim port. |
+| Cap authoring/runtime contract | Lifecycle hooks | `exeris-sdk` | `CapabilityLifecycleHooks` (`initialize`/`ready`/`drain`/`terminate`) — the runtime twin of the `@CapabilityLifecycle` marker (open follow-up 1). **Not** in the kernel (the body's "lives in kernel SPI" wording is void under obligation 9). |
+| SKU-boot runtime | Boot conductor + stamp assertion | an SDK-side runtime module (extractable to a dedicated `exeris-orchestrator` repo if a second host integration appears) | Asserts the stamp before any cap `initialize`, then drives caps through the four phases in `initOrder`, reverse on shutdown with the drain deadline. Binds to the kernel bootstrap as **one** opaque `Subsystem`. Ships into the SKU jar (realizes obligation 8). |
+| Deploy-time control plane | Studio + delivery integrations | `exeris-platform` | Composes multi-SKU / mesh / multi-host systems, integrates with git and cloud/Kubernetes delivery, deploys. **Consumes** the composition library for design/deploy-time validation and preview. Does **not** host the boot-time runtime. |
+| Substrate | Kernel | `exeris-kernel` | Cap-blind (obligation 9, unchanged). |
+
+### Where the composition-spec lives — and when it would leave
+
+`exeris-sdk-composition-spec`, an SDK module, is the home — not a standalone repo — because the spec has **two coupled consumers**, not an independent set. The tooling **emits** the manifest and the SDK-runtime asserter **consumes** it; the platform control plane consumes it only **transitively** through the runtime library, and is itself — by the dogfooding principle (Platform is built with SDK + Tooling + caps + SKUs like the gateway) — already a deep SDK dependant. The tooling↔SDK pair co-evolves in lockstep (tooling already depends on SDK to process its annotations), so there is no independent producer/consumer boundary to protect with a neutral third repo.
+
+This is the inverse of the `exeris-telemetry-spec` precedent. That wire format earned its own repo precisely because its emitter (the kernel) and decoder (`exeris-enterprise-observability`) are **independent repos that must not depend on each other** (ADR-018) — the spec had to be neutral ground. The composition-spec has no such independent pair: the natural "third consumer" candidate, a forensics decoder reading composition metadata, consumes the **telemetry** wire (ADR-018), not `cap-manifest.json` (see *What is NOT in scope — Telemetry of the composition*).
+
+**Extraction trigger (reversible):** if a consumer later appears for which depending on the SDK is the wrong shape — a substrate-near tool that must read `cap-manifest.json` **directly** without the SDK surface — extract `exeris-sdk-composition-spec` into a standalone `exeris-composition-spec` repo. Module → repo is a mechanical move; starting standalone now would be premature structure for a two-consumer contract.
+
+**Revised obligations (supersede the 2026-06-17 obligation 8; obligations 7 and 9 stand):**
+
+8a. **The boot conductor and stamp assertion live in an SDK-side runtime module, shipped into every SKU artefact** — not in `exeris-platform`. The generated SKU bootstrap invokes them during its own startup, before any cap `initialize`, and the module binds to the kernel bootstrap as a single opaque `Subsystem` in the `RUNTIME` phase. It performs no DAG re-resolution; the cap order is the tooling-supplied `initOrder`.
+
+8b. **The manifest schema and content-binding algorithm are defined once in `exeris-sdk-composition-spec`** (an SDK module, no codegen deps), depended on by both the tooling emitter and the runtime asserter. The byte-verbatim re-implementation is retired; the golden test vector is retained as a cross-module conformance pin. The spec stays in the SDK while its consumer set is the coupled tooling↔SDK-runtime pair (plus platform transitively); it extracts to a standalone `exeris-composition-spec` repo only if an SDK-independent direct consumer appears.
+
+8c. **`exeris-platform` is the deploy-time control plane.** It composes and deploys multi-SKU / mesh / multi-host systems and integrates with external delivery (git, cloud, Kubernetes). It **consumes** the composition library for design/deploy-time validation; it does not host the boot-time runtime, and reintroducing in-jar composition machinery into a Studio/LSP/backend module is a regression.
+
+### Migration
+
+The validation-stamp assertion shipped in `exeris-platform-composition-runtime` (the 2026-06-17 realization of obligation 8) relocates to the SDK-side runtime module; the `exeris-platform` link stub and the repo's `CLAUDE.md` guardrail update to reflect "platform = control plane, consumes the library" rather than "platform realizes obligation 8". Tracked as a follow-up — the assertion logic and its golden vector port unchanged; only its module coordinates move.
+
+### Cross-references for this amendment
+
+- The 2026-06-17 amendment above — this amendment refines, not reverses, it: the kernel stays cap-blind; only the *non-kernel* home of the assertion is corrected (platform → SDK-runtime) and the genuine platform role (control plane) is made explicit.
+- ADR-006 (Spring-Free Kernel Boundary — The Wall) — the one-seam binding (a single opaque `Subsystem`) is what keeps the substrate blind to the cap tier.
+- `exeris-sdk` open follow-up 1 (the concrete `@CapabilityModule`/`@Provides`/`@Requires`/`@CapabilityLifecycle` classes) — now also owns the `CapabilityLifecycleHooks` runtime interface and the composition-spec module placement.
+
 ## Cross-references
 
 - ADR-006 (Spring-Free Kernel Boundary — The Wall) — the substrate-tier Wall that this ADR extends to the cap tier.
