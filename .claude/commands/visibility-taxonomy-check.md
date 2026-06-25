@@ -16,7 +16,7 @@ License taxonomy (ADR-023, three-valued, SEPARATE AXIS — applies to capability
 - `enterprise-private` — closed-source, Enterprise tier only — 1 cap (`bot-fingerprinting`).
 
 SKU repository source-visibility (ADR-023 same-day amendment 2026-05-13):
-- 6/7 Platform SKUs are **source-available** public repos under Exeris Commercial License (API Gateway, Edge Proxy, IDP, PIM, OMS, Headless CMS).
+- 6/7 Platform SKUs are **source-available** public repos under Exeris Commercial License (API Gateway, Edge Proxy, IDP, PIM, OMS, Headless CMS API).
 - 1/7 Platform SKU is **closed-source** on anti-abuse-security principle: Bot Blocker (named exception, principled — published detection helps adversaries).
 
 Change:
