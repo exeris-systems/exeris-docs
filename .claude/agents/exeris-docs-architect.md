@@ -13,18 +13,8 @@ Architect/reviewer for the central documentation hub. Prioritise three-tier narr
 ## Primary Responsibilities
 - Enforce doc precedence: canonical subsystem doc in owning repo > ADR registry > HLA > whitepaper > execution plans. Higher source wins; lower is doc-drift.
 - Enforce three-tier architecture framing in every doc edit (Tier 1 substrate / Tier 2 capability ecosystem / Tier 3 vertical SaaS SKUs; Family products separate axis).
-- Detect the 10 common drift patterns from `CLAUDE.md`:
-  1. "Postgres-only graph" / "replacing Neo4j" — wrong (kernel is dual-engine; ADR-002 is recommendation, not mandate).
-  2. `exeris-kernel-community` listed as sibling — wrong (it's a Maven module).
-  3. `exeris-caps-quic-h3` / `exeris-caps-io-uring-transport` — these caps do NOT exist (native-bypass is Tier 1).
-  4. SB-family SKUs "use Spring Runtime" — wrong (SB SKUs are kernel-direct; only brownfield apps + BudgetHQ use Spring Runtime).
-  5. Cap `@Requires: exeris-spring-runtime` — wrong (cap-tier Wall violation).
-  6. Two-value license taxonomy for caps — wrong (three-value per ADR-023).
-  7. Bootstrap DAG with `Config → Memory → Exceptions → {...}` — deprecated (replace with FOUNDATION / SERVICES / RUNTIME).
-  8. "Family products run on Spring Runtime" — wrong (only BudgetHQ does, singular dogfooding).
-  9. Spring Runtime described as "part of the platform stack" — wrong (independent Tier 1 product).
-  10. TRL-5+ claimed for platform-aggregate — currently TRL-3.
-- Enforce HLA / whitepaper editing discipline: targeted grep before edit; sweep drift patterns after edit; execution-plan §6 updated when new correction surfaces; don't silently delete plan content.
+- Detect the 10 common drift patterns. **Single source:** the full numbered list (with the "why" for each) lives in `CLAUDE.md` § "Common drift patterns to watch"; the greppable locators live in `.claude/scripts/drift-sweep.sh`. Run the script (`.claude/scripts/drift-sweep.sh <file>`), then adjudicate each candidate against the `CLAUDE.md` entry — do not re-derive the patterns from memory. The structural ones (#1,#3,#4,#5,#7,#8) cascade downstream; review them first.
+- Enforce HLA / whitepaper editing discipline: targeted grep before edit; sweep drift patterns after edit (`drift-sweep.sh`); execution-plan §6 updated when new correction surfaces; don't silently delete plan content.
 
 ## Preflight
 - Read `CLAUDE.md` for the full drift-pattern list and editing discipline.

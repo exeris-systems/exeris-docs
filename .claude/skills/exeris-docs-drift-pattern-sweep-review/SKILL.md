@@ -6,61 +6,51 @@ description: Drift-pattern sweep review for exeris-docs. Use after any non-trivi
 # Exeris Docs Drift-Pattern Sweep Review
 
 ## Purpose
-Enforce: 10 recurring drift patterns are absent from edited files. Single-edit fixes leave inconsistencies; the same correction must apply to every site.
+Confirm the 10 recurring drift patterns are absent from edited files — and that
+any correction was applied to **every** site, not just the one the PR touched.
+
+**Single source.** The 10 patterns (why each is wrong) live once in
+`CLAUDE.md` § "Common drift patterns to watch". The greppable locators live once
+in `.claude/scripts/drift-sweep.sh`. This skill does NOT restate them — it runs
+the script and adjudicates the candidates.
 
 ## When to Use
-- After any non-trivial `high-level-architecture.md` edit.
-- After any non-trivial `b2b-technical-whitepaper.md` edit.
+- After any non-trivial `high-level-architecture.md` or `b2b-technical-whitepaper.md` edit.
 - After any ADR edit that frames cross-tier or cross-repo structure.
 - After any execution-plan amendment.
 - On request as a standalone audit pass.
 
 ## Required Inputs
-- File(s) edited.
-- Edit summary.
-
-## The 10 Patterns
-1. **Postgres-only graph / "replacing Neo4j"** — wrong; kernel is dual-engine.
-2. **`exeris-kernel-community` as sibling** — wrong; Maven module.
-3. **`exeris-caps-quic-h3` / `exeris-caps-io-uring-transport`** — do NOT exist; Tier 1 substrate.
-4. **SB-family SKUs "use Spring Runtime"** — wrong; kernel-direct.
-5. **Cap `@Requires: exeris-spring-runtime`** — Wall violation.
-6. **Two-value license taxonomy for caps** — wrong; three-value.
-7. **`Config → Memory → Exceptions → {...}` bootstrap framing** — deprecated; use FOUNDATION / SERVICES / RUNTIME.
-8. **"Family products run on Spring Runtime"** — wrong; only BudgetHQ.
-9. **Spring Runtime "part of the platform stack"** — wrong; independent Tier 1.
-10. **TRL-5+ for platform-aggregate** — currently TRL-3.
+- File(s) edited + an edit summary.
 
 ## Review Procedure
-1. For each pattern, run a targeted `grep -nE` on edited file(s).
-2. Report hits: line numbers + offending text.
-3. For each hit, propose canonical-correct phrasing.
-4. Check single-edit consistency — every site of the same pattern needs the same correction; don't fix one and leave others.
-5. If hits on patterns 1, 3, 4, 5, 7, 8 (the structural ones) — flag as high-severity because they propagate downstream.
-6. Decision: `CLEAN` / `CORRECTIONS_REQUIRED` / `INVESTIGATION_REQUIRED`.
+1. **Run the locator** on every edited file:
+   `.claude/scripts/drift-sweep.sh <file>…`
+2. **Adjudicate each candidate.** The script marks likely-correct negations with
+   `⟵ (neg? verify)`. For each candidate decide: real drift, or a correct
+   negation/mention? When unsure of canonical phrasing, read the relevant
+   `CLAUDE.md` § "Common drift patterns" entry (numbered 1–10 to match the
+   script's `#N`).
+3. **Prioritise STRUCTURAL hits** (the script tags patterns 1,3,4,5,7,8) — they
+   propagate downstream; review them first.
+4. **Single-edit consistency.** For every confirmed drift, grep the *whole* doc
+   (not just the diff) and confirm the same correction is applied at every site.
+5. **Verdict:** `CLEAN` / `CORRECTIONS_REQUIRED` / `INVESTIGATION_REQUIRED`.
 
 ## Decision Logic
-- **CLEAN**: No hits on any pattern.
-- **CORRECTIONS_REQUIRED**: Hits with known canonical correction; propose patch list.
-- **INVESTIGATION_REQUIRED**: Hits ambiguous between drift and intentional framing — escalate to architect.
-
-## Completion Criteria
-- All 10 patterns grepped.
-- Hits enumerated.
-- Corrections proposed (or escalation requested).
+- **CLEAN**: script clean, or all candidates confirmed correct negations/mentions.
+- **CORRECTIONS_REQUIRED**: ≥1 confirmed drift with a known canonical fix — emit a patch list.
+- **INVESTIGATION_REQUIRED**: a candidate is ambiguous between drift and intentional framing — escalate to `exeris-docs-architect`.
 
 ## Review Output Template
-1. **Scope** (file(s) swept)
-2. **Per-pattern results**:
-   - Pattern 1: hits / clean
-   - Pattern 2: hits / clean
-   - …
-   - Pattern 10: hits / clean
-3. **Single-edit consistency check** (same correction applied everywhere?)
-4. **Verdict** (`CLEAN` / `CORRECTIONS_REQUIRED` / `INVESTIGATION_REQUIRED`)
-5. **Patch list** (precise corrections per hit)
+1. **Scope** (files swept; script exit code).
+2. **Adjudication** — per candidate: pattern `#N`, line, `drift` | `correct-negation` | `ambiguous`.
+3. **Single-edit consistency check** (same correction applied everywhere?).
+4. **Verdict** (`CLEAN` / `CORRECTIONS_REQUIRED` / `INVESTIGATION_REQUIRED`).
+5. **Patch list** (precise corrections per confirmed drift).
 
 ## Non-Negotiable Rules
-- Never declare CLEAN without grepping every pattern.
-- Never approve single-edit corrections that leave inconsistent sites.
-- Never silently allow a pattern hit to remain (escalate if uncertain).
+- Never declare CLEAN without running `drift-sweep.sh` on every edited file.
+- Never resolve a candidate from memory when the canonical phrasing is in reach — read the `CLAUDE.md` entry.
+- Never fix one site and leave another; confirmed drift is corrected at every site.
+- Never silently drop an ambiguous candidate — escalate.

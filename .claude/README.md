@@ -17,9 +17,25 @@ and works as the operating context for AI assistants on the central documentatio
 - `skills/` — invocable skills (`/<skill-name>`):
   - `exeris-docs-task-classifier`, `exeris-docs-routing-planner`
   - `exeris-docs-document-shape-classifier`
-  - `exeris-docs-adr-registry-discipline-review`
+  - `exeris-docs-adr-registry-discipline-review` (subsumes the visibility/license check)
   - `exeris-docs-drift-pattern-sweep-review`
   - `exeris-docs-three-tier-narrative-review`
+- `scripts/` — deterministic gates that hold the *greppable* rules (see [`scripts/README.md`](scripts/README.md)):
+  - `drift-sweep.sh`, `taxonomy-check.sh` — candidate locators (exit 1 = review required, not "broken")
+  - `adr-filename-check.sh`, `check-consistency.sh` — true gates (exit 1 = real violation)
+
+## When skill vs command vs agent vs script
+
+One function should not be re-implemented across forms. The division of labour:
+
+- **`scripts/`** — the *mechanical, regex-expressible* check. The one place a
+  pattern/census is written down. Runs in CI / pre-commit unchanged.
+- **skills** — the *judgement* procedure around a script: adjudicate candidates,
+  read the canonical `CLAUDE.md` entry, decide a verdict. Model-invoked.
+- **commands** (`/<name> $ARGUMENTS`) — a *thin entrypoint*: run the script on the
+  argument, then point at the skill for the procedure. No restated doctrine.
+- **agents** — *delegation* with their own context/tools; the router is a
+  dispatcher that delegates classification/planning to the two routing skills.
 
 ## Doctrine — single source
 
@@ -31,4 +47,13 @@ Project doctrine is **not** duplicated under `.claude/`:
 - **`b2b-technical-whitepaper.md`** — buyer-facing summary + roadmap.
 - **`templates/`** — `ADR-TEMPLATE.md`, `RFC-TEMPLATE.md`, `RESEARCH-TEMPLATE.md` + `README.md` (template usage rules).
 
-When skills/agents need policy context, they reference these — they do not restate them.
+The **prose** doctrine lives once in the sources above; the **greppable** rules
+(drift patterns, taxonomy locators, ADR filename pattern) live once in
+`scripts/`. When skills/commands/agents need policy context, they reference these
+— they do not restate them.
+
+`scripts/check-consistency.sh` enforces this: it fails if any file under
+`.claude/{skills,commands,agents}` hard-codes rotting doctrine (cap census,
+named census caps, TRL levels, the SKU split) that must live only in
+`CLAUDE.md` / the ADRs. Run it after editing this directory — the toolkit guards
+itself against the exact doc-drift it exists to catch.
