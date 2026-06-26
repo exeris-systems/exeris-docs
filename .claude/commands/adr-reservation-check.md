@@ -3,30 +3,26 @@ description: Verify a new / amended ADR follows the registry discipline — numb
 argument-hint: ADR PR / new ADR file / index update to audit
 ---
 
-Audit this ADR change against registry discipline.
+Audit the ADR change below against registry discipline.
 
-ADR registry rules (per repo `CLAUDE.md` + `adr/ADR-020-open-core-documentation-mirror-policy.md`):
-- **Reserve the number first.** A new ADR adds its row to `adr-index.md` BEFORE the ADR-content file lands.
-- **Filename pattern**: `ADR-NNN-<lowercase-kebab-title>.md` — 3-digit zero-padded; replace `&` with `and`; drop other punctuation.
-- **Authoritative location per scope**:
-  - Platform-scope → `exeris-docs/adr/`
-  - Per-repo → `<owning-repo>/docs/adr/`
-  - Cross-repo → owning repo's `docs/adr/` PLUS `ADR-NNN.link.md` stubs in every affected repo
-  - Enterprise-private → `<enterprise-repo>/docs/adr/` (number publicly registered, content private)
-- **Visibility taxonomy**: two-valued — `public` or `enterprise-private`. `public-staged` deprecated.
-- **License taxonomy** (separate axis, ADR-023): three-valued — `community` / `commercial` / `enterprise-private` — applies to capability artefacts, NOT to ADR files.
-- **No refactor-only ADRs** — those live in `<repo>/docs/refactor-notes/` or PR descriptions.
-- **No portfolio entries** — `budgetHQ/`, `pbm/` do NOT enter `adr-index.md`.
+Change: $ARGUMENTS
 
-Change:
-$ARGUMENTS
+The rules live once in `CLAUDE.md` § "ADR registry conventions" and
+`adr/ADR-020-open-core-documentation-mirror-policy.md`; the mechanical checks live
+in `.claude/scripts/`. Read those — this command does not restate the rule text.
 
-Please review:
-1. Is the ADR number reserved in `adr-index.md` BEFORE the content file is added?
-2. Does the filename match `ADR-NNN-<lowercase-kebab-title>.md` exactly?
-3. Does the file location match the scope (platform / per-repo / cross-repo / enterprise-private)?
-4. For cross-repo: are `ADR-NNN.link.md` stubs in every affected repo?
-5. Is the visibility taxonomy claim correct (`public` / `enterprise-private`)? No `public-staged` reintroduction?
-6. If the ADR concerns capability artefacts: is the license taxonomy (`community` / `commercial` / `enterprise-private`) cited and not conflated with visibility?
-7. Is this a real decision document, or should it be a refactor note / PR description?
-8. Minimal correction if registry discipline is at risk.
+Steps:
+1. Run `.claude/scripts/adr-filename-check.sh <adr-file>` — verifies the filename
+   matches `ADR-NNN-<lowercase-kebab-title>.md` AND that the number already has a
+   row in `adr-index.md` (reserve-number-first). Exit 1 = real violation.
+2. Run `.claude/scripts/taxonomy-check.sh <changed-files>` for visibility (ADR-020,
+   two-valued; no live `public-staged`) and license (ADR-023, three-valued; not
+   conflated with visibility).
+3. Confirm by hand against `CLAUDE.md`:
+   - Location matches scope (platform / per-repo / cross-repo / enterprise-private).
+   - Cross-repo ADRs have `ADR-NNN.link.md` stubs in every affected repo.
+   - Not a refactor-only change masquerading as an ADR (→ refactor-notes / PR description).
+   - No `budgetHQ/` / `pbm/` portfolio entry in `adr-index.md`.
+4. Report the minimal correction if discipline is at risk.
+
+For the full procedure use the `exeris-docs-adr-registry-discipline-review` skill.

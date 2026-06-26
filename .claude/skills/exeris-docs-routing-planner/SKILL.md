@@ -25,13 +25,13 @@ Given a classified task (see `exeris-docs-task-classifier`), produce a minimal, 
 - `MULTI_DOMAIN` → start with `router` triage, list all dominant handoffs.
 
 ## Default Validation Gates
-- Document shape decided (Research / RFC / ADR) when "draft a decision doc".
-- ADR number reserved in `adr-index.md` BEFORE content lands.
-- Filename matches `ADR-NNN-<lowercase-kebab-title>.md`.
-- Visibility taxonomy correct (`public` / `enterprise-private`); no `public-staged`.
-- License taxonomy correct when capability artefacts in scope.
-- Drift-pattern sweep done after non-trivial HLA / whitepaper edit.
-- Three-tier narrative respected.
+Rule definitions live in `CLAUDE.md`; mechanical checks live in `.claude/scripts/`.
+This list names *which* gate applies, not the rule text.
+- Document shape decided (Research / RFC / ADR) when "draft a decision doc" → `exeris-docs-document-shape-classifier`.
+- ADR number reserved before content + filename pattern → `adr-filename-check.sh` / `exeris-docs-adr-registry-discipline-review`.
+- Visibility + license taxonomy correct when ADR / capability artefacts in scope → `taxonomy-check.sh` (same skill).
+- Drift-pattern sweep after non-trivial HLA / whitepaper edit → `drift-sweep.sh` / `exeris-docs-drift-pattern-sweep-review`.
+- Three-tier narrative respected → `exeris-docs-three-tier-narrative-review`.
 - Cross-repo `ADR-NNN.link.md` stubs created when cross-repo.
 - Execution-plan §6 reconciliation updated when new architectural correction surfaces.
 

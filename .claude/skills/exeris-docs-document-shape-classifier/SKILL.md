@@ -8,15 +8,20 @@ description: Document shape classifier for exeris-docs. Use whenever a user asks
 ## Purpose
 Classify the question shape before opening a template. The three templates are NOT interchangeable; refactor-only changes are NOT decision docs at all.
 
+**Single source.** Template shapes, filenames, and selection rules live once in
+`templates/README.md` (and `CLAUDE.md` § "Decision-document templates"). This
+skill applies the decision tree below and points at the right file — read
+`templates/README.md` for the authoritative shape definitions.
+
 ## When to Use
 - Any "draft an ADR" / "write an RFC" / "make a research note" request.
 - Any time the user reaches for a template without naming which one.
 - Any time an ADR draft surfaces but upstream measurement / option comparison is missing.
 
-## Templates (per `templates/README.md`)
-- **Research** (`RESEARCH-TEMPLATE.md`) — falsifiable hypothesis, lab-notebook shape, JMH/JFR-driven. Branch-scoped (`research/<slug>`), no central registry.
-- **RFC** (`RFC-TEMPLATE.md`) — multi-option strategic question. Filename: `RFC-YYYY-MM-DD <Short Title>.md`. No central registry.
-- **ADR** (`ADR-TEMPLATE.md`) — decision already made. Filename: `ADR-NNN <Short Title>.md`. Enters the registry.
+## Templates (summary — authoritative copy in `templates/README.md`)
+- **Research** (`RESEARCH-TEMPLATE.md`) — falsifiable hypothesis, lab-notebook, JMH/JFR-driven. Branch-scoped, no registry.
+- **RFC** (`RFC-TEMPLATE.md`) — multi-option strategic question. No registry.
+- **ADR** (`ADR-TEMPLATE.md`) — decision already made. Enters the registry.
 
 ## Decision Procedure
 1. **Is upstream measurement missing?** → Research first.

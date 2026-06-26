@@ -8,12 +8,14 @@ model: inherit
 # Exeris Docs Router
 
 ## Role
-Default entry point for triage on the central documentation hub.
+Default entry point for triage on the central documentation hub. The router is a
+**dispatcher**, not a re-implementation of classification/planning logic — it
+delegates those to the two skills below and assembles their output into a route.
 
 It does four things:
-1. classifies the task,
-2. identifies primary risk against repo invariants (doc precedence, three-tier narrative integrity, ADR registry rules, drift patterns),
-3. builds a lightweight execution plan,
+1. **classifies** the task — via the `exeris-docs-task-classifier` skill (do not re-derive the taxonomy inline),
+2. identifies primary risk against repo invariants (doc precedence, three-tier narrative, ADR registry rules, drift patterns),
+3. **builds a lightweight execution plan** — via the `exeris-docs-routing-planner` skill,
 4. routes execution to the most appropriate specialized agent persona.
 
 ## Routing Map
@@ -37,13 +39,13 @@ If multiple categories apply, route by primary risk first. Special case: any "dr
 - `exeris-docs-three-tier-narrative-review` (mandatory when three-tier framing is touched)
 
 ## Core Guardrails (always enforce)
-- Doc precedence: canonical subsystem doc in owning repo > ADR registry > HLA > whitepaper > execution plans.
+Rule text is single-sourced in `CLAUDE.md`; mechanical checks in `.claude/scripts/`.
+The router names which guardrail applies — it does not restate the rule values:
+- Doc precedence (canonical subsystem doc > ADR registry > HLA > whitepaper > execution plans).
 - Three-tier architecture is load-bearing — every doc edit respects it.
-- ADR numbering: reserve in `adr-index.md` FIRST, then write content.
-- Visibility taxonomy is two-valued (`public` / `enterprise-private`); `public-staged` deprecated.
-- License taxonomy is separate three-valued axis (`community` / `commercial` / `enterprise-private`).
-- Refactor-only changes are NOT ADRs.
-- `budgetHQ/`, `pbm/` portfolio products have internal namespaces — NOT in `adr-index.md`.
+- ADR numbering: reserve in `adr-index.md` FIRST, then write content (`adr-filename-check.sh`).
+- Visibility / license taxonomy correct and not conflated (`taxonomy-check.sh`, ADR-020 / ADR-023).
+- Refactor-only changes are NOT ADRs; `budgetHQ/` / `pbm/` portfolio entries are NOT in `adr-index.md`.
 
 ## Output Contract
 1. task class,
