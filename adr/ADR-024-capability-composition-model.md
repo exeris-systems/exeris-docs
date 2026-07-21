@@ -202,8 +202,37 @@ The validation-stamp assertion shipped in `exeris-platform-composition-runtime` 
 ### Cross-references for this amendment
 
 - The 2026-06-17 amendment above — this amendment refines, not reverses, it: the kernel stays cap-blind; only the *non-kernel* home of the assertion is corrected (platform → SDK-runtime) and the genuine platform role (control plane) is made explicit.
-- ADR-006 (Spring-Free Kernel Boundary — The Wall) — the one-seam binding (a single opaque `Subsystem`) is what keeps the substrate blind to the cap tier.
+- ADR-006 (Spring-Free Kernel Boundary — The Wall) — the one-seam binding (a single opaque `Subsystem`) is what keeps the substrate blind to the cap tier. *(Binding mechanism superseded by the 2026-07-21 amendment below — the seam survives, but as the SKU entrypoint's call site, not a DAG node.)*
 - `exeris-sdk` open follow-up 1 (the concrete `@CapabilityModule`/`@Provides`/`@Requires`/`@CapabilityLifecycle` classes) — now also owns the `CapabilityLifecycleHooks` runtime interface and the composition-spec module placement.
+
+## Boot Conductor Call Site — Invoked by the SKU Bootstrap After `KERNEL READY`, Never a Kernel Subsystem (2026-07-21 amendment)
+
+The 2026-06-25 amendment correctly placed the boot conductor in an SDK-side runtime module, but described its kernel binding as "a single opaque `Subsystem` (phase `RUNTIME`, after `KERNEL READY`)", and its revised obligation 8a repeated that the module "binds to the kernel bootstrap as a single opaque `Subsystem` in the `RUNTIME` phase". That phrasing is **internally inconsistent with this ADR's own body**: `BootstrapPhase.RUNTIME` is a kernel bootstrap phase that completes *before* `KERNEL READY` is declared (canonical DAG: `FOUNDATION → SERVICES → RUNTIME → KERNEL READY`), while the body's lifecycle table triggers cap `initialize` *"after kernel `READY`, before first request"*. A DAG-registered `Subsystem` structurally cannot run after `KERNEL READY` — the two clauses cannot both hold. Founder ruling 2026-07-21 resolves the contradiction in favour of the lifecycle table.
+
+### Why the `Subsystem` binding is the wrong call site
+
+1. **Lifecycle semantics.** Cap `initialize` is defined to run after the *whole* substrate is ready — including HTTP, which boots in the `RUNTIME` phase. A cap conductor registered as a `RUNTIME`-phase `Subsystem` would run concurrently with (or, `dependsOn` notwithstanding, still *inside*) the very phase whose completion the cap contract presupposes. Only a post-bootstrap call site satisfies the body's table.
+2. **Tier purity.** A `ServiceLoader`-registered `SubsystemProvider` from the cap layer would insert a cap-tier node into the kernel's bootstrap DAG — observable through `KernelDiagnostics.getBootstrapDag()` (ADR-033). Obligation 9's promise is not just that the kernel *codebase* is cap-blind, but that the substrate's runtime self-description stays pure Tier 1. Caps and SKUs are platform-tier code *above* the substrate, not subsystems *of* it.
+3. **Deployment independence (code detachment, obligation 6).** The SKU artefact must boot standalone — kernel + caps + conductor in one deployable, sequenced by its own entrypoint, with no platform/control-plane runtime dependency and no reliance on kernel-side discovery of cap machinery. An SKU whose cap layer only starts because the kernel's ServiceLoader happened to find it couples the detached artefact to a discovery convention the customer's fork must then preserve; an SKU whose own `main` calls the conductor is mechanically self-describing.
+
+### The Decision
+
+**The generated SKU bootstrap owns the boot sequence: `KernelBootstrap` → `KERNEL READY` → composition-stamp assertion → conductor `initOrder` loop. On shutdown the SKU entrypoint drains and terminates caps first (reverse `initOrder`, drain deadline per the body's lifecycle table), then stops the kernel. The cap layer registers nothing with the kernel — no `SubsystemProvider`, no node in the bootstrap DAG. The kernel remains cap-blind (obligation 9 unchanged); the conductor's module home (obligation 8a), the shared composition-spec (8b), and the platform control-plane role (8c) are unchanged.**
+
+The 2026-06-25 "one seam" insight survives: there is still exactly one substrate lifecycle and one nested, tooling-ordered cap loop — no second bootstrap engine. The correction is *where the seam sits*: it is the SKU entrypoint's call site immediately after `KERNEL READY`, not a node inside the kernel's DAG. The finer-grained-lifecycle observation (cap `ready`/`drain`/`terminate` as a refinement of `Subsystem.start()`/`stop()`) stands as an analogy, not as an implementation-by-interface.
+
+**Revised obligation (supersedes the *binding clause* of the 2026-06-25 obligation 8a; its module-home clause and obligations 7, 8b, 8c, 9 stand):**
+
+8a′. **The boot conductor and stamp assertion live in the SDK-side runtime module shipped into every SKU artefact, and are invoked by the generated SKU bootstrap after the kernel reports `KERNEL READY`** — before any cap `initialize`, performing no DAG re-resolution (the cap order is the tooling-supplied `initOrder`). The cap layer makes no `SubsystemProvider` registration and contributes no node to the kernel bootstrap DAG. Shutdown is SKU-entrypoint-driven: caps drain and terminate in reverse `initOrder` (honouring the drain deadline), then the kernel stops. The SKU artefact boots standalone, with no platform/control-plane runtime dependency.
+
+### Cross-references for this amendment
+
+- The 2026-06-25 amendment above — module placement (SDK-runtime home, composition-spec, platform-as-control-plane) is unchanged; only the binding mechanism ("opaque `Subsystem`, phase `RUNTIME`") is superseded.
+- This ADR's body, §Lifecycle — the `initialize` trigger *"after kernel `READY`"* is the clause this amendment restores to primacy.
+- ADR-033 (`KernelDiagnostics` SPI) — `getBootstrapDag()` stays a pure Tier 1 self-description; no cap-tier node appears in it.
+- ADR-006 (The Wall) — tier purity rationale 2.
+- Whitepaper §5.4 / obligation 6 (Code Detachment) — deployment-independence rationale 3.
+- ADR-053 (SKU Composition Manifest Format — JSON) — decided the same day; resolves the *format* half of open follow-up 3.
 
 ## Cross-references
 
