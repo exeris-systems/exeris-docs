@@ -34,7 +34,7 @@ The platform is structured in three tiers, detailed in `high-level-architecture.
 - **Refactor-only docs are not ADRs.** Documents whose primary purpose is to track the mechanics of a refactor live in `<repo>/docs/refactor-notes/` (or in PR descriptions) and never get assigned ADR numbers.
 - **Out of scope for the registry:** `budgetHQ/`, `pbm/`, and similar portfolio products have their own internal namespaces and do not enter `adr-index.md`.
 
-Capability licensing taxonomy (`community` / `commercial` / `enterprise-private`) is a separate axis from ADR-020 visibility and applies to Tier 2 cap repositories specifically. Until the dedicated **Capability Licensing Taxonomy ADR** lands on the 2027 horizon, the working source-of-truth is HLA §3.2 and whitepaper §3.2.
+Capability licensing taxonomy (`community` / `commercial` / `enterprise-private`) is a separate axis from ADR-020 visibility and applies to Tier 2 cap repositories specifically. It is formalized in **ADR-023 (Capability Licensing Taxonomy, accepted 2026-05-13)**; HLA §3.2 and whitepaper §3.2 mirror it.
 
 ## Decision-document templates
 

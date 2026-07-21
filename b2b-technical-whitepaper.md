@@ -57,7 +57,7 @@ Capabilities are organized in seven layers. Each layer is independently reusable
 
 > **Where native-bypass transport lives.** QUIC / HTTP/3, `io_uring`, and IOCP are **Tier 1 substrate** driver implementations in `exeris-kernel-enterprise`, not Tier 2 caps. The Enterprise engine swap (see §3.3 below) is a Maven-coordinate substitution at the substrate driver layer; cap compositions in Tier 2 are byte-identical across Community and Enterprise deployments.
 
-This taxonomy extension is on the ADR roadmap (amendment to ADR-020 or a dedicated Capability Licensing Taxonomy ADR — see §7).
+This taxonomy is formalized in **ADR-023 (Capability Licensing Taxonomy, accepted 2026-05-13)** — a dedicated licence axis orthogonal to ADR-020 visibility.
 
 | Layer | Capability repository | License | Used by |
 |---|---|---|---|
@@ -112,7 +112,7 @@ This taxonomy extension is on the ADR roadmap (amendment to ADR-020 or a dedicat
 |  | `exeris-caps-ai-prompt-templating` | commercial | All AI-enabled SKUs |
 | **7. Cross-cutting** | `exeris-caps-observability-bridge` (JFR → ADR-018 wire) | community | All SKUs and Family products |
 
-All cap repositories are currently in **specified** status. Implementation cadence is driven by the SKU roadmap in §7. The Capability Composition Model and the License Taxonomy extension are both governed by forthcoming ADRs; until those land, the binding source-of-truth is the codegen pipeline (ADR-015), the kernel bootstrap lifecycle contract, and ADR-020 (interpreted as covering Tier 1 only).
+All cap repositories are currently in **specified** status. Implementation cadence is driven by the SKU roadmap in §7. The Capability Composition Model is governed by **ADR-024** (accepted 2026-05-13, amended through 2026-07-21), the licensing taxonomy by **ADR-023** (accepted 2026-05-13), and the SKU composition manifest format by **ADR-053** (JSON, 2026-07-21); the codegen pipeline (ADR-015) and the kernel bootstrap lifecycle contract are the implementation substrate those ADRs bind.
 
 **Compositional reuse is structural, not aspirational.** `exeris-caps-contact-graph` is a single cap consumed by Context-Centric CRM, OMS (customer/recipient model), PIM (B2B trading-partner model), and BudgetHQ (account-owner model). `exeris-caps-ocr-pipeline` is consumed by IDP and by BudgetHQ's receipt-scan capability — the same cap, not a fork. This is what makes Tier 2 a genuine ecosystem: a customer at the Platform tier can pull `contact-graph` + `product-catalog` + `pricing-engine` + `inventory-tracking` + `order-lifecycle` + `payment-gateway` + the SB platform layer and assemble a bespoke ERP composition that no Exeris-shipped SKU enumerates.
 
@@ -236,7 +236,7 @@ For workloads in the third category, keep a dedicated reverse proxy or full Spri
 
 #### 5.3 Edge / IoT
 
-A target baseline RSS of ~128–200 MB (measured against the Community kernel on AWS Graviton2 ARM64; methodology to be published in `exeris-benchmarks/docs/edge-rss-baseline.md` — *planned, ships in `exeris-benchmarks` v0.8.0+*) enables running complex Java business logic on 512 MB ARM gateways and similar constrained hardware where C++/Rust was previously the only option. The same kernel binary runs cloud and edge — only driver selection and memory partition sizing differ.
+A target baseline RSS of ~128–200 MB for the Community kernel on ARM64-class edge hardware (a design target, not yet a published measurement; the EU-sovereign reference platform and methodology ship in `exeris-benchmarks/docs/edge-rss-baseline.md` — *planned, `exeris-benchmarks` v0.8.0+*) enables running complex Java business logic on 512 MB ARM gateways and similar constrained hardware where C++/Rust was previously the only option. The same kernel binary runs cloud and edge — only driver selection and memory partition sizing differ.
 
 #### 5.4 Vertical SKU Subscription
 
@@ -283,7 +283,7 @@ The kernel currently ships at **v0.7.0 (2026-05-10)**; v0.8 sprint is active (qu
 | Q3 2026 | Kernel v0.8 GA — quality gates closed; **TRL-4 integration-tested** for kernel subsystem set; first internal Edge/IoT pilot cohorts begin against `exeris-kernel-community` |
 | Q4 2026 | Kernel v0.9 — TRL-5 component validation in relevant environment; SPI freeze candidate hardening into **v0.9-RC SPI lock**; Exeris Spring Runtime 1.0 RC (Phases 0–3 feature-complete against the locked SPI; ADR-010, ADR-011, ADR-017); Exeris Studio MVP private beta (read-only inspection + targeted edit surfaces); customer pilot cohorts expand |
 | **H1 2027** | **Exeris Kernel 1.0 GA + Exeris Spring Runtime 1.0 GA shipped together** — SPI / Core / TCK stabilization (ADR-007, ADR-008); TRL-6 system prototype demonstrated in operational environment |
-| 2027 | Capability composition language formal ADR; **Capability Licensing Taxonomy ADR** (amendment to ADR-020 or standalone) — locks the `community` / `commercial` / `enterprise-private` model from §3.2 |
+| 2027 | *Delivered early (2026):* Capability Composition Model **ADR-024** (2026-05-13, amended through 2026-07-21), **Capability Licensing Taxonomy ADR-023** (2026-05-13 — locks the `community` / `commercial` / `enterprise-private` model from §3.2), SKU manifest format **ADR-053** (JSON, 2026-07-21). Remaining on this horizon: the composition language's formal *release* (frozen manifest + first shipped SKU manifest — Track B, H1 2027) |
 | 2028 | `exeris-caps-*` community caps formal Apache 2.0 releases; commercial caps source-available repositories opened to customers |
 
 **Track B — Platform SKUs (Tier 3).**

@@ -171,7 +171,7 @@ These are not user-space capabilities — they are properties of the substrate i
 |---|---|---|---|
 | Zero-copy hot path | Panama FFM + LoanedBuffer ownership | ADR-007 | Eliminates ~60% CPU waste on GC/allocation |
 | High-density compute | Virtual Threads + JEP 491 (no pinning) | ADR-007 | Far more concurrent flows per node on the same hardware |
-| Edge sovereignty | ~128–200 MB target RSS baseline (AWS Graviton2 ARM64; methodology in `exeris-benchmarks/docs/edge-rss-baseline.md` — *planned, ships in `exeris-benchmarks` v0.8.0+*) | kernel WP §4 | Full Java on 512 MB IoT gateways |
+| Edge sovereignty | ~128–200 MB target RSS baseline (ARM64 edge class; EU-sovereign reference platform + methodology in `exeris-benchmarks/docs/edge-rss-baseline.md` — *planned, ships in `exeris-benchmarks` v0.8.0+*) | kernel WP §4 | Full Java on 512 MB IoT gateways |
 | Bidirectional dev | Studio ↔ LSP ↔ source ↔ codegen | ADR-003, ADR-015 | Visual speed without low-code lock-in (clean Java) |
 | Physical tenant isolation | Postgres RLS + ScopedValue context propagation | ADR-012 | Hard tenant isolation at the data plane |
 | Compile-time RBAC | `@RequiresRole` codegen | ADR-014 | Authorization at the call site, not via runtime reflection |
@@ -195,7 +195,7 @@ Capabilities are organized in seven layers. Each layer is independently reusable
 | `commercial` | Exeris Commercial License (source-available; BSL-style) | The bulk of Tier 2 — substrate aggregates, Gateway building blocks, Gateway policies, all SB platform caps, all domain primitives, all AI Abstraction caps. Code visible in public repositories; production use requires an active Platform SKU subscription or Platform-tier license. |
 | `enterprise-private` | Closed-source | One Tier 2 cap (`exeris-caps-bot-fingerprinting`, which depends on a kernel-tier SPI extension shipping in `exeris-kernel-enterprise`). Available to Enterprise-tier subscribers only. |
 
-This extension is on the ADR roadmap — either as an amendment to ADR-020 broadening the visibility taxonomy, or as a dedicated **Capability Licensing Taxonomy ADR**. Until that lands, the column below labelled `License` is the working source-of-truth.
+This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026-05-13)** — a dedicated three-valued licence axis orthogonal to ADR-020 visibility. The column below labelled `License` mirrors ADR-023; on conflict, ADR-023 wins.
 
 **Layer 1 — Substrate aggregates** (one per SKU family; provide the family's foundational lifecycle and bootstrap binding).
 
@@ -286,7 +286,7 @@ This extension is on the ADR roadmap — either as an amendment to ADR-020 broad
 
 > **Note on host-runtime independence.** No cap `@Requires` `exeris-spring-runtime`, and **no first-party Platform SKU layers it in either**. The platform — kernel, capability ecosystem, and all Tier 3 SKUs — runs kernel-direct: HTTP endpoints come from `@ExerisDomain` types + `@Action` methods + `rest-emission` codegen (ADR-015), not from Spring `@RestController` paths. `exeris-spring-runtime` is an independent Tier 1 product that ships separately for two consumers only: (a) customer applications doing brownfield Spring migration, and (b) Family products (BudgetHQ, §9) that deliberately dogfood the Spring-on-Exeris combination. The Wall (§4 below) extends to capabilities: caps cannot reach into Spring internals — which keeps the cap layer reusable across both kernel-direct deployments and Spring-Runtime-hosted deployments without manifest changes. Spring `@RestController` paths (in customer code or BudgetHQ, never in caps or SKUs) consume cap `@Provides` services through `exeris-spring-runtime`'s integration layer; the dependency arrow never reverses.
 
-All cap repositories are currently in **specified** status — implementation cadence is driven by the SKU roadmap in §5 and the platform whitepaper §7. The Capability Composition Model and the License Taxonomy extension are both governed by forthcoming ADRs; until those land, the binding source-of-truth is the codegen pipeline (ADR-015), the kernel bootstrap lifecycle contract, and ADR-020 (interpreted as covering Tier 1 only).
+All cap repositories are currently in **specified** status — implementation cadence is driven by the SKU roadmap in §5 and the platform whitepaper §7. The Capability Composition Model is governed by **ADR-024** (accepted 2026-05-13, amended through 2026-07-21) and the licensing taxonomy by **ADR-023** (accepted 2026-05-13); the SKU composition manifest format is fixed as JSON by **ADR-053** (2026-07-21). The codegen pipeline (ADR-015) and the kernel bootstrap lifecycle contract are the implementation substrate those ADRs bind.
 
 **Compositional reuse is structural, not aspirational.** `exeris-caps-contact-graph` is one cap consumed by Context-Centric CRM, OMS (customer/recipient model), PIM (B2B trading-partner model), and BudgetHQ (account-owner model). `exeris-caps-ocr-pipeline` is consumed by IDP and by BudgetHQ's receipt-scan capability — the same cap, not a fork. This is what makes Tier 2 a genuine ecosystem: a customer at the Platform tier can pull `contact-graph` + `product-catalog` + `pricing-engine` + `inventory-tracking` + `order-lifecycle` + `payment-gateway` + a forthcoming `financial-ledger` cap + the SB platform layer and assemble a bespoke ERP composition that no Exeris-shipped SKU enumerates.
 
@@ -314,15 +314,15 @@ The **Context-Centric CRM data model** is `exeris-caps-contact-graph` from §3.2
 
 ## 4. Capability Composition Model
 
-The composition model is the Tier 2 contract that makes Tier 3 SKUs structurally trustworthy. This section is forward-referenced by a forthcoming ADR (Capability Composition Model); until that lands, the binding source-of-truth is the codegen pipeline (ADR-015), the Wall (ADR-006), and the kernel bootstrap lifecycle (`exeris-kernel/docs/subsystems/bootstrap.md`).
+The composition model is the Tier 2 contract that makes Tier 3 SKUs structurally trustworthy. It is formalized by **ADR-024 (Capability Composition Model, accepted 2026-05-13; amendments 2026-06-17 / 2026-06-25 / 2026-07-21)**, which binds the codegen pipeline (ADR-015), the Wall (ADR-006), and the kernel bootstrap lifecycle (`exeris-kernel/docs/subsystems/bootstrap.md`); the composition manifest format is JSON per ADR-053.
 
 **Definitions.** A **capability** is a named module with three contract surfaces:
 
 - `@Provides` services exposed to other capabilities (e.g. `RouteRegistry`, `RateLimitPolicy`, `JwtAdmissionPolicy`).
 - `@Requires` declarations on capabilities it depends on. Declarations are version-pinned at build time.
-- A **lifecycle** — `initialize` → `ready` → `drain` → `terminate` — tied to the kernel bootstrap subsystem state machine.
+- A **lifecycle** — `initialize` → `ready` → `drain` → `terminate` — driven by the SDK-side composition runtime in the generated SKU bootstrap, sequenced strictly after the kernel reports `KERNEL READY` (ADR-024, 2026-07-21 amendment); the kernel itself remains cap-blind.
 
-A **composition** is a directed acyclic graph of capabilities with no unresolved `@Requires` and no cycles. The kernel codegen pipeline (`exeris-tooling`, ADR-015) validates compositions at build time and refuses to start any composition with unresolved dependencies, cycles, version mismatches, or Wall violations. **Validation runs at build time, not at runtime** — a malformed cap composition fails the build, never the deployment.
+A **composition** is a directed acyclic graph of capabilities with no unresolved `@Requires` and no cycles. The codegen pipeline (`exeris-tooling`, ADR-015) validates compositions at build time — unresolved dependencies, cycles, version mismatches, or Wall violations **fail the build** — and stamps the manifest (validation stamp + content binding). At SKU startup the SDK-side composition runtime asserts that stamp before any cap initializes; the kernel stays cap-blind and performs no composition checks (ADR-024 amendments). **Validation runs at build time, not at runtime** — a malformed cap composition fails the build, never the deployment; the boot-time assertion only catches honest drift (stale manifest, version skew against the classpath), it never re-validates.
 
 **Worked example — API Gateway SKU composition.**
 
@@ -519,5 +519,5 @@ The Family product pattern is extensible — additional Family products may emer
 - **Decision registries.** Tech ADRs: [`adr-index.md`](adr-index.md). Business decisions (legal / IP / financial / procurement) are kept in a separate, private decision registry maintained outside this repository. Templates and lifecycle: [`templates/README.md`](templates/README.md).
 - **Kernel whitepaper.** [`exeris-kernel/docs/whitepaper.md`](../exeris-kernel/docs/whitepaper.md) — long-form substrate technical pillars, SLA/SLO baseline table, TCK-enforced performance contract.
 - **B2B technical whitepaper.** [`b2b-technical-whitepaper.md`](b2b-technical-whitepaper.md) — buyer-facing summary of evidence, three-tier architecture, SKU inventory, and adoption paths.
-- **Source-of-truth subsystem docs.** Bootstrap DAG: [`exeris-kernel/docs/subsystems/bootstrap.md`](../exeris-kernel/docs/subsystems/bootstrap.md). Crypto + TLS engine placement: [`exeris-kernel/docs/subsystems/crypto.md`](../exeris-kernel/docs/subsystems/crypto.md) and [`exeris-kernel-enterprise/docs/subsystems/crypto.md`](../exeris-kernel-enterprise/docs/subsystems/crypto.md). NUMA: [`exeris-kernel-enterprise/docs/subsystems/memory.md`](../exeris-kernel-enterprise/docs/subsystems/memory.md) §"NUMA-Aware Allocation".
+- **Source-of-truth subsystem docs.** Bootstrap DAG: [`exeris-kernel/docs/subsystems/bootstrap.md`](../exeris-kernel/docs/subsystems/bootstrap.md). Crypto + TLS engine placement: [`exeris-kernel/docs/subsystems/crypto.md`](../exeris-kernel/docs/subsystems/crypto.md) and `exeris-kernel-enterprise/docs/subsystems/crypto.md` *(private repo)*. NUMA: `exeris-kernel-enterprise/docs/subsystems/memory.md` §"NUMA-Aware Allocation" *(private repo)*.
 - **Architecture guardrails per repo.** Each repository carries a `CLAUDE.md` with enforced rules (SPI blindness, Wall integrity, mode isolation, hot-path bans, comparator fairness for benchmarks).
