@@ -150,7 +150,11 @@ This ADR is **descriptive at acceptance**: it codifies the licensing decision al
 
 Open follow-ups (tracked separately):
 
-1. **`cap-license-registry.md` in `exeris-docs/`** — a per-cap registry table (cap repo name, licence value, ADR-020 visibility, current implementation status). This is the single source of truth that CI jobs verify against. Drafted alongside the first `exeris-caps-*` repository creation.
+1. ~~**`cap-license-registry.md` in `exeris-docs/`**~~ — **Discharged 2026-08-16**, alongside the first `exeris-caps-*` repository as intended. [`cap-license-registry.md`](../cap-license-registry.md) carries all 50 caps with licence value, ADR-020 visibility, and implementation status, grouped by the seven layers.
+
+   Two deliberate choices. The rows are **generated from HLA §3.2** rather than retyped — the inventory already exists there, and a hand-maintained second copy would drift on the first edit that touched only one of them; the registry says so and documents how to re-derive. And the **totals are asserted against this ADR's 3 / 46 / 1 split**, so a mismatch surfaces as a contradiction rather than as a quietly wrong row.
+
+   The "single source of truth that CI jobs verify against" half is *not* yet realized: no CI job reads this file. That needs a home first — a check belongs where cap repositories are enumerated, and nothing enumerates them yet.
 2. **`LICENSE-COMMERCIAL.md` canonical text** — the Exeris Commercial License document referenced by every `commercial`-licensed cap repo. Drafted before the first `commercial` cap repository ships. Lives at a stable URL referenced from each cap's `LICENSE` file.
 3. **CI verification job (`exeris-docs` workflow or per-cap-repo)** — three-source consistency check per obligation 1 + registry-match check. Implementation owner: the platform team, scheduled alongside the Capability Composition Model codegen pipeline (ADR-024).
 4. **`cap-licensing-faq.md`** — customer-facing FAQ distinguishing the three licence values, addressing the common confusion between `community` and `commercial`. Drafted alongside the first customer pilot that touches Tier 2 caps.

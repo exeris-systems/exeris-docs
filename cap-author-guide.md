@@ -200,6 +200,30 @@ Track the released lines: **SDK 0.10.0**, **kernel 0.11.0**. The codegen plugin 
 **0.7.0-SNAPSHOT** — not yet released, so a cap repo currently builds it from source or resolves a
 snapshot. That is a real friction point today, not a permanent design.
 
+### Build the tooling dependency without credentials
+
+Building `exeris-tooling` whole drags in artefacts your cap has no use for, and the failure is
+confusing because it names the kernel in a build that never mentions it. Scope the reactor instead:
+
+```bash
+# SDK: skip the semver gate — it resolves the previous release as its baseline, and no
+# eu.exeris artefact is on Maven Central yet, so a clean runner has nothing to resolve.
+(cd exeris-sdk && mvn -DskipTests -Djapicmp.skip=true install)
+
+# Tooling: only the two modules a cap consumes, plus what they need.
+(cd exeris-tooling && mvn -DskipTests install -pl exeris-processor,exeris-codegen-maven-plugin -am)
+```
+
+The `-pl` scoping is what keeps this **credential-free**. Kernel dependencies appear in exactly one
+tooling module — `exeris-e2e-tests`, at test scope — and those artefacts live on GitHub Packages,
+so building the full reactor demands a token. Nothing in the processor or plugin chain references
+the kernel at all.
+
+**`-DskipTests` alone does not work here**, and the reason is worth internalising: Maven collects a
+module's dependency graph whether or not its tests compile. The module has to be *out of the
+reactor*, not merely quiet. Diagnosing that from the error message is hard — it surfaces as
+`401 Unauthorized` on `exeris-kernel-spi` while building a repository that has no kernel dependency.
+
 **JDK 25 LTS.** Do not compile a cap with `--enable-preview`: it re-pins your bytecode to one exact
 JDK major and re-inherits the "may change next release" contract that the preview-clean baseline
 (kernel ADR-066, SDK ADR-069) exists to escape.
