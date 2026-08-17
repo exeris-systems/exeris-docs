@@ -31,9 +31,9 @@ Only `enterprise-private` implies a private repository.
 | Licence | Caps |
 |---|---|
 | `community` | 3 |
-| `commercial` | 49 |
+| `commercial` | 50 |
 | `enterprise-private` | 1 |
-| **total** | **53** |
+| **total** | **54** |
 
 The single `enterprise-private` cap is `bot-fingerprinting`, and the reason is structural rather
 than commercial: it depends on a kernel-tier SPI extension that ships in `exeris-kernel-enterprise`.
@@ -138,6 +138,7 @@ pipeline was finished before any cap consumed it from outside `exeris-tooling`'s
 | `exeris-caps-outbound-credentials` | `commercial` | public | specified |
 | `exeris-caps-service-identity` | `commercial` | public | specified |
 | `exeris-caps-idempotency` | `commercial` | public | specified |
+| `exeris-caps-usage-metering` | `commercial` | public | specified |
 ---
 
 ## Notes on individual rows
@@ -156,5 +157,5 @@ pipeline was finished before any cap consumed it from outside `exeris-tooling`'s
 
 The tables above are parsed from HLA §3.2 — cap name from the first column, licence from the last,
 grouped by the `**Layer N — …**` headings. Re-derive after any §3.2 edit rather than hand-patching a
-row, and re-check the totals against ADR-023's stated 3 / 49 / 1 split; a mismatch means one of the
+row, and re-check the totals against ADR-023's stated 3 / 50 / 1 split; a mismatch means one of the
 two documents moved without the other.

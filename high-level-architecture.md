@@ -284,6 +284,7 @@ This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026
 | `exeris-caps-outbound-credentials` | `OutboundCredentialStore` (resolves credentials per named upstream), `RequestSigner` (per-scheme signing: HMAC, mTLS client-certificate selection, OAuth2 `client_credentials` acquisition and refresh) | kernel Crypto SPI, kernel Persistence SPI | commercial |
 | `exeris-caps-service-identity` | `ServiceIdentityProvider` (attaches workload identity to outbound calls), `ServicePeerVerifier` (verifies inbound peer identity) | kernel Security SPI, kernel Crypto SPI | commercial |
 | `exeris-caps-idempotency` | `IdempotencyGuard` (claim-or-replay by key), `DeduplicationWindow` | kernel Persistence SPI | commercial |
+| `exeris-caps-usage-metering` | `UsageMeter` (records counted events against a dimension set), `UsageSnapshot` (read side, for rollup, export and end-customer usage views) | kernel Persistence SPI | commercial |
 
 > **Why these three are cross-cutting rather than Gateway or SB caps.** None `@Requires` `gateway-core` or `service-boundary-core`. Binding either aggregate would confine them to one SKU family, and each is needed in both: a Gateway calls upstreams with credentials exactly as a Service Boundary calls a third-party API.
 >
@@ -292,6 +293,14 @@ This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026
 > **`service-identity` is a different axis from `jwt-validation`.** That cap validates an end-user token arriving at the edge. This one is workload identity — one of your services proving itself to another — which is what a microservice deployment needs and what the kernel's `IdentityProvider` SPI does not mint.
 >
 > **`idempotency` is a correctness requirement, not a convenience.** The kernel's transactional outbox is *at-least-once*, so duplicate delivery downstream is guaranteed by design rather than merely possible. Something has to collapse them, and `order-lifecycle` and `payment-gateway` are precisely the domains where a duplicate is a wrong answer rather than an annoyance. Absent this cap, each domain cap grows its own deduplication table.
+>
+> **`usage-metering` and `rate-limiting` share a shape but not their guarantees, and the dependency runs one way only.** The shape really is common: a plan quota of "1000 requests/month" and a throttle of "100 requests/minute" differ only in window size, and both count events against a dimension set (tenant, route, key).
+>
+> They diverge on everything that decides an implementation. `rate-limiting` (layer 3) sits on the hot path, may be per-node and approximate, may lose its counters on restart, and exists to **refuse** a request. `usage-metering` sits off the hot path, must be durable and globally accurate because a lost counter is lost revenue, and must **never reject** traffic it merely counts. A protection control fails closed; a meter fails open.
+>
+> Therefore **`rate-limiting` does not `@Requires` `usage-metering`.** That edge would drag the kernel Persistence SPI into the Gateway data plane and make an API Gateway SKU need a database in order to throttle — today a limiter can be entirely in-memory. The useful dependency runs the other way and is optional: `rate-limiting` may declare `@Requires(usage-metering, optional = true)` to *emit* throttle decisions into the meter, which yields "how often did we throttle this tenant" without imposing durability on the hot path. Optional requires are exactly what ADR-024 admits for cross-cutting concerns.
+>
+> Metering is also read by end customers, not only by billing: `UsageSnapshot` backs a "your usage this period" view. That does not change the licence — the cap underpins subscription and quota accounting, which is the commercial model itself rather than a commodity integration point of the kind the `community` tier exists to seed.
 
 > **Note on transport implementations.** QUIC/HTTP/3, `io_uring`, IOCP (Windows) and other native-bypass transport mechanisms are **not Tier 2 capabilities**. They are alternative driver implementations of the kernel Transport / HTTP / Crypto SPIs and live in **Tier 1** — specifically in `exeris-kernel` (Community driver: custom NIO H1/H2 + portable Off-Heap TLS via OpenSSL/Panama FFM) or `exeris-kernel-enterprise` (Enterprise driver: `io_uring` / IOCP transport, `EnterpriseQuicTlsEngine` with H3). Tier 2 cap compositions are engine-agnostic — they declare requirements against the kernel SPIs and bind whichever driver implementation is on the classpath at deployment. The Enterprise "swap" is a Tier 1 JAR substitution, not a cap manifest change. See §4 for the architectural mechanism and §5 for per-SKU deployment implications.
 
@@ -427,10 +436,10 @@ Tier 2 introduces a third licensing value beyond ADR-020's `public` / `enterpris
 | License | Cap count | Examples |
 |---|---|---|
 | `community` (Apache 2.0 / MIT) | 3 | `exeris-caps-cors-policy`, `exeris-caps-i18n`, `exeris-caps-observability-bridge` |
-| `commercial` (Exeris Commercial License, source-available) | 49 | Gateway substrate + building blocks + remaining Gateway policies, SB substrate + all platform caps (except `i18n`), all domain primitives, all AI Abstraction caps, the cross-cutting caps except `observability-bridge` |
+| `commercial` (Exeris Commercial License, source-available) | 50 | Gateway substrate + building blocks + remaining Gateway policies, SB substrate + all platform caps (except `i18n`), all domain primitives, all AI Abstraction caps, the cross-cutting caps except `observability-bridge` |
 | `enterprise-private` (closed-source, Enterprise tier subscription only) | 1 | `exeris-caps-bot-fingerprinting` (depends on a kernel-tier SPI extension shipping in `exeris-kernel-enterprise`) |
 
-Total: 53 caps across the seven layers in §3.2.
+Total: 54 caps across the seven layers in §3.2.
 
 Native-bypass transport (QUIC/HTTP/3, `io_uring`, IOCP) is **not** a Tier 2 cap — it ships as part of the `exeris-kernel-enterprise` substrate driver (Tier 1), activated by Maven-coordinate swap. See §6.1 and §4 for the swap mechanism.
 
