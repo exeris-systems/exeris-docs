@@ -196,9 +196,16 @@ would silently wipe committed output.
 
 ### Versions
 
-Track the released lines: **SDK 0.10.0**, **kernel 0.11.0**. The codegen plugin is on
-**0.7.0-SNAPSHOT** — not yet released, so a cap repo currently builds it from source or resolves a
-snapshot. That is a real friction point today, not a permanent design.
+Track the released lines: **SDK 0.10.0**, **kernel 0.11.0**, **tooling 0.7.0** (released
+2026-08-18). Pin all three to release tags rather than tracking `main` — in both your POM and your
+CI checkout refs. tooling's `main` moved to `0.8.0-SNAPSHOT` in the same step that cut `v0.7.0`, so
+a cap that asked for `0.7.0-SNAPSHOT` and checked out `main` began resolving a version nothing
+produces any more, without a single commit landing in the cap itself. An immutable ref also stops an
+unrelated upstream commit from turning your build red.
+
+A cap still *builds* tooling from source, because the published artefacts live on GitHub Packages
+and resolving them reintroduces the credential this whole recipe exists to avoid. Pinning the ref
+and building from source are separate decisions; do both.
 
 ### Build the tooling dependency without credentials
 
