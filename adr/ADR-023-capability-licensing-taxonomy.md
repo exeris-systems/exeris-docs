@@ -37,6 +37,12 @@ This ADR answers: **what license terms govern an `exeris-caps-*` repository's so
 
 The 2026-05-12 cap inventory established the per-layer distribution: **3 `community` caps** (`exeris-caps-cors-policy`, `exeris-caps-i18n`, `exeris-caps-observability-bridge`), **46 `commercial` caps** (substrate aggregates, Gateway building blocks, remaining Gateway policies, SB platform caps except `i18n`, all domain primitives, all AI Abstraction caps), **1 `enterprise-private` cap** (`exeris-caps-bot-fingerprinting`, depends on a kernel-tier SPI extension shipping in `exeris-kernel-enterprise`). Total: 50 caps.
 
+> **Inventory growth — 2026-08-16.** The paragraph above records the founding 2026-05-12 inventory and is left intact as that record. The inventory has since grown to **54 caps — 3 / 50 / 1** with four additions to layer 7, all `commercial`: `outbound-credentials`, `service-identity`, `idempotency`, `usage-metering` (HLA §3.2).
+>
+> The *taxonomy* is unchanged; only the counts moved. That distinction is the point of recording this as a note rather than editing the numbers in place: the three-valued decision is what this ADR decided, and a count is a fact about an inventory that lives in HLA §3.2. Future additions update HLA and [`cap-license-registry.md`](../cap-license-registry.md); this note is the pointer, not a second inventory.
+>
+> Worth stating plainly since it is the kind of thing that silently stops being true: the split is now **3 / 50 / 1**, and the registry asserts against that. If they disagree, one of the two documents moved without the other.
+
 **Concrete obligations:**
 
 1. **Every `exeris-caps-*` repository declares its licence value in three places.** A top-level `LICENSE` file with the canonical licence text; a `<license>` block in `pom.xml` (or equivalent build metadata); a `## License` section in `README.md` naming the licence value and pointing at the `LICENSE` file. A repository whose three sources disagree is a registry violation.
@@ -150,7 +156,11 @@ This ADR is **descriptive at acceptance**: it codifies the licensing decision al
 
 Open follow-ups (tracked separately):
 
-1. **`cap-license-registry.md` in `exeris-docs/`** — a per-cap registry table (cap repo name, licence value, ADR-020 visibility, current implementation status). This is the single source of truth that CI jobs verify against. Drafted alongside the first `exeris-caps-*` repository creation.
+1. ~~**`cap-license-registry.md` in `exeris-docs/`**~~ — **Discharged 2026-08-16**, alongside the first `exeris-caps-*` repository as intended. [`cap-license-registry.md`](../cap-license-registry.md) carries all 54 caps with licence value, ADR-020 visibility, and implementation status, grouped by the seven layers.
+
+   Two deliberate choices. The rows are **generated from HLA §3.2** rather than retyped — the inventory already exists there, and a hand-maintained second copy would drift on the first edit that touched only one of them; the registry says so and documents how to re-derive. And the **totals are asserted against this ADR's 3 / 50 / 1 split**, so a mismatch surfaces as a contradiction rather than as a quietly wrong row.
+
+   The "single source of truth that CI jobs verify against" half is *not* yet realized: no CI job reads this file. That needs a home first — a check belongs where cap repositories are enumerated, and nothing enumerates them yet.
 2. **`LICENSE-COMMERCIAL.md` canonical text** — the Exeris Commercial License document referenced by every `commercial`-licensed cap repo. Drafted before the first `commercial` cap repository ships. Lives at a stable URL referenced from each cap's `LICENSE` file.
 3. **CI verification job (`exeris-docs` workflow or per-cap-repo)** — three-source consistency check per obligation 1 + registry-match check. Implementation owner: the platform team, scheduled alongside the Capability Composition Model codegen pipeline (ADR-024).
 4. **`cap-licensing-faq.md`** — customer-facing FAQ distinguishing the three licence values, addressing the common confusion between `community` and `commercial`. Drafted alongside the first customer pilot that touches Tier 2 caps.

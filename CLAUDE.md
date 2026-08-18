@@ -38,7 +38,7 @@ Caps participate in two orthogonal dimensions:
 
 **Licensing taxonomy** (ADR-023, three values — orthogonal to ADR-020 visibility):
 - `community` (Apache 2.0 / MIT) — 3 caps: `cors-policy`, `i18n`, `observability-bridge`
-- `commercial` (Exeris Commercial License, source-available, BSL-style) — 46 caps (the bulk of Tier 2)
+- `commercial` (Exeris Commercial License, source-available, BSL-style) — 50 caps (the bulk of Tier 2)
 - `enterprise-private` (closed-source, Enterprise tier only) — 1 cap: `bot-fingerprinting`
 
 **SKU repository source-visibility** (ADR-023 same-day amendment 2026-05-13):
