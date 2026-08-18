@@ -210,8 +210,9 @@ confusing because it names the kernel in a build that never mentions it. Scope t
 # eu.exeris artefact is on Maven Central yet, so a clean runner has nothing to resolve.
 (cd exeris-sdk && mvn -DskipTests -Djapicmp.skip=true install)
 
-# Tooling: only the two modules a cap consumes, plus what they need.
-(cd exeris-tooling && mvn -DskipTests install -pl exeris-processor,exeris-codegen-maven-plugin -am)
+# Tooling: the two modules a cap consumes, plus the BOM, plus what they need.
+(cd exeris-tooling && mvn -DskipTests install \
+    -pl exeris-tooling-bom,exeris-processor,exeris-codegen-maven-plugin -am)
 ```
 
 The `-pl` scoping is what keeps this **credential-free**. Kernel dependencies appear in exactly one
@@ -219,10 +220,28 @@ tooling module — `exeris-e2e-tests`, at test scope — and those artefacts liv
 so building the full reactor demands a token. Nothing in the processor or plugin chain references
 the kernel at all.
 
-**`-DskipTests` alone does not work here**, and the reason is worth internalising: Maven collects a
+Three ways to get this wrong, all of them observed rather than imagined:
+
+**`-DskipTests` alone does not work**, and the reason is worth internalising: Maven collects a
 module's dependency graph whether or not its tests compile. The module has to be *out of the
 reactor*, not merely quiet. Diagnosing that from the error message is hard — it surfaces as
 `401 Unauthorized` on `exeris-kernel-spi` while building a repository that has no kernel dependency.
+
+**Subtracting instead of selecting moves the failure one hop.** `-pl '!exeris-e2e-tests'` fails at
+`exeris-coverage-aggregate`, which declares the excluded module at `provided` scope to locate its
+`jacoco.exec`. Removing a module from the build order does not remove it from a sibling's dependency
+graph. A blacklist also rots silently: it breaks again the next time tooling gains a module.
+
+**Naming the BOM is not optional.** `-am` traverses parent and dependency edges but *not*
+`dependencyManagement` imports, and `exeris-tooling-bom` reaches the plugin only through
+`exeris-tooling-parent`'s import block. Omit it and you install a plugin whose POM cannot be read
+back — which resolves fine on a developer machine with a warm `~/.m2` and fails on a clean one.
+`exeris-caps-cors-policy`'s first CI run died exactly there, on
+`exeris-tooling-bom:pom:0.7.0-SNAPSHOT (absent) ... 401`.
+
+That last one generalises past this recipe: **verify build instructions against a scratch
+`-Dmaven.repo.local`, never against your own `~/.m2`.** Every local check of this step passed on a
+warm repo while CI stayed red. A cap repo's CI always starts empty, and so should your test of it.
 
 **JDK 25 LTS.** Do not compile a cap with `--enable-preview`: it re-pins your bytecode to one exact
 JDK major and re-inherits the "may change next release" contract that the preview-clean baseline
