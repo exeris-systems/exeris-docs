@@ -134,7 +134,7 @@ First-party Platform SKUs are pre-wired capability compositions sold or licensed
 | **Bot Blocker** | Gateway | **Closed-source** (Exeris Commercial License) — anti-abuse security exception per ADR-023 | E-commerce, fintech, ticketing | JA3/JA4 TLS fingerprinting at the kernel layer — fingerprint extraction happens before the request reaches policy chain |
 | **IDP** | Service Boundary | Source-available (Exeris Commercial License) | Document-heavy B2B operations (insurance, logistics, legal) | Page-throughput parity with hyperscaler IDP at fraction of per-page cost; on-prem deployable |
 | **PIM** | Service Boundary | Source-available (Exeris Commercial License) | Multi-channel retail, B2B distributors | Headless product information with kernel-direct API surface and graph-native attribute relations |
-| **OMS** | Service Boundary | Source-available (Exeris Commercial License) | Marketplaces, multi-vendor logistics | Distributed saga orchestration (ADR-013) as the order state model |
+| **OMS** | Service Boundary | Source-available (Exeris Commercial License) | Marketplaces, multi-vendor logistics | Saga orchestration across distributed business steps (ADR-013) as the order state model, run in-process — see §4.1 |
 | **Headless CMS API** | Service Boundary | Source-available (Exeris Commercial License) | Editorial-driven B2B and B2C sites | Content as `@ExerisDomain` types, generated REST + GraphQL surfaces |
 | **Context-Centric CRM** | Cross-cutting data model (`exeris-caps-contact-graph` cap, not a standalone SKU) | Source-available — inherits cap licensing (`commercial`) per ADR-023 | Service Boundary SKU composers | Anti-account-centric data primitive — relationship graph as first-class, not as a CRM appendage |
 
