@@ -21,6 +21,7 @@ The platform is structured in three tiers, detailed in `high-level-architecture.
 | [`high-level-architecture.md`](high-level-architecture.md) | C4 model, capability composition model, SKU compositions, open-core split, telemetry architecture, Family-product framing. The authoritative architecture document. |
 | [`b2b-technical-whitepaper.md`](b2b-technical-whitepaper.md) | Buyer-facing summary — three-tier structure, empirical evidence, deployment models, sovereignty/IP framing, roadmap. |
 | [`adr-index.md`](adr-index.md) | The central tech ADR registry. Single numbering namespace (`ADR-NNN`) across the entire ecosystem. |
+| [`layer-build-order.md`](layer-build-order.md) | Cross-repo ordering constraints between the platform layers — what is unblocked now, what waits on whose release, and what waits on a decision. A dated snapshot; re-verify rows when editing them. |
 | [`adr/`](adr/) | Platform-scope tech ADRs that live in this repo (ADR-001, ADR-002, ADR-004, ADR-006, ADR-020). Per-repo ADRs live next to their owning code. |
 | [`templates/`](templates/) | Decision-document templates: `RESEARCH-TEMPLATE.md`, `RFC-TEMPLATE.md`, `ADR-TEMPLATE.md`. See lifecycle notes in [`templates/README.md`](templates/README.md). |
 
