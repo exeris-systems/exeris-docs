@@ -170,7 +170,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 - ADR-020 (Open-Core Documentation Boundary & Cross-Repo Mirror Policy) — visibility model this ADR builds on; §A.3 and §G.24 make it machine-checked.
 - ADR-025 (AI Agent Bridge) — the agent surface reads repos; §A keeps `<repo>/docs/**` and `adr-index.md` as the contract.
 - ADR-065 (SPI Compatibility Gate) — §H.28 adds the justified accepted-changes file.
-- ADR-008 (Open-Core Strategy), ADR-023 (Capability Licensing Taxonomy) — to be amended once the 0.12 licence change lands. It has not shipped: `main`'s `LICENSE` is still Apache-2.0 + Commons Clause and the plain-Apache-2.0 relicense exists only on `development/0.12.0`. §K assumes that change has landed.
+- ADR-008 (Open-Core Strategy), ADR-023 (Capability Licensing Taxonomy) — to be amended when the 0.12 licence change reaches `main`. The relicense itself is done: `development/0.12.0` carries plain Apache-2.0 and it ships with the 0.12 merge; `main` still carries Apache-2.0 + Commons Clause until then. §K reads as written from that merge onward.
 - The option comparison behind §A, §J and §K — internal working material, not part of this repository.
 - The Phase 0 inventory of what the repositories do today, the reference analysis of OpenJDK, Spring, Quarkus, Micronaut and Netty, and the generator spike — evidence. All three are local-only working material and are deliberately not part of the repository, so they are named rather than linked.
 - External: Oracle "How to Write Doc Comments for the Javadoc Tool"; JDK-8008632 (`@apiNote`/`@implSpec`/`@implNote`); Conventional Commits 1.0; Keep a Changelog 1.1; Diátaxis; Netty "Writing a commit message".
