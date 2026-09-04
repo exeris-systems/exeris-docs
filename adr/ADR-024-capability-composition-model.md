@@ -4,7 +4,7 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-04
+last-verified: 2026-09-05
 slug: adr/ADR-024
 ---
 
@@ -73,8 +73,7 @@ A composition is **valid** when all four predicates hold:
 
 1. **Every `@Requires` edge resolves.** For every `@Requires(S)` in every cap, there exists a cap in the composition with `@Provides(S)` whose version satisfies the `versionRange`. Optional `@Requires` (`optional = true`) need not resolve; the consuming cap is responsible for `null`-safe handling.
 2. **No cycles.** The `@Requires` graph across all caps in the composition is a DAG.
-3. **No version conflicts.** When multiple caps declare `@Provides(S)`, the composition resolves to exactly one — either by version-range intersection (when all consumers' ranges overlap) or by an explicit `prefers:` directive in the composition. Ambiguity is a build failure.
-   <!-- VERIFY(sweep-2026-09): predicate 3 allows resolving a duplicate @Provides by "an explicit `prefers:` directive in the composition". No such key exists — grep for "prefers" across exeris-tooling, exeris-sdk, exeris-docs and exeris-caps-cors-policy returns only unrelated prose — and ADR-053 fixed the manifest format as JSON, so the YAML-shaped `prefers:` spelling cannot be right as written. Confirm whether the directive is still intended and under what JSON key. -->
+3. **No version conflicts.** When multiple caps declare `@Provides(S)`, the composition resolves to exactly one — either by version-range intersection (when all consumers' ranges overlap) or by an explicit `prefers:` directive in the composition. Ambiguity is a build failure. *(Unimplemented — see the 2026-09-05 amendment: no `prefers:` key exists and the resolver performs no ambiguity check.)*
 4. **No Wall violations.** Per the cap-tier Wall extension below, no cap class imports across forbidden boundaries.
 
 A composition that fails any predicate **fails the build**. The kernel refuses to start any composition lacking a "validated" stamp from the codegen pipeline. *(Stamp **placement** superseded by the 2026-06-17 amendment "Validation Stamp Lifecycle" below: the boot-time assertion moves to the platform composition runtime and the open kernel stays cap-blind. The build-time-validation contract itself is unchanged.)*
@@ -93,11 +92,9 @@ The cap-tier Wall is validated by the same `exeris-tooling` pipeline that perfor
 
 1. **Every `exeris-caps-*` repository declares its contract surface through `@Provides` and `@Requires` annotations on a `@CapabilityModule` class.** Caps without these annotations are not loadable. The annotations are processed by the `exeris-tooling` annotation processor (ADR-015) at build time and emit a `cap-manifest.json` artefact alongside the cap's JAR.
 2. **The kernel refuses to start any composition lacking a "validated" stamp.** The codegen pipeline emits the validation stamp into the composition manifest only when all four predicates of the validation algorithm pass. The kernel bootstrap checks for the stamp during the FOUNDATION phase, before any subsystem initialises. *(**Superseded by the 2026-06-17 amendment "Validation Stamp Lifecycle" below.** The stamp emission stays at the tooling; the boot-time assertion moves out of the kernel into the platform composition runtime. The kernel acquires no awareness of the stamp, the manifest, or the cap concept. See revised obligations 7–9.)*
-3. **The cap-tier Wall is enforced by build-time ArchUnit-style guards in every cap repository.** A new `exeris-caps-*` repository scaffold ships with the standard guard set; modifying or disabling the guards is a registry violation reported through periodic audits until automated cross-repo CI lands. *(Mechanism superseded by [ADR-055](../../exeris-tooling/docs/adr/ADR-055-cap-tier-wall-guard.md) (`exeris-tooling`, 2026-07-30): the primary gate is a JDK Class-File API bytecode scan inside the `exeris:verify-capabilities` goal at `process-classes`; per-repository ArchUnit guards remain welcome as defence-in-depth. The prohibition itself stands — `-Dexeris.wall.skip=true` exists and is deliberately loud, and the tooling names a build that sets it a violation of this obligation.)*
-   <!-- VERIFY(sweep-2026-09): obligation 3's first clause — "A new `exeris-caps-*` repository scaffold ships with the standard guard set" — has no realization. There is no scaffold: cap-author-guide.md §8 records "No archetype | ADR-024 promises `mvn archetype:generate` for cap repos. It does not exist; this guide is the manual substitute. | open", and the one existing cap repo was hand-built. Confirm whether the clause should be retired now that ADR-055 moved the gate into the pipeline, or kept pending the archetype. -->
+3. **The cap-tier Wall is enforced by build-time ArchUnit-style guards in every cap repository.** A new `exeris-caps-*` repository scaffold ships with the standard guard set; modifying or disabling the guards is a registry violation reported through periodic audits until automated cross-repo CI lands. *(The scaffold clause is unrealised — see the 2026-09-05 amendment: no archetype exists.)* *(Mechanism superseded by [ADR-055](../../exeris-tooling/docs/adr/ADR-055-cap-tier-wall-guard.md) (`exeris-tooling`, 2026-07-30): the primary gate is a JDK Class-File API bytecode scan inside the `exeris:verify-capabilities` goal at `process-classes`; per-repository ArchUnit guards remain welcome as defence-in-depth. The prohibition itself stands — `-Dexeris.wall.skip=true` exists and is deliberately loud, and the tooling names a build that sets it a violation of this obligation.)*
 4. **Lifecycle ordering is derived mechanically from `@Requires`; no manual priorities.** A cap that needs to run before another cap declares the dependency explicitly through a (potentially empty-payload) `@Requires` service marker. Priority hacks (`@Order`, integer priorities, alphabetic ordering) are not permitted and fail the build.
-5. **Composition manifests are version-pinned and signed.** An SKU manifest pins every cap to an exact version (no `LATEST`, no version range broader than a single release). Signing detail is delegated to the SKU repository convention (`exeris-sku-*`) — this ADR's obligation is the pinning discipline, not the signature algorithm.
-   <!-- VERIFY(sweep-2026-09): obligation 5 requires SKU manifests to pin every cap to an exact version — "no LATEST, no version range broader than a single release". Nothing enforces it today: there is no canonical composition.json reader (cap-author-guide.md §8, "No `composition.json` reader … SKU scaffold, Phase 5"), and exeris:verify-capabilities reads cap-manifest.json, not the authored SKU manifest. Confirm the obligation is still live and name the gate that will carry it. -->
+5. **Composition manifests are version-pinned and signed.** An SKU manifest pins every cap to an exact version (no `LATEST`, no version range broader than a single release). Signing detail is delegated to the SKU repository convention (`exeris-sku-*`) — this ADR's obligation is the pinning discipline, not the signature algorithm. *(No enforcer — see the 2026-09-05 amendment: nothing reads a manifest to check the pinning.)*
 6. **Code Detachment artefact set is defined by composition validation output.** When a customer pays the Code Detachment Fee (whitepaper §5.4), the artefacts they receive are exactly the cap source repositories named in the composition manifest, plus the build-time codegen output (cap manifests, validation stamp, signed composition manifest), plus the perpetual-use grant per ADR-023 obligation 4. Detachment is mechanical because the model guarantees no hidden classpath dependencies — every dependency is declared in `@Requires` and every dependency is in the manifest.
 
 ## Consequences
@@ -246,6 +243,31 @@ The 2026-06-25 "one seam" insight survives: there is still exactly one substrate
 - ADR-006 (The Wall) — tier purity rationale 2.
 - Whitepaper §5.4 / obligation 6 (Code Detachment) — deployment-independence rationale 3.
 - ADR-053 (SKU Composition Manifest Format — JSON) — decided the same day; resolves the *format* half of open follow-up 3.
+
+## Three Obligations the Code Does Not Implement (2026-09-05 amendment)
+
+Verified against the working tree on 2026-09-05. The decision text above is unchanged; each clause
+carries an inline pointer to this section. None of the three reopens the model — they record that
+parts of it are stated as settled while remaining unbuilt. (PR #91)
+
+**Predicate 3's conflict resolution does not exist.** The predicate says a duplicate `@Provides`
+resolves "by an explicit `prefers:` directive in the composition" and that "ambiguity is a build
+failure". No `prefers:` key appears anywhere in `exeris-tooling`, `exeris-sdk` or
+`exeris-caps-cors-policy`, and `CapabilityGraph` contains no ambiguity handling at all — the words
+*ambiguous*, *duplicate*, *conflict* and *prefers* appear zero times in it, and it iterates candidate
+providers without ever asking whether there is more than one. Version-range intersection, the
+predicate's first mechanism, is implemented; the second is not, and neither is the build failure.
+
+**Obligation 3's scaffold does not exist.** The obligation says "a new `exeris-caps-*` repository
+scaffold ships with the standard guard set". No Maven archetype exists in any repository. The one cap
+repository that exists, `exeris-caps-cors-policy`, was assembled by hand. ADR-055 supplies the guard
+mechanism the obligation's second half describes; what is missing is the scaffold that would deliver
+it to a new repository.
+
+**Obligation 5 has no enforcer.** The obligation requires an SKU manifest to pin every cap to an exact
+version. Nothing reads a manifest to check that: no `composition.json` reader exists in
+`exeris-tooling` or `exeris-sdk`. The discipline is stated and unenforced, which is a weaker position
+than the obligation implies but not a different decision.
 
 ## Cross-references
 
