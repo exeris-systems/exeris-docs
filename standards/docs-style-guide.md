@@ -39,7 +39,7 @@ Binding per ADR-085 §B and §J. Applies to every Markdown file under `docs/` in
 9. **Numbers carry evidence.** Any performance, footprint or throughput figure outside `exeris-benchmarks/results/reports/` cites the report path and a figure state (`claims-and-evidence.md`). `[L2 — HARD BLOCK on release gates]`
 10. **Terminology** (Vale `Exeris` style, warning level): `[L1: vale, MinAlertLevel=warning]`
     - *capability*, not *cap*, in prose (code identifiers excepted); *The Wall*; *Category B* (generated files; `A` and `C` are not Exeris terms — see ADR-085 §E.16); *hot path* (two words); *Community* / *Enterprise* capitalised as tiers.
-    - Forbidden pairs from `exeris-docs/CLAUDE.md` *Common drift patterns* are Vale `existence` rules: "Postgres-only graph", "replacing Neo4j", `exeris-kernel-community` as a sibling repo, "Axon" adjacent to a digit, "~60% CPU waste", ">160 GB", TRL-5 or higher for the platform aggregate.
+    - Forbidden pairs from each repo's registered drift patterns (`.agents/policies/drift-patterns.md` in `exeris-docs`) are Vale `existence` rules: "Postgres-only graph", "replacing Neo4j", `exeris-kernel-community` as a sibling repo, "Axon" adjacent to a digit, "~60% CPU waste", ">160 GB", TRL-5 or higher for the platform aggregate.
     - Style rules seeded from the Quarkus package: sentence-case headings, no heading punctuation, sentence length ≤ 32 words (suggestion), no "in order to", no "utilize", American spelling.
 11. **English.** `[L2]`
 
