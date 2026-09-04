@@ -9,6 +9,29 @@ last-verified: 2026-06-25
 
 # RFC-2026-06-25: Publishable-unit / marketplace surface — what does the ecosystem need beyond the composition model (ADR-024) and the licensing taxonomy (ADR-023), and which repo owns each part?
 
+
+> **Since this was written — 2026-09-05.** The RFC is a dated map and its body is unchanged; four of
+> the things it maps have moved, and a reader weighing its still-open Recommendation should know before
+> using them.
+>
+> - **The composition runtime left `exeris-platform`.** The Affected-Repos row credits that repo with
+>   "the composition runtime that already exists per ADR-024". ADR-024's own amendment of the same day,
+>   *Composition Runtime Placement*, moved the boot conductor and stamp assertion to the SDK and recast
+>   `exeris-platform` as the deploy-time control plane. Verified: only `target/` output remains under
+>   `exeris-platform/exeris-platform-composition-runtime`, the module appears nowhere in that repo's
+>   `pom.xml`, and `exeris-sdk` now carries `exeris-sdk-composition-runtime`, `-spec` and `-lifecycle`.
+>   `exeris-platform/CLAUDE.md` records the retirement.
+> - **The first capability repository exists.** Three passages state that no `exeris-caps-*` repository
+>   is on disk and that the first is an H1-2027 target. `exeris-caps-cors-policy` was scaffolded on
+>   2026-08-16 and committed its emitted cap manifest on 2026-08-18, ahead of that target.
+> - **The presentation RFC is no longer in review.** The front-facet row marks the SDK presentation RFC
+>   `IN-REVIEW`; it was accepted. Whether "designed, build-gated" still describes that row's Status was
+>   not checked here and is left as written.
+>
+> None of this changes the Recommendation or the build-gate verdict, which is why the body stands as
+> the record of what was known on 2026-06-25.
+
+
 | Field             | Value                                                                 |
 |:------------------|:----------------------------------------------------------------------|
 | **Status**        | **DRAFT**                                                            |
