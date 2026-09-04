@@ -19,7 +19,7 @@ the script and adjudicates the candidates.
 ## When to Use
 - After any non-trivial `high-level-architecture.md` or `b2b-technical-whitepaper.md` edit.
 - After any ADR edit that frames cross-tier or cross-repo structure.
-- After any execution-plan amendment.
+- After any amendment to a record the page draws on.
 - On request as a standalone audit pass.
 
 ## Required Inputs

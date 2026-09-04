@@ -83,7 +83,7 @@ or `None`
 - `<visibility / license taxonomy correct>`
 - `<drift-pattern sweep done on edited file>`
 - `<three-tier narrative respected>`
-- `<execution-plan §6 updated when new architectural correction surfaces>`
+- `<dated `## Amendments` entry when a correction changes what a record decided>`
 
 ### Minimal Next Action
 `<single best immediate next move>`

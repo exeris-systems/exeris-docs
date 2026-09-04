@@ -18,7 +18,7 @@ slug: adr/ADR-006
 | **Scope**       | cross-repo (binds `exeris-kernel`, `exeris-kernel-enterprise`, `exeris-sdk`, `exeris-spring-runtime`)         |
 | **Owning Repo** | `exeris-docs` (cross-repo platform copy; the seam this ADR governs is implemented in `exeris-spring-runtime`) |
 | **Driven By**   | Abandonment of the original Spring-as-platform model; ADR-007 update (2026-02-22) clarified runtime ownership |
-| **Compliance**  | [Strategic Pillar: Clean IP & Detachment](../../exeris-kernel/docs/architecture.md), `module-boundaries.md`   |
+| **Compliance**  | Strategic Pillar: Clean IP & Detachment — [Whitepaper §6 Sovereignty & IP Ownership](../b2b-technical-whitepaper.md), `module-boundaries.md` |
 
 
 ## Context and Problem Statement

@@ -1,6 +1,6 @@
 ---
 name: exeris-docs-implementer
-description: Large-doc editing agent for exeris-docs. Use for HLA / whitepaper / execution plans / templates concrete edits, applying the editing discipline (targeted grep before edit, drift-sweep after edit, execution-plan §6 reconciliation).
+description: Large-doc editing agent for exeris-docs. Use for concrete edits to the HLA, the whitepaper, records and templates, applying the editing discipline (targeted grep before edit, drift-sweep after edit, and a dated `## Amendments` entry where a record's meaning moves).
 tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, TodoWrite
 model: inherit
 ---
@@ -67,7 +67,7 @@ or `None`
 - `<drift-pattern sweep on edited file>`
 - `<ADR-NNN reserved before content (if new ADR)>`
 - `<link stubs created (if cross-repo ADR)>`
-- `<execution-plan §6 entry (if new architectural correction)>`
+- `<dated `## Amendments` entry on the affected record, if the correction changes what it decided>`
 
 ### Escalation Needed
 `<None | exeris-docs-architect | exeris-docs-adr-registry-keeper | exeris-docs-document-shape-classifier>`
