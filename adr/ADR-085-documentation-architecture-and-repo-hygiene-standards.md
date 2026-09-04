@@ -151,6 +151,20 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 - Landing-site domains (`exeris.systems`, `exeris-kernel.io`) — landing work; only `docs.exeris.eu` is fixed here.
 - Business ADRs (`BUS-NNN`) and portfolio-product internal namespaces.
 
+## Amendments
+
+- **2026-09-05 — `adr-conventions` rule 8 now names the decorated section headings the corpus uses.**
+  Rule 8 was written on 2026-09-04 naming `### Non-Goals` and `### Risks and Assumptions` as literal
+  strings. The ADR corpus does not write headings that way: 74 of its 80 files carry a leading emoji,
+  `### 🏁 The Decision` 61 times, `### ⚠️ Trade-offs` 47, `### ✅ Positive Outcomes` 45 and
+  `### 📋 What is NOT in scope` 38. The template the rule was written alongside already used the same
+  form for the two new sections, so the rule created an exception in one file rather than describing
+  the practice. It now names `### 🚫 Non-Goals` and `### ⚠️ Risks and Assumptions` and says which
+  existing headings it is matching. Nothing about which sections an ADR must carry changes, and no
+  gate config moves — rule 8 is `[L2]`. Alternative considered and rejected: stripping the emoji from
+  all 74 files, a corpus-wide diff across five repositories for a style the owner authored
+  deliberately. (PR #91)
+
 ## Cross-references
 
 - ADR-020 (Open-Core Documentation Boundary & Cross-Repo Mirror Policy) — visibility model this ADR builds on; §A.3 and §G.24 make it machine-checked.
