@@ -46,8 +46,9 @@ jobs:
             hub for the Exeris Systems ecosystem (Markdown only): the single-namespace
             ADR registry, platform-scope ADRs, the High-Level Architecture, the B2B
             whitepaper, decision-document templates, and execution-plan trails. It is
-            NOT a monorepo and ships no code. Read `CLAUDE.md` for the load-bearing
-            facts before reviewing.
+            NOT a monorepo and ships no code. Read `AGENTS.md` before reviewing; it
+            is the entry point, and the detailed rules live under `.agents/` — read the
+            ones your diff touches rather than working from memory.
 
             Focus on:
             1. **Correctness & merge hygiene** — broken intra-repo links and anchors,
@@ -65,13 +66,16 @@ jobs:
                updated (registry + HLA + whitepaper)? Does it respect the precedence
                order (subsystem doc > ADR > HLA > whitepaper)? Flag single-edit changes
                that leave the rest of the corpus inconsistent.
-            5. **Three-tier integrity & drift** — sweep for the drift patterns in
-               `CLAUDE.md` (Postgres-only graph; `exeris-kernel-community` as a sibling
-               repo; non-existent `exeris-caps-quic-*` / `-io-uring-*`; SB SKUs "use
-               Spring Runtime"; cap `@Requires: exeris-spring-runtime`; two-value
-               license taxonomy; deprecated bootstrap-DAG framing; "Family products run
-               on Spring Runtime"; Spring Runtime as "platform stack"; TRL-5+ for the
-               aggregate). State "none" if clean; don't pad.
+            5. **Three-tier integrity & drift** — open
+               `.agents/policies/drift-patterns.md` and sweep the edited files for every
+               pattern it lists. Read the file; do not work from a remembered subset. It
+               is the single owner of that list, and a copy of it here would go stale the
+               next time a pattern is added — as an earlier copy did, missing the three
+               patterns that carry withdrawn figures. State "none" if clean; don't pad.
+            6. **Scoped bans** — `.agents/policies/adr-registry.md` and the Scoped bans
+               section of `AGENTS.md` are absolute. A withdrawn figure asserted rather
+               than fenced, and any number without a report path and a figure state, are
+               blockers regardless of how small the diff is.
 
             Skip cosmetic nits unless they affect the above. Be specific: cite
             `file:line`. Lead with blockers, then in-scope improvements, then
