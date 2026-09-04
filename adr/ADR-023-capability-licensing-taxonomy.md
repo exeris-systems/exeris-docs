@@ -4,7 +4,7 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-04
+last-verified: 2026-09-05
 slug: adr/ADR-023
 ---
 
@@ -114,16 +114,8 @@ The body of this ADR formalises the three-value licensing taxonomy at the Tier 2
 | `exeris-sku-pim` | **Source-available** (public repo) | Exeris Commercial License | Same as API Gateway |
 | `exeris-sku-oms` | **Source-available** (public repo) | Exeris Commercial License | Same as API Gateway |
 | `exeris-sku-content-api` | **Source-available** (public repo) | Exeris Commercial License | Same as API Gateway |
-| Context-Centric CRM | N/A — cross-cutting cap (`exeris-caps-contact-graph`), not a standalone SKU repository | — | Covered by §3.2 cap licensing taxonomy |
+| Context-Centric CRM | N/A — cross-cutting cap (`exeris-caps-contact-graph`), not a standalone SKU repository *— layer 5, see Amendments 2026-09-05* | — | Covered by §3.2 cap licensing taxonomy |
 
-<!-- VERIFY(sweep-2026-09): this row calls `exeris-caps-contact-graph` a "cross-cutting cap", and
-     `Cross-cutting` is HLA §3.2's name for **layer 7** (`cors-policy`, `i18n`, `observability-bridge`).
-     HLA places this cap in **layer 5 — Domain primitive caps**, twice and explicitly (:263 defines the
-     layer as cross-SKU reuse of one bounded domain concept; :345 says the CRM data model "is
-     `exeris-caps-contact-graph` from §3.2 layer 5"). Four prose sites carrying the same mislabel were
-     corrected on 2026-09-05; this one sits in a record, so it waits for a dated amendment rather than
-     an in-place edit. The same change was proposed and refused earlier in this sweep for the same
-     reason. -->
 
 ### Rationale
 
@@ -163,6 +155,25 @@ Comparable revenue models in source-available B2B infrastructure (GitLab, Conflu
 - Whitepaper §3.3 — same SKU inventory at buyer-detail level; updated alongside this amendment with a Source-visibility column.
 - Whitepaper §5.4 "Vertical SKU Subscription" — Code Detachment Fee scope; updated alongside this amendment to distinguish source-available and closed-source SKU detachment scope per obligation 9.
 - Whitepaper §6 "Sovereignty & IP Ownership" — IP-sovereignty thesis remains structurally intact; the source-available SKU default strengthens rather than weakens it.
+
+## Layer Placement of `exeris-caps-contact-graph` (2026-09-05 amendment)
+
+The Source-Visibility Policy table calls `exeris-caps-contact-graph` a "cross-cutting cap". In this
+corpus that phrase names a layer. HLA §3.2 defines **Layer 7 — Cross-cutting** (`cors-policy`, `i18n`,
+`observability-bridge`) and **Layer 5 — Domain primitive caps**, the latter as "cross-SKU reuse; each
+represents one bounded domain concept that multiple SKUs share". The HLA places this cap in layer 5
+twice: once by listing it in the layer-5 table with `service-boundary-core` and the graph SPI, and once
+in prose — the Context-Centric CRM data model "is `exeris-caps-contact-graph` from §3.2 layer 5. It is a
+single domain-primitive cap."
+
+Read the row as **layer 5**. The reuse that "cross-cutting" was reaching for is already inside layer 5's
+own definition, so the label moved the cap two layers and gained nothing. Nothing else in the row
+changes: the cap is still not a standalone SKU repository, and its licensing is still covered by the
+§3.2 taxonomy.
+
+Four sites carrying the same mislabel — `README.md`, `high-level-architecture.md` and two rows of
+`b2b-technical-whitepaper.md` — were corrected directly on 2026-09-05, being prose in explanation
+pages rather than record text. (PR #91)
 
 ## Cross-references
 
