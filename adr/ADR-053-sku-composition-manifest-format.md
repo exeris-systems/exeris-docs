@@ -1,3 +1,13 @@
+---
+title: "ADR-053: SKU Composition Manifest Format — JSON"
+type: adr
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-07-21
+slug: adr/ADR-053
+---
+
 # ADR-053: SKU Composition Manifest Format — JSON
 
 | Attribute       | Value                                                                                                                |
@@ -15,6 +25,8 @@
 ADR-024 defines a Tier 3 SKU as a named, signed, version-pinned composition of Tier 2 capabilities, expressed in a manifest file — but deliberately left the file format open ("`composition.yaml` or equivalent, format TBD", open follow-up 3), delegating the choice to the SKU repository convention in coordination with `exeris-tooling`.
 
 The first SKU track (`exeris-sku-api-gateway`, per the 2026-07-21 gateway-caps implementation plan) now needs the format fixed before the first SKU repository is scaffolded. The surrounding machinery has meanwhile converged on JSON: the tooling pipeline already emits a deterministic **`cap-manifest.json`** (ADR-024 obligation 7), its canonical read-schema (`CapManifest`) and the one content-binding implementation live in **`exeris-sdk-composition-spec`**, and the boot-time asserter (`exeris-sdk-composition-runtime`) parses JSON via the Jackson 3 stack already present on every relevant classpath. Choosing anything other than JSON for the authored SKU manifest would introduce a second parser dependency (SnakeYAML / `jackson-dataformat-yaml` / a pkl runtime) into the tooling and the SKU-boot path, a second canonicalisation story for signing, and a format seam between the authored manifest and the emitted one.
+
+<!-- VERIFY(sweep-2026-09): founder decision, not an open question of fact. The Context paragraph and the "Zero new dependencies" trade-off both put Jackson 3 on the whole manifest path. Verified 2026-09-04: only the SKU-boot half is true. exeris-sdk-composition-runtime parses with Jackson 3 (CompositionStampAssertion.java:13-15; pom.xml:51-52 compile scope), but every exeris-tooling production module is Jackson 2 (CodegenPipeline.java:6 and :670; exeris-codegen-core/pom.xml:40-41; exeris-processor/pom.xml:44-45), and exeris-tooling-bom/pom.xml:202-209 states Jackson 3 is "Not pulled by production tooling modules". The JSON decision and the zero-new-dependencies argument both survive the correction — a Jackson databind stack is already on both classpaths. Rules 5 and 8 reserve the fix: amend under ## Amendments, correct as typo-class, or leave as written. -->
 
 This ADR answers: **in what format does an `exeris-sku-*` repository author its composition manifest?**
 

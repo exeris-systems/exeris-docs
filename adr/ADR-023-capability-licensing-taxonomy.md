@@ -1,3 +1,13 @@
+---
+title: "ADR-023: Capability Licensing Taxonomy — `community` / `commercial` / `enterprise-private`"
+type: adr
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-04
+slug: adr/ADR-023
+---
+
 # ADR-023: Capability Licensing Taxonomy — `community` / `commercial` / `enterprise-private`
 
 | Attribute       | Value                                                                                                                |
@@ -46,6 +56,7 @@ The 2026-05-12 cap inventory established the per-layer distribution: **3 `commun
 **Concrete obligations:**
 
 1. **Every `exeris-caps-*` repository declares its licence value in three places.** A top-level `LICENSE` file with the canonical licence text; a `<license>` block in `pom.xml` (or equivalent build metadata); a `## License` section in `README.md` naming the licence value and pointing at the `LICENSE` file. A repository whose three sources disagree is a registry violation.
+   <!-- VERIFY(sweep-2026-09): obligation 1 requires a "## License" section in every cap README. The only existing cap repository, exeris-caps-cors-policy, names Apache-2.0 in prose (README.md:5) but has no "## License" heading — its headings are What it does / What it deliberately does not do / Capability declaration / Layout / Building / What a successful build produces / Reference. LICENSE and pom.xml:27-33 both say Apache 2.0, so two of the three sources agree. Founder to rule: does the prose line satisfy obligation 1, or is the first cap repo non-compliant? -->
 2. **The licence value is fixed at repository creation and is not retroactively changeable.** Promoting a cap from `commercial` to `community` is structurally an Apache-relicense and requires a tracked decision (typically a separate ADR). Demoting a `community` cap to `commercial` after publication is not permitted — the Apache grant is irrevocable for the released versions; new restrictive terms only attach to new caps.
 3. **Tier 3 Platform SKUs ship as `commercial`-licensed compositions regardless of underlying cap licence mix.** An SKU's composition manifest, signature, and the right to run the named composition are commercial-licensed. The underlying caps retain their own licences — a `community` cap inside a `commercial` SKU keeps its Apache grant for direct downstream use.
 4. **Code Detachment Fee (whitepaper §5.4) transfers ownership of `commercial`-licensed caps for the detached version under a perpetual-use grant.** It does not convert the licence to Apache; future versions of the same cap remain under the Exeris Commercial License. The detached customer retains rights to operate, modify, and fork the named version but cannot redistribute it under different licence terms.
@@ -59,7 +70,8 @@ The 2026-05-12 cap inventory established the per-layer distribution: **3 `commun
 
    ADR-020 governs where documentation lives; this ADR governs the terms under which code may be used. The two dimensions never need to be conflated.
 
-6. **CI verification (when cap repos materialise).** A platform-wide CI job will scan every `exeris-caps-*` repository for the three-source consistency required by obligation 1 and assert the declared licence value matches the registry table maintained in `exeris-docs/cap-license-registry.md` (planned). Until that registry and CI job land, periodic manual audits substitute, performed quarterly.
+6. **CI verification (when cap repos materialise).** A platform-wide CI job will scan every `exeris-caps-*` repository for the three-source consistency required by obligation 1 and assert the declared licence value matches the registry table maintained in `exeris-docs/cap-license-registry.md` (planned). Until that registry and CI job land, periodic manual audits substitute, performed quarterly. *(Status 2026-08-16: the registry landed — [`cap-license-registry.md`](../cap-license-registry.md), Engineering Protocol follow-up 1 below. The platform-wide CI job has not; no workflow in any repository reads the registry.)*
+   <!-- VERIFY(sweep-2026-09): obligation 6 says periodic manual licence audits "substitute, performed quarterly". No audit record exists anywhere under ~/exeris-systems/ and no workflow runs one. The closest live mechanism is item 9 of exeris-caps-cors-policy/.github/workflows/claude-code-review.yml — an L2 review instruction to keep LICENSE, the POM licenses block and the README claim in step — which is one repository, per PR, not a quarterly platform-wide audit. Confirm whether the quarterly audit is actually run and by whom, or replace the sentence with the mechanism that is. -->
 
 ## Consequences
 
@@ -152,7 +164,7 @@ Comparable revenue models in source-available B2B infrastructure (GitLab, Conflu
 
 ## Engineering Protocol
 
-This ADR is **descriptive at acceptance**: it codifies the licensing decision already documented in HLA §3.2 and whitepaper §3.2 (2026-05-12). It becomes prescriptive when cap repositories begin to materialise, expected from Q1 2027 per whitepaper §7 Track A.
+This ADR is **descriptive at acceptance**: it codifies the licensing decision already documented in HLA §3.2 and whitepaper §3.2 (2026-05-12). This ADR has been prescriptive since 2026-08-16, when the first cap repository — `exeris-caps-cors-policy`, one of the three `community` caps — was scaffolded. Whitepaper §7 Track A places the remaining cap-layer milestone on the 2028 horizon: "`exeris-caps-*` community caps formal Apache 2.0 releases; commercial caps source-available repositories opened to customers".
 
 Open follow-ups (tracked separately):
 
@@ -165,4 +177,4 @@ Open follow-ups (tracked separately):
 3. **CI verification job (`exeris-docs` workflow or per-cap-repo)** — three-source consistency check per obligation 1 + registry-match check. Implementation owner: the platform team, scheduled alongside the Capability Composition Model codegen pipeline (ADR-024).
 4. **`cap-licensing-faq.md`** — customer-facing FAQ distinguishing the three licence values, addressing the common confusion between `community` and `commercial`. Drafted alongside the first customer pilot that touches Tier 2 caps.
 
-Until the registry and CI job land, the binding source-of-truth is the per-cap licence column in HLA §3.2 tables and whitepaper §3.2 cap inventory.
+The binding source-of-truth is the per-cap licence column in HLA §3.2, with [`cap-license-registry.md`](../cap-license-registry.md) as its derived per-cap index — the registry's rows regenerate from §3.2, and on any conflict between the registry and this ADR, this ADR wins. Whitepaper §3.2 mirrors the same inventory buyer-side. No CI job reads any of them yet.
