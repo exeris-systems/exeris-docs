@@ -35,4 +35,4 @@ Each standard has the same shape: **hard rules** first, each tagged with the lay
 
 ## Provenance
 
-Written 2026-09-04 from the Phase 0 inventory (what the repos do today), the reference analysis of what OpenJDK, Spring, Quarkus, Micronaut and Netty do, the generator spike, and [RFC-2026-09-04](../rfc/RFC-2026-09-04-docs-guardrails-open-decisions.md). The first three are local-only working material and are deliberately not part of the repository; they are named descriptively rather than linked. Modelled on the arkstack voice checklist: few rules, testable, short.
+Written 2026-09-04 from the Phase 0 inventory (what the repos do today), the reference analysis of what OpenJDK, Spring, Quarkus, Micronaut and Netty do, the generator spike and the option comparison that chose between them. All of it is internal working material and is deliberately not part of the repository, so it is named descriptively rather than linked. Modelled on the arkstack voice checklist: few rules, testable, short.

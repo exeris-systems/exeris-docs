@@ -26,5 +26,5 @@ Exeris is built with AI assistance as a matter of course: roughly nine in ten co
 ## What this is not
 
 - Not a ban on AI tooling anywhere in the workflow.
-- Not a CLA. Contributions are accepted under the module's published licence; the project does not ask for relicensing rights (RFC-2026-09-04 Q3).
+- Not a CLA. Contributions are accepted under the module's published licence; the project does not ask for relicensing rights.
 - Not legal advice; the CONTRIBUTING wording and the copyright-holder line get a lawyer's pass after the company registration.

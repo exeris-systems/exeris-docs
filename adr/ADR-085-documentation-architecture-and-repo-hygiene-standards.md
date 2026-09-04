@@ -17,7 +17,7 @@ slug: adr/ADR-085
 | **Date**        | 2026-09-04 |
 | **Scope**       | platform (binds every Exeris repository — public open-core and private enterprise alike; portfolio products such as `budgetHQ` follow §B only) |
 | **Owning Repo** | `exeris-docs` |
-| **Driven By**   | [RFC-2026-09-04 docs-guardrails open decisions](../rfc/RFC-2026-09-04-docs-guardrails-open-decisions.md); the Phase 0 inventory, the reference analysis and the generator spike — local-only working material, named rather than linked |
+| **Driven By**   | Standardising documentation and repository hygiene across the organisation. The option comparison, the inventory of what the repositories do today and the reference analysis behind it are internal working material and are not part of this repository. |
 | **Compliance**  | [ADR-020](ADR-020-open-core-documentation-mirror-policy.md) (visibility & mirror policy), [ADR-025](../../exeris-ai-bridge/docs/adr/ADR-025-ai-agent-bridge.md) (agent surface reads repos, not the site), [ADR-065](../../exeris-kernel/docs/adr/ADR-065-spi-compatibility-gate.md) (compatibility gate) |
 
 ## Context and Problem Statement
@@ -159,7 +159,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 - ADR-025 (AI Agent Bridge) — the agent surface reads repos; §A keeps `<repo>/docs/**` and `adr-index.md` as the contract.
 - ADR-065 (SPI Compatibility Gate) — §H.28 adds the justified accepted-changes file.
 - ADR-008 (Open-Core Strategy), ADR-023 (Capability Licensing Taxonomy) — amended by the 0.12 licence change; §K assumes that change has landed.
-- `exeris-docs/rfc/RFC-2026-09-04-docs-guardrails-open-decisions.md` — options and pros/cons behind §A, §J, §K.
+- The option comparison behind §A, §J and §K — internal working material, not part of this repository.
 - The Phase 0 inventory of what the repositories do today, the reference analysis of OpenJDK, Spring, Quarkus, Micronaut and Netty, and the generator spike — evidence. All three are local-only working material and are deliberately not part of the repository, so they are named rather than linked.
 - External: Oracle "How to Write Doc Comments for the Javadoc Tool"; JDK-8008632 (`@apiNote`/`@implSpec`/`@implNote`); Conventional Commits 1.0; Keep a Changelog 1.1; Diátaxis; Netty "Writing a commit message".
 
