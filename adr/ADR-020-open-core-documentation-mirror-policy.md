@@ -70,7 +70,18 @@ When a document owned by repo A is referenced by repos B, C, ..., each consuming
 - States in one short paragraph why the consuming repo cares.
 - Lists "when to consult" triggers relevant to the consuming repo.
 
-<!-- VERIFY(sweep-2026-09): §1 forbids duplicate full-content copies and §2 forbids stubs that replicate content, yet exeris-kernel-enterprise/docs-open-core/ holds full-content near-copies of exeris-kernel/docs — a scripted comparison over all 13 shared subsystem files reports DIFFERS on 13/13 (http.md 129 lines in the mirror vs 388 in the kernel; persistence.md 271 vs 599; transport.md 337 vs 680), plus architecture.md, whitepaper.md, performance-contract.md, glossary.md and two space-named ADR copies (ADR-007, ADR-008) whose authoritative versions live in exeris-kernel. This ADR never names that directory (grep for "docs-open-core" here returns no match), yet ~/exeris-systems/CLAUDE.md attributes the mirror to it ("the public face of enterprise-private docs per ADR-020"). Maintainer must rule: add a mirror clause here, or record the mirror as a standing ADR-020 violation and correct CLAUDE.md. -->
+<!-- VERIFY(sweep-2026-09): §1 and §2 are breached by three tracked files, and not by the one the
+     sweep first suspected. `exeris-kernel-enterprise/docs-open-core/` is NOT a violation: its 24
+     files are untracked, appear in zero commits on zero branches, and are not gitignored — local
+     scratch dated 2026-06-14, never mirrored anywhere. What does breach the policy is
+     `exeris-kernel-enterprise/docs/adr/`, which holds full-content tracked copies of three
+     kernel-owned public ADRs — ADR-007 (518 lines against the kernel's 118), ADR-008 (199) and
+     ADR-009 (241) — where §1 allows one authoritative copy and §2 a `.link.md` stub. The same
+     directory already holds correct stubs for ADR-001, 020, 033, 034, 036 and 080, and its
+     enterprise-owned ADR-018 and ADR-019 are legitimately full. So this is a bounded legacy of the
+     three oldest cross-repo entries, not a standing practice. All five of the older files also use
+     space-separated names against adr-conventions rule 1. Fixing them belongs to that repository,
+     which is outside this sweep. -->
 Stubs are **navigation aids**, not content. They MUST NOT replicate the authoritative content. A stub that drifts into a half-summary is a policy violation.
 
 ### 3. Visibility taxonomy (canonical)
