@@ -1,3 +1,13 @@
+---
+title: "ADR-002: Unified Database Strategy (PostgreSQL 18)"
+type: adr
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-04
+slug: adr/ADR-002
+---
+
 # ADR-002: Unified Database Strategy (PostgreSQL 18)
 
 > **Scope:** platform-recommended stack for new applications, not a kernel mandate. The Exeris kernel itself remains database-agnostic at the runtime layer (`PersistenceProvider` SPI); apps can override with their own persistence provider.
@@ -14,7 +24,9 @@
 ## Context and Problem Statement
 The "Polyglot Persistence" pattern (e.g., using Neo4j for Graph, Mongo for Docs, SQL for core) introduces massive operational complexity ("Integration Tax"), high licensing costs, and distributed transaction consistency issues.
 
-To support **Hyper-Density** and keep the "Code Detachment" stack manageable for clients, we need to consolidate data models while maintaining high write throughput (>50k writes/sec).
+To support **Hyper-Density** and keep the "Code Detachment" stack manageable for clients, we need to consolidate data models while maintaining high write throughput (>50k writes/sec — `unartifacted`: no write-path campaign exists in `exeris-benchmarks/docs/CLAIMS.md`).
+
+<!-- VERIFY(sweep-2026-09): the >50k writes/sec figure on this line has no report path. Re-checked 2026-09-04 against the 989-line exeris-benchmarks/docs/CLAIMS.md: the only 50k in the file is a read-path tail-latency rps level (lines 485 and 500), and no write-throughput campaign exists in the L1-L11 ladder or the retraction register. A human must say whether this was a stated requirement at decision time (keep it marked `unartifacted` per claims-and-evidence.md rule 1) or a claimed measurement (then it goes, via an Amendments entry). -->
 
 ## 🏁 The Decision
 We standardize on **PostgreSQL 18** as the single engine for all primary data needs.
