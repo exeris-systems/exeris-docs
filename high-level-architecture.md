@@ -447,7 +447,6 @@ ADR-020's two-valued visibility taxonomy (`public` / `enterprise-private`) gover
 | Benchmarks | `exeris-benchmarks` (Community, cross-runtime, no H3) | `exeris-benchmarks-enterprise` — H3 track per ADR-016 (*scope document planned; current README is a placeholder*) |
 | Observability | *(none today — see note)* | `exeris-telemetry-spec` (wire format; publishable as an open spec per ADR-018, repository private today), `exeris-enterprise-observability` (decoder, CLI, forensics) |
 
-<!-- VERIFY(sweep-2026-09): §6.1 lists `exeris-telemetry-spec` under 'Open-core repositories' and §8 calls it 'Open-licensed', but the repository is private (GitHub org listing), holds no LICENSE file, is classified enterprise-private by adr-index row 018 whose stub row marks it *(private repo)*, and ADR-018's own Consequences say only that 'Repo C can be released as an open-spec artifact'. The wire format is genuinely designed for third-party decoders (zero dependencies beyond java.base, Java 21 target), so this may be an intent the maintainer means to execute rather than a drafting error. Maintainer call: publish the spec repository under an open licence and restore the original wording, or keep the corrected wording. -->
 
 ### 6.2 Tier 2 — Capability Ecosystem
 
