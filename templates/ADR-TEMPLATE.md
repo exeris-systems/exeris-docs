@@ -72,11 +72,11 @@ TEMPLATE USAGE NOTES — DELETE THIS BLOCK BEFORE COMMITTING.
 
 - <Adjacent decisions that might look like they belong here but don't. Naming them prevents scope creep at review time.>
 
-### 🚫 Non-Goals
+### Non-Goals
 
 - <Outcomes this decision deliberately does not pursue, even though it could. Distinct from "not in scope": a non-goal is a road not taken on purpose (JEP 2 §Non-Goals).>
 
-### ⚠️ Risks and Assumptions
+### Risks and Assumptions
 
 - **Assumes:** <what must stay true for the decision to hold — a JDK feature staying in preview, a vendor limit, a measurement>
 - **Reversed by:** <the evidence that would overturn this ADR. If nothing would, this is a preference, not a decision.>
