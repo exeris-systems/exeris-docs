@@ -1,3 +1,12 @@
+---
+title: "Exeris Systems: High-Level Architecture (HLA)"
+type: explanation
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-04
+---
+
 # Exeris Systems: High-Level Architecture (HLA)
 
 ## 1. Executive Summary
@@ -5,7 +14,7 @@
 Exeris is a next-generation JVM runtime and development platform engineered for **Zero-Waste Compute**. It addresses the structural inefficiencies of mainstream Java stacks (the "Software Inflation Tax") through four coupled mechanisms:
 
 1. A **zero-copy, off-heap execution kernel** that bypasses the JVM heap on hot paths via Project Panama (FFM API) and Project Loom (Virtual Threads + Structured Concurrency).
-2. **In-process execution of what mainstream stacks deploy as separate services.** Saga orchestration and durable execution (kernel `Flow` — no coordinator, no distributed lock service, ADR-013), event sourcing and delivery (transactional outbox plus in-process publish/subscribe; a broker is optional rather than structural), and observability (in-process JFR, ADR-018 — no APM sidecar) are libraries in the application JVM. The claim is countable from a deployment diagram and falsifiable by a single manifest: no cap and no Platform SKU may `@Requires` an orchestration server, which the Wall (§4) enforces at build time. Resident cost is in turn proportional to what the deployment declared — subsystems load on demand, and a composition pays only for the caps it lists (§3.1, §3.3).
+2. **In-process execution of what mainstream stacks deploy as separate services.** Saga orchestration and durable execution (kernel `Flow` — no coordinator, no distributed lock service, ADR-013), event sourcing and delivery (transactional outbox plus in-process publish/subscribe; a broker is optional rather than structural), and observability (in-process JFR, ADR-018 — no APM sidecar) are libraries in the application JVM. The claim is countable from a deployment diagram and falsifiable by a single manifest: no cap and no Platform SKU declares `@Requires` on an orchestration server, and a composition whose `@Requires` edges do not all resolve inside its own manifest fails the build — `CapabilityGraph` rejects an unsatisfied requirement, a version mismatch or a cycle before any manifest is emitted (§4). Resident cost is in turn proportional to what the deployment declared — subsystems load on demand, and a composition pays only for the caps it lists (§3.1, §3.3).
 3. A **build-time, entity-first development lifecycle** that turns annotated POJOs into kernel-native handlers, sagas, OpenAPI, and Angular UI components.
 4. A **Spring-on-Exeris host runtime** (`exeris-spring-runtime`) — an independent Tier 1 repository, sold as its own product, that lets *customers with existing Spring applications* adopt the Exeris kernel incrementally without rewriting business code. Spring keeps DI, beans, and config; Exeris owns ingress, lifecycle, and the off-heap data plane. The platform itself — kernel, capability ecosystem, and first-party Platform SKUs — runs kernel-direct and does **not** depend on `exeris-spring-runtime`. Exeris Systems Family products (BudgetHQ being the first, §9) deliberately run on Spring Runtime + Exeris Kernel as the **dogfooding case for that specific combination** — proving the Spring-on-Exeris product works in production under real customer load, the way a brownfield customer would adopt it. The Spring Runtime is thus both a customer-facing product and the structural proof that **Exeris is a runtime, not a framework**: it can host even Spring code underneath, and that is the strongest possible statement of runtime ownership.
 
@@ -31,7 +40,7 @@ C4Context
     System_Ext(cloud, "Cloud (K8s, bare metal)", "High-density compute environment.")
     System_Ext(user, "End user / API client", "Consumes business services over<br/>HTTP/1.1, HTTP/2, HTTP/3.")
 
-    %% Krótkie opisy na relacjach zapobiegają nakładaniu się tekstu
+    %% Short relation labels keep the arrow text from overlapping
     Rel(developer, exeris, "Designs & deploys")
     Rel(exeris, db, "Zero-copy I/O")
     Rel(exeris, cache, "Cache")
@@ -41,7 +50,7 @@ C4Context
     Rel(user, exeris, "API calls")
 ```
 
-ADR-002 specifies **PostgreSQL 18 as the platform-recommended default stack** for new applications — it is explicitly *not* a kernel mandate. The kernel itself remains database-agnostic at the runtime SPI layer (per ADR-002 §"Kernel relationship"). The Community graph driver supports **both** SQL:2023 PGQ on Postgres **and** Cypher on Neo4j / Memgraph / FalkorDB via a unified `MATCH` DSL; the same business code works on either backend because the codegen pipeline (ADR-015) transpiles intent into the active driver's dialect at build time. The Enterprise tier adds a native PG wire protocol driver (via the Enterprise persistence subsystem) and a planned FFM-native Bolt v5 driver for Neo4j (TRL-4 — not yet shipping). Kafka 3.x is a **first-class Community Events driver** (`exeris-kernel-community-kafka` since v0.7 Sprint 5b2), not just an adjunct — but it is optional, since the default Community Events driver uses the Postgres Outbox pattern + JVM-heap pub/sub. Redis is an optional cache adjunct only.
+ADR-002 specifies **PostgreSQL 18 as the platform-recommended default stack** for new applications — it is explicitly *not* a kernel mandate. The kernel itself remains database-agnostic at the runtime SPI layer (per ADR-002 §"Kernel relationship"). The Community graph driver supports **both** SQL:2023 PGQ on Postgres **and** Cypher on Neo4j / Memgraph / FalkorDB via a unified `MATCH` DSL; the same business code works on either backend because the codegen pipeline (ADR-015) transpiles intent into the active driver's dialect at build time. The Enterprise tier adds a native PG wire protocol driver (via the Enterprise persistence subsystem) and a planned FFM-native Bolt v5 driver for Neo4j (TRL-4 — not yet shipping). Kafka is a **first-class Community Events driver** (`exeris-kernel-community-kafka`, shipped in kernel v0.7.0 Sprint 5b; `kafka-clients` pinned at 4.0.2 in `exeris-kernel-bom`, integration tests against `confluentinc/cp-kafka:7.6.1`), not just an adjunct — but it is optional, since the default Community Events driver uses the Postgres Outbox pattern + JVM-heap pub/sub. Redis is an optional cache adjunct only.
 
 ### 2.2 Level 2: Containers
 
@@ -52,24 +61,24 @@ C4Container
     title Container Diagram — Exeris Platform
 
     Container_Boundary(design_time, "Design & Build Time") {
-        Container(studio, "Exeris Studio", "Angular shell + embedded React", "Bidirectional visual domain editor;<br/>lives in exeris-platform.")
-        Container(lsp, "LSP Server", "Java 26", "Synchronizes Studio and IDEs with<br/>on-disk @ExerisDomain Java sources.")
+        Container(studio, "Exeris Studio", "Angular 21 shell", "Bidirectional visual domain editor;<br/>lives in exeris-platform.")
+        Container(lsp, "LSP Server", "Java 25 LTS", "Synchronizes Studio and IDEs with<br/>on-disk @ExerisDomain Java sources.")
         Container(tooling, "Exeris Tooling", "Maven annotation processor + codegen", "Generates kernel handlers, OpenAPI, sagas,<br/>Flyway, and Angular components (ADR-015).")
     }
 
     Container_Boundary(substrate, "Tier 1 — Substrate Runtime") {
-        Container(kernel_spi, "Exeris Kernel SPI + Core", "Java 26 + Panama FFM + Loom", "Zero-copy off-heap execution engine.")
+        Container(kernel_spi, "Exeris Kernel SPI + Core", "Java 25 LTS + Panama FFM + Loom", "Zero-copy off-heap execution engine.")
         Container(kernel_community, "Community Driver", "exeris-kernel-community", "Custom NIO H1/H2 transport +<br/>portable Off-Heap TLS. Open-core baseline.")
         Container(kernel_enterprise, "Enterprise Driver", "exeris-kernel-enterprise", "io_uring / IOCP transport, HTTP/3 codec,<br/>slab-pool memory, NUMA allocation.")
     }
 
     Container_Boundary(spring_overlay, "Tier 1 — Spring-on-Exeris") {
-        Container(spring_rt, "Exeris Spring Runtime", "Java 26", "Independent Tier 1 product hosting Spring apps<br/>on the Exeris kernel.")
+        Container(spring_rt, "Exeris Spring Runtime", "Java 25 LTS", "Independent Tier 1 product hosting Spring apps<br/>on the Exeris kernel.")
     }
 
     Container_Boundary(caps, "Tier 2 — Capability Ecosystem") {
         Container(cap_substrate, "Substrate caps", "gateway-core, service-boundary-core", "Family-level substrate caps.")
-        Container(cap_policy, "Policy + SB platform + AI caps", "rate-limiting, jwt-validation, etc.", "Decomposed into ~50 caps across seven layers.<br/>References SPIs only.")
+        Container(cap_policy, "Policy + SB platform + AI caps", "rate-limiting, jwt-validation, etc.", "54 caps across seven layers.<br/>References SPIs only.")
     }
 
     Container_Boundary(skus, "Tier 3 — Platform SKUs") {
@@ -86,7 +95,7 @@ C4Container
         Container(observability, "Enterprise Observability", "Java 26 CLI + decoder", "Crash-ring decoder, live-stream client (Repo B).")
     }
 
-    %% Zredukowane teksty relacji
+    %% Shortened relation labels
     Rel(studio, lsp, "Syncs")
     Rel(lsp, tooling, "Triggers")
     Rel(tooling, kernel_spi, "Generates code")
@@ -103,7 +112,9 @@ C4Container
     Rel(observability, telemetry_spec, "Decodes")
 ```
 
-> **¹ Footnote on telemetry-spec Java version.** `exeris-telemetry-spec` deliberately targets Java 21 (not Java 26) to maximise third-party decoder portability per ADR-018. All other repositories in this diagram target Java 26 with `--enable-preview`.
+> **¹ Footnote on JDK baselines.** The distributable line is preview-clean on **JDK 25 LTS**: `exeris-kernel`, `exeris-sdk`, `exeris-tooling`, `exeris-platform` and `exeris-spring-runtime` compile their main sources at `<maven.compiler.release>25</maven.compiler.release>` (kernel [ADR-066](../exeris-kernel/docs/adr/ADR-066-preview-clean-ga-baseline.md), SDK [ADR-069](../exeris-sdk/docs/adr/ADR-069-jdk-baseline-lts.md), spring-runtime [ADR-068](../exeris-spring-runtime/docs/adr/ADR-068-two-track-jdk-artefact-model.md)); the kernel still applies `--enable-preview` to its own test-compile and TCK fixtures, which are not distributed. ADR-066 publishes a companion `-preview` coordinate on the latest JDK beside the GA line, and ADR-068 mirrors that two-artefact model for the Spring runtime. `exeris-kernel-enterprise` builds at `release 26` with `--enable-preview`; `exeris-enterprise-observability` at `release 26`. `exeris-telemetry-spec` deliberately targets Java 21 to maximise third-party decoder portability per ADR-018.
+
+<!-- VERIFY(sweep-2026-09): ADR-004 (JDK 26 EA + Preview Features Mandate) is still 'accepted (2025-12-26)' in adr-index.md row 25 with no supersession note, and it mandates release 26 with a build failure below it. Kernel ADR-066 (Accepted 2026-08-08, target exeris-kernel 0.11.0), spring-runtime ADR-068 (ACCEPTED 2026-08-08) and SDK ADR-069 (ACCEPTED 2026-08-12) moved the distributable line to JDK 25 LTS, and origin/main poms agree: kernel, sdk, tooling, platform, spring-runtime and caps-cors-policy all at release 25, with --enable-preview surviving only on the kernel's non-distributed test-compile and TCK fixtures. ADR-066 records 'Supersedes / amends: none', so the registry still shows ADR-004 live and unqualified. A maintainer pass is needed to amend ADR-004 (dated entry under '## Amendments') or mark it superseded; this page's JDK sentences are corrected to present state ahead of that. -->
 
 Studio here is the platform-internal Studio (`exeris-platform/exeris-studio-frontend`); it is distinct from the top-level `studio/` workspace, which holds Angular 21 vertical demo apps. The codegen TS pipeline emits Angular components consumable by either surface. The Family product boundary is rendered with a dashed semantic in this description because BudgetHQ is structurally not a Platform SKU — it is an independent SaaS product that happens to consume platform capabilities through the same `@Provides` / `@Requires` mechanism a paying platform subscriber would.
 
@@ -116,7 +127,7 @@ C4Component
     title Component Diagram — Exeris Kernel
 
     Component(spi, "SPI (The Constitution)", "Records + Interfaces", "Immutable contracts, implementation-blind,<br/>Spring-free (ADR-006).")
-    Component(core, "Core (The Brain)", "Java 26 / ScopedValue / StructuredTaskScope", "Bootstrap DAG, orchestration, KernelProviders.")
+    Component(core, "Core (The Brain)", "Java 25 LTS / ScopedValue / StructuredScope", "Bootstrap DAG, orchestration, KernelProviders.")
 
     Container_Boundary(subsystems, "Subsystem Layers") {
         Component(l0, "L0 — Foundation", "Memory (LoanedBuffer, Arenas), JFR Telemetry", "Mandatory base.")
@@ -131,7 +142,7 @@ C4Component
         Component(enterprise, "Enterprise Driver", "io_uring / QUIC / EnterpriseQuicTlsEngine", "Native-bypass, NUMA-aware, high-density.")
     }
 
-    %% Bardzo zwięzłe strzałki
+    %% Very terse arrows
     Rel(core, spi, "Implements")
     Rel(community, spi, "Implements")
     Rel(enterprise, spi, "Implements")
@@ -149,7 +160,7 @@ C4Component
 FOUNDATION (sequential, no JFR available yet):
     Memory
 
-SERVICES (parallel via StructuredTaskScope, after FOUNDATION READY):
+SERVICES (parallel, after FOUNDATION READY):
     Crypto & Persistence & Graph & Transport
 
 RUNTIME (parallel, after SERVICES READY):
@@ -158,7 +169,7 @@ RUNTIME (parallel, after SERVICES READY):
 → KERNEL READY
 ```
 
-`Config` is resolved by `KernelBootstrap` via `ServiceLoader<ConfigProvider>` *before* the orchestrator runs and is not a Subsystem in the DAG. `Exceptions` is not a Subsystem layer either. `Security` is an L1 Citadel concept, not a boot-DAG node — its semantics are governed by ADR-012 (fail-closed resource-server validation), distinct from the general bootstrap fail-fast/degrade policy. Bootstrap fail-fast (the policy that halts the process on missing OpenSSL ABI symbols, invalid memory partitions, or insufficient native access before the first byte of traffic) is specified in `exeris-kernel/docs/subsystems/bootstrap.md` §"Failure Sovereignty" — `FAIL_FAST` is the mandatory Strict Mode for production; `DEGRADE` is reserved for local dev.
+`Config` is resolved by `KernelBootstrap` via `ServiceLoader<ConfigProvider>` *before* the orchestrator runs and is not a Subsystem in the DAG. The SERVICES and RUNTIME phases start in dependency-safe rounds **on the thread that called `boot()`**, not one virtual thread per subsystem — the kernel's own `StructuredScope` replaced the preview `StructuredTaskScope` on the distributable line (ADR-066), and a subsystem's `start()` reads `ScopedValue` bindings the orchestrator cannot enumerate, so only staying on the binding thread delivers them; the cost is that a phase takes the sum of its subsystems' start times rather than the longest. `Exceptions` is not a Subsystem layer either. `Security` is an L1 Citadel concept, not a boot-DAG node — its semantics are governed by ADR-012 (fail-closed resource-server validation), distinct from the general bootstrap fail-fast/degrade policy. Bootstrap fail-fast (the policy that halts the process on missing OpenSSL ABI symbols, invalid memory partitions, or insufficient native access before the first byte of traffic) is specified in `exeris-kernel/docs/subsystems/bootstrap.md` §"Failure Sovereignty" — `FAIL_FAST` is the mandatory Strict Mode for production; `DEGRADE` is reserved for local dev.
 
 ## 3. Platform Capabilities Map
 
@@ -170,26 +181,28 @@ These are not user-space capabilities — they are properties of the substrate i
 
 | Capability | Technical realization | Decision | Business value |
 |---|---|---|---|
-| Zero-copy hot path | Panama FFM + LoanedBuffer ownership | ADR-007 | **−25.6% / −33.3% CPU per request** vs a tuned pure-JDBC Quarkus arm and a Quarkus + Hibernate arm on a runtime-bound read (`comparison_eligible`, 12/12 strict-gate leaves, AB/BA, `perf-box-amd64` — `exeris-benchmarks/results/reports/2026-07-21-…-tuned-pg-triad-comparison-eligible.md`). The earlier "~60% CPU waste" figure had no campaign behind it and is withdrawn. |
+| Zero-copy hot path | Panama FFM + LoanedBuffer ownership | ADR-007 | **−25.6% / −33.3% CPU per request** vs a tuned pure-JDBC Quarkus arm and a Quarkus + Hibernate arm on a runtime-bound read (`comparison_eligible`, 12/12 strict-gate leaves, AB/BA, `perf-box-amd64` — `exeris-benchmarks/results/reports/2026-07-21-entity-read-by-id-tuned-pg-triad-comparison-eligible.md`). <!-- vale Exeris.RetractedFigures = NO --> The earlier "~60% CPU waste" figure had no campaign behind it and is withdrawn. <!-- vale Exeris.RetractedFigures = YES --> |
 | High-density compute | Virtual Threads + JEP 491 (no pinning) | ADR-007 | Far more concurrent flows per node on the same hardware |
-| Edge sovereignty | ~128–200 MB target RSS baseline (ARM64 edge class; EU-sovereign reference platform + methodology in `exeris-benchmarks/docs/edge-rss-baseline.md` — *planned, ships in `exeris-benchmarks` v0.8.0+*) | kernel WP §4 | Full Java on 512 MB IoT gateways |
+| Edge sovereignty | ~128–200 MB target RSS baseline (ARM64 edge class) — **unartifacted**: `exeris-benchmarks` declares a `perf-box-arm64` hardware profile but publishes no ARM64 results, and no `docs/edge-rss-baseline.md` exists in that repository | *(no report path)* | Full Java on 512 MB IoT gateways |
 | Bidirectional dev | Studio ↔ LSP ↔ source ↔ codegen | ADR-003, ADR-015 | Visual speed without low-code lock-in (clean Java) |
 | Physical tenant isolation | Postgres RLS + ScopedValue context propagation | ADR-012 | Hard tenant isolation at the data plane |
 | Compile-time RBAC | `@RequiresRole` codegen | ADR-014 | Authorization at the call site, not via runtime reflection |
 | Saga orchestration & durable execution (in-process) | L4 Flow Engine with off-heap state; durable state in the application's own datastore via `FlowSnapshotStore` | ADR-013, ADR-022 | **No coordinator process and no distributed lock service** (ADR-013 §3 — a single-leader coordinator with consensus is the recorded rejected alternative). *Distribution* here means what ADR-013 scopes: a saga spanning distributed business steps, and saga state shared across multiple kernel instances via the durable store plus choreography wake. The engine itself is a library in the application process — distributed **workflow**, not a distributed **coordinator**. Deployment labels: *in-process* + *store-backed*, against *server-backed* and *dedicated* elsewhere in the field. Countable by the buyer from the deployment diagram. |
-| Manifest-proportional resident cost | On-demand subsystem load resolved by `ServiceLoader` against the declared deployment; Tier 2 cap composition is an explicit list | ADR-007, ADR-024 | Resident cost tracks what the deployment declared, not what the framework can do. Measured instance: the crypto subsystem costs **+24 MB and only when TLS is enabled** — "same money, different billing" — where an always-resident native TLS provider carries it in the base whether or not TLS is used (`exeris-benchmarks/results/reports/2026-07-22-…-memory-cpu-sweep.md`, TLS-tax campaign, 12/12 clean, `exploratory`). Survivable memory floor on the same workload: **128 MiB vs 192 MiB**. |
+| Manifest-proportional resident cost | On-demand subsystem load resolved by `ServiceLoader` against the declared deployment; Tier 2 cap composition is an explicit list | ADR-007, ADR-024 | Resident cost tracks what the deployment declared, not what the framework can do. Measured instance: the crypto subsystem costs **+24 MB and only when TLS is enabled** — "same money, different billing" — where an always-resident native TLS provider carries it in the base whether or not TLS is used (`exeris-benchmarks/results/reports/2026-07-22-entity-read-by-id-memory-cpu-sweep.md`, TLS-tax campaign at 1 GiB / 4 vCPU, 12/12 clean; per-run stamp `exploratory`, report stamp `claim_scope: descriptive_only` with `comparison_policy: forbidden`). Survivable memory floor on the same single-read workload, each arm on its own minimal heap: **`exeris-community` 128 MiB (16 MiB heap) vs `quarkus-tuned` 192 MiB (64 MiB heap)** — a "boots and survives at all" threshold, not a performance threshold, from an open-loop wrk2 binary search at a fixed 1 000 rps arrival rate with **n=1 per grid point**; the report's split of the 64 MiB gap (~48 MiB heap, ~16 MiB non-heap) is arithmetic on the declared configs, not a measured attribution. |
 | Spring-hosting capability (`exeris-spring-runtime`, independent Tier 1 product) | Pure Mode + Compatibility Mode | ADR-010, ADR-011 | Brownfield customer migration path — host existing Spring apps on the kernel without rewriting. Not used by platform / SKUs. |
 | Glass-box observability | JFR-first telemetry + crash-ring decoder | ADR-018 | Nanosecond-resolution traces, no sidecar |
 | Stack-portable graph | Unified `MATCH` DSL → SQL:2023 PGQ (Postgres 18) **or** Cypher (Neo4j / Memgraph / FalkorDB); Enterprise: native PG wire driver + planned FFM Bolt v5 for Neo4j (TRL-4) | ADR-002 (platform-recommended default stack only — kernel is DB-agnostic at SPI) | Graph performance with backend choice; same business code on either dialect |
 | Enterprise NUMA awareness | `libnuma mbind()` via Panama FFM | `exeris-kernel-enterprise/docs/subsystems/memory.md` §"NUMA-Aware Allocation" | Per-partition node-local memory binding on multi-socket hardware |
 
+<!-- VERIFY(sweep-2026-09): the '~128-200 MB target RSS baseline (ARM64 edge class)' figure in §3.1 has no artefact behind it, and neither does 'Full Java on 512 MB IoT gateways' in the same row. Its citation 'kernel WP §4' is dead — exeris-kernel/docs/whitepaper.md §4 'Deployment Topology' (lines 101-127) carries a process diagram and a no-sidecar paragraph and no RSS figure of any kind. exeris-benchmarks/docs/edge-rss-baseline.md does not exist on that repository's origin/main (17 files under docs/, none by that name; `git grep -l edge-rss-baseline origin/main` empty). No ARM64 result is committed under results/ although docs/hardware-profiles.md:160 declares a perf-box-arm64 profile. CLAIMS.md holds no entry for either figure. Maintainer must decide: commission the ARM64 edge campaign, restate against the measured x86 floor (exeris-community 128 MiB on a 16 MiB heap, 2026-07-22 memory-floor campaign, n=1 per grid point), or drop the row's numbers. -->
+
 ### 3.2 Composable Capabilities (Tier 2 — `exeris-caps-*` repositories)
 
 User-space capabilities developed in `exeris-caps-*` repositories. Each is a named module with explicit `@Provides` and `@Requires` declarations. The capability composition model itself is specified in §4.
 
-Capabilities are organized in seven layers. Each layer is independently reusable; an SKU manifest composes 10–15 caps drawn from across the stack. Domain primitives (layer 5) are deliberately decomposed below the SKU granularity so the same cap can back a CRM, an OMS, a PIM, or a customer-defined ERP composition without forking.
+Capabilities are organized in seven layers. Each layer is independently reusable; the SKU manifests in §3.3 compose 7–16 caps each, drawn from across the stack. Domain primitives (layer 5) are deliberately decomposed below the SKU granularity so the same cap can back a CRM, an OMS, a PIM, or a customer-defined ERP composition without forking.
 
-**License taxonomy.** ADR-020's two-valued open-core split (`public` / `enterprise-private`) covers the Tier 1 substrate cleanly. Tier 2 capabilities require a third value because the cap layer carries most of the platform's commercial value; without it the model contradicts the SKU-monetization thesis of §3.3 and §5.4. Capabilities therefore ship under one of three licenses:
+**License taxonomy.** ADR-020's two-valued open-core split (`public` / `enterprise-private`) covers the Tier 1 substrate cleanly. Tier 2 capabilities require a third value because the cap layer carries most of the platform's commercial value; without it the model contradicts the SKU-monetization thesis of §3.3 and the B2B whitepaper §5.4. Capabilities therefore ship under one of three licenses:
 
 | License tier | Terms | Coverage |
 |---|---|---|
@@ -290,7 +303,7 @@ This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026
 
 > **Why these three are cross-cutting rather than Gateway or SB caps.** None `@Requires` `gateway-core` or `service-boundary-core`. Binding either aggregate would confine them to one SKU family, and each is needed in both: a Gateway calls upstreams with credentials exactly as a Service Boundary calls a third-party API.
 >
-> **`outbound-credentials` closes a real asymmetry.** Every inbound authorization concern has a cap — `jwt-validation`, `rbac-policy`, `tls-termination`, `waf-rules` — and until now nothing covered the outbound direction. The demand is concrete: PSD2 access needs eIDAS QWAC/QSEAL certificates, per-institution mTLS and OAuth2 `client_credentials`; crypto-exchange APIs need key-based HMAC request signing. Without this cap those land inside `payment-gateway` and `bank-aggregator` separately, which is how one signing bug becomes several. **Tier check:** kernel [ADR-040](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/adr/ADR-040-identity-provider-spi.md) reserved the outbound-credential seam (option O-c) as a *kernel* concern; this cap sits above that seam providing storage, rotation and per-scheme signing. It does not reimplement it.
+> **`outbound-credentials` closes a real asymmetry.** Every inbound authorization concern has a cap in this inventory — `jwt-validation`, `rbac-policy`, `tls-termination`, `waf-rules` — and the outbound direction has none without this one. The demand is concrete: PSD2 access needs eIDAS QWAC/QSEAL certificates, per-institution mTLS and OAuth2 `client_credentials`; crypto-exchange APIs need key-based HMAC request signing. Without this cap those land inside `payment-gateway` and `bank-aggregator` separately, which is how one signing bug becomes several. **Tier check:** kernel [ADR-040](../exeris-kernel/docs/adr/ADR-040-identity-provider-spi.md) reserved the outbound-credential seam (option O-c) as a *kernel* concern; this cap sits above that seam providing storage, rotation and per-scheme signing. It does not reimplement it.
 >
 > **`service-identity` is a different axis from `jwt-validation`.** That cap validates an end-user token arriving at the edge. This one is workload identity — one of your services proving itself to another — which is what a microservice deployment needs and what the kernel's `IdentityProvider` SPI does not mint.
 >
@@ -314,7 +327,7 @@ All cap repositories are in **specified** status except `exeris-caps-cors-policy
 
 ### 3.3 SKU Compositions (Tier 3 — named compositions sold as products)
 
-A Platform SKU is a named, signed, **commercial-licensed composition** of §3.2 capabilities. The composition manifest is the source-of-truth artifact that Studio consumes for visualization and that the build-time pipeline (ADR-015) validates against the Wall (ADR-006) and `@Requires` graph. SKU compositions are version-pinned per release; the per-SKU manifest lives in the corresponding `exeris-sku-*` repository.
+A Platform SKU is a named, signed, **commercial-licensed composition** of §3.2 capabilities. The composition manifest is the source-of-truth artifact that Studio consumes for visualization and that the build-time pipeline (ADR-015) validates against the Wall (ADR-006) and `@Requires` graph. SKU compositions are version-pinned per release; each manifest will live in its own `exeris-sku-*` repository. None of those repositories exists yet — `exeris-sku-api-gateway` is the scaffold ADR-053 names as the manifest format's first enforced artefact.
 
 The manifests below show the full cap list per SKU. Where a cap is `community`-licensed it inherits its open license; the SKU composition itself is `commercial` regardless. `enterprise-private` caps inside an SKU require the corresponding Enterprise subscription tier on top of the SKU.
 
@@ -406,6 +419,9 @@ SKUs are organized into two families plus one cross-cutting data model. Each fam
 | Headless CMS API | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission / graphql-emission codegen) | Marginal — Community driver typically sufficient | Cloud or edge-co-located for read replicas |
 | Context-Centric CRM data model | Cross-cutting cap | Composed by Service Boundary SKUs; not standalone | N/A (cap-layer, driver-agnostic) | N/A (cap-layer) |
 
+<!-- VERIFY(sweep-2026-09): the '>50k RPS' threshold on the API Gateway row in §5 has no public report path and no figure state. No io_uring or HTTP/3 campaign exists in exeris-benchmarks: origin/main results/reports/ holds seven top-level .md reports, all entity-read-by-id work plus the 2026-05-01 aggregate. H3 results exist only in exeris-benchmarks-enterprise, which is enterprise-private, so docs-style-guide rule 6 forbids this public page citing a path into it. Maintainer must decide whether to drop the threshold or publish a citable Enterprise-driver figure. -->
+<!-- VERIFY(sweep-2026-09): 'sub-ms failover' on the Edge Proxy row in §5 has no measurement behind it in either benchmark repository — exeris-benchmarks origin/main carries only entity-read-by-id reports and the 2026-05-01 aggregate, and exeris-benchmarks-enterprise carries health-probe and entity-read scenarios, none of them a multi-region failover run. There is also no exeris-sku-edge-proxy repository to measure (confirmed against the GitHub org listing, not only the workstation). Maintainer call: drop it or schedule the campaign. -->
+
 > All SKU compositions are `commercial`-licensed regardless of the row above. The "Enterprise driver benefits" column refers exclusively to **Tier 1 substrate driver swap** (Community `exeris-kernel-community` Maven module → Enterprise `exeris-kernel-enterprise` artifact), not to a separate cap manifest or cap-layer license change.
 
 **Gateway family architecture.** Kernel-level HTTP path with no Spring dependency in the data plane (consistent with the clarified ADR-021). The control plane (admin API, configuration reload) is single-process or distributed depending on cap manifest selection; observability flows through `exeris-caps-observability-bridge` to the ADR-018 wire format. The Enterprise driver swap (custom NIO H1/H2 → `io_uring` + HTTP/3 + QUIC TLS) lives in `exeris-kernel-enterprise` and is activated by Maven coordinate substitution at the substrate layer — Gateway SKU composition manifests are byte-identical across Community and Enterprise deployments. Bot Blocker additionally requires a JA3/JA4 TLS fingerprinting kernel proposal modifying `CoreSslHandles` to expose ClientHello fingerprint material before the request reaches the policy chain — that proposal is on the kernel roadmap; the corresponding `exeris-caps-bot-fingerprinting` cap is the only enterprise-private cap in Tier 2 because it depends on this kernel-tier extension.
@@ -429,7 +445,9 @@ ADR-020's two-valued visibility taxonomy (`public` / `enterprise-private`) gover
 | SDK / Tooling | `exeris-sdk`, `exeris-tooling` | — |
 | Platform / Studio | `exeris-platform` (Studio core, LSP, studio backend) | `exeris-platform-enterprise` (planned — multi-env promotion, design-time RBAC, audit dashboards, multi-tenant org) |
 | Benchmarks | `exeris-benchmarks` (Community, cross-runtime, no H3) | `exeris-benchmarks-enterprise` — H3 track per ADR-016 (*scope document planned; current README is a placeholder*) |
-| Observability | `exeris-telemetry-spec` (wire format, open) | `exeris-enterprise-observability` (decoder, CLI, forensics) |
+| Observability | *(none today — see note)* | `exeris-telemetry-spec` (wire format; publishable as an open spec per ADR-018, repository private today), `exeris-enterprise-observability` (decoder, CLI, forensics) |
+
+<!-- VERIFY(sweep-2026-09): §6.1 lists `exeris-telemetry-spec` under 'Open-core repositories' and §8 calls it 'Open-licensed', but the repository is private (GitHub org listing), holds no LICENSE file, is classified enterprise-private by adr-index row 018 whose stub row marks it *(private repo)*, and ADR-018's own Consequences say only that 'Repo C can be released as an open-spec artifact'. The wire format is genuinely designed for third-party decoders (zero dependencies beyond java.base, Java 21 target), so this may be an intent the maintainer means to execute rather than a drafting error. Maintainer call: publish the spec repository under an open licence and restore the original wording, or keep the corrected wording. -->
 
 ### 6.2 Tier 2 — Capability Ecosystem
 
@@ -449,7 +467,7 @@ Native-bypass transport (QUIC/HTTP/3, `io_uring`, IOCP) is **not** a Tier 2 cap 
 
 ### 6.3 Tier 3 — Platform SKUs
 
-Every Platform SKU is a **commercial-licensed composition** of underlying caps. The composition manifest itself (the cap list, version pins, signature) ships under the Exeris Commercial License regardless of the licensing of individual underlying caps. SKU repositories are source-available public repositories by default per ADR-023 §"SKU Repository Source-Visibility Policy" — closing the audit gap at the SKU layer alongside the cap layer — with the Bot Blocker SKU as the single principled closed-source exception on anti-abuse-security grounds. A subscriber receives the right to run the named composition; a customer who pays the Code Detachment Fee (whitepaper §5.4) receives transferable ownership scoped to the SKU's source-visibility class.
+Every Platform SKU is a **commercial-licensed composition** of underlying caps. The composition manifest itself (the cap list, version pins, signature) ships under the Exeris Commercial License regardless of the licensing of individual underlying caps. SKU repositories are source-available public repositories by default per ADR-023 §"SKU Repository Source-Visibility Policy" — closing the audit gap at the SKU layer alongside the cap layer — with the Bot Blocker SKU as the single principled closed-source exception on anti-abuse-security grounds. A subscriber receives the right to run the named composition; a customer who pays the Code Detachment Fee (whitepaper §5.4) receives transferable ownership scoped to the SKU's source-visibility class. No `exeris-sku-*` repository exists yet; the table below fixes each SKU's intended coordinate, licence and source-visibility class ahead of the first scaffold (ADR-053).
 
 | SKU repository | License | Source visibility | Note |
 |---|---|---|---|
@@ -500,7 +518,7 @@ Repo A (exeris-kernel-enterprise, producer) ──► Repo C (exeris-telemetry-s
 ```
 
 - **Repo A** produces 64-byte binary frames into a crash-ring file or a live TCP stream.
-- **Repo C** defines the wire format (`EXRSCRSH` for crash files, `EXRSLIVE` for live streams), frozen field offsets, append-only versioning (V1 active, V2 reserved). Open-licensed, Java 21 for maximum third-party decoder portability, publishable as a third-party decoder spec.
+- **Repo C** defines the wire format (`EXRSCRSH` for crash files, `EXRSLIVE` for live streams), frozen field offsets, append-only versioning (V1 active, V2 reserved). Java 21 for maximum third-party decoder portability; ADR-018 records the intent to release it as an open spec, and the repository is private today.
 - **Repo B** consumes frames offline (crash forensics, ring-file inspection) and online (live attach, dropped-frame accounting). One-directional dependency graph: A → C ← B. B never depends on A.
 
 This split lets the decoder tooling ship at a different cadence than the runtime, supports third-party decoders against the spec, and keeps the runtime free of decoder dependencies on its hot path.
@@ -513,7 +531,7 @@ A **Family product** is built and operated by Exeris Systems itself, on the Exer
 
 **Architectural rules every Family product follows.**
 
-- Runs on the Exeris kernel. **BudgetHQ is the singular exception that also runs on `exeris-spring-runtime`** — deliberately, to dogfood the Spring-on-Exeris product. All future Family products are pure Exeris: built on `exeris-sdk` (`@ExerisDomain`, `@Action`, `@Field`, `@Relationship`, `@RequiresRole`) plus `exeris-tooling` codegen, with the platform's Tier 2 cap ecosystem providing reusable functionality. No future Family product will use `exeris-spring-runtime`.
+- Runs on the Exeris kernel. **BudgetHQ is the singular exception that also runs on `exeris-spring-runtime`** — deliberately, to dogfood the Spring-on-Exeris product. All future Family products are pure Exeris: built on `exeris-sdk` (`@ExerisDomain`, `@Action`, `@Field`, `@Relationship`) plus the kernel SPI's `@RequiresRole` and `exeris-tooling` codegen, with the platform's Tier 2 cap ecosystem providing reusable functionality. No future Family product will use `exeris-spring-runtime`.
 - Consumes platform capabilities through the public Tier 2 composition surface — no internal or "preview-only" access.
 - May prototype new capabilities under production load before they are promoted to the platform's capability ecosystem.
 - Proprietary code, branding, and customer data are entirely outside the platform's IP perimeter (the boundary called out explicitly in §6.4).
@@ -530,7 +548,7 @@ BudgetHQ is the first Family product. It is an independent SaaS spanning both B2
 - **OAuth/OIDC B2C identity capability.** Prototyped inside BudgetHQ for end-user authentication.
 - **Telemetry.** BudgetHQ composes `exeris-caps-observability-bridge` and emits to a Repo B consumer running in BudgetHQ's own infrastructure — same wire format as a platform subscriber's telemetry, distinct consumer instance.
 
-Each prototyped capability lands in the platform's capability ecosystem **after** BudgetHQ has stabilized it in production, never before. This inverts the "demo product" framing of earlier strategic documents: BudgetHQ is not built to validate the platform; the platform is structurally sound enough that BudgetHQ can run on it from day one, and that is the validation. The capability development pipeline replaces the "Trojan horse" lead-generation framing from earlier internal strategy documents.
+Each prototyped capability lands in the platform's capability ecosystem **after** BudgetHQ has stabilized it in production, never before. BudgetHQ is not built to validate the platform: the platform is structurally sound enough that BudgetHQ runs on it from day one, and that is the validation. BudgetHQ's role in the platform is a capability-development pipeline — production hardening ahead of promotion.
 
 ### 9.2 Family product pattern extensibility
 

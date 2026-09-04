@@ -1,6 +1,16 @@
+---
+title: Capability Licence Registry
+type: reference
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-04
+---
+
 # Capability Licence Registry
 
-**Status:** living document · **Scope:** platform · **Owns:** ADR-023 open follow-up 1
+**Scope:** platform · **Discharges:** [ADR-023](adr/ADR-023-capability-licensing-taxonomy.md) open
+follow-up 1 (per-cap licence registry)
 
 The per-cap source of truth for which licence a capability artefact carries, whether its repository
 is public, and how far it has actually been built.
@@ -48,8 +58,9 @@ chosen to drive adoption and ecosystem integration rather than to carry revenue.
 | `scaffolded` | Repository exists, builds, and emits a stamped `cap-manifest.json`. Behaviour may be partial. |
 | `implemented` | Feature-complete against its `@Provides` contract, with tests. |
 
-As of this writing exactly one cap is past `specified`. That is the honest state: the composition
-pipeline was finished before any cap consumed it from outside `exeris-tooling`'s own test fixtures.
+Exactly one cap is past `specified`: `exeris-caps-cors-policy`. That is the honest state: the
+composition pipeline was finished before any cap consumed it from outside `exeris-tooling`'s own
+test fixtures.
 
 ### Layer 1 — Substrate aggregates
 
@@ -139,6 +150,7 @@ pipeline was finished before any cap consumed it from outside `exeris-tooling`'s
 | `exeris-caps-service-identity` | `commercial` | public | specified |
 | `exeris-caps-idempotency` | `commercial` | public | specified |
 | `exeris-caps-usage-metering` | `commercial` | public | specified |
+
 ---
 
 ## Notes on individual rows
