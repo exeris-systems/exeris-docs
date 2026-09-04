@@ -24,7 +24,7 @@ Inflation has a second dimension that per-request efficiency does not capture: *
 
 The cost is structural, not configurational. No amount of tuning of a Spring + Reactor + Netty stack closes the gap — the abstractions themselves are the tax. The runtime needs to be replaced underneath the application, not the application replaced on top of the runtime.
 
-Exeris addresses this in three coupled tiers. **Tier 1 (Substrate)** replaces the inflated runtime with a zero-copy, off-heap execution kernel. **Tier 2 (Capability Ecosystem)** turns that substrate into composable, build-time-validated capability modules. **Tier 3 (Vertical SaaS SKUs)** ships pre-composed capability manifests for specific verticals — API Gateway, Edge Proxy, Bot Blocker, IDP, PIM, OMS, Headless CMS API. The Context-Centric CRM data model is a cross-cutting capability any Service Boundary SKU can compose, not an eighth SKU (§3.3). Each tier in this document is grounded in source-of-truth ADRs and subsystem documents the buyer can re-read independently.
+Exeris addresses this in three coupled tiers. **Tier 1 (Substrate)** replaces the inflated runtime with a zero-copy, off-heap execution kernel. **Tier 2 (Capability Ecosystem)** turns that substrate into composable, build-time-validated capability modules. **Tier 3 (Vertical SaaS SKUs)** ships pre-composed capability manifests for specific verticals — API Gateway, Edge Proxy, Bot Blocker, IDP, PIM, OMS, Headless CMS API. The Context-Centric CRM data model is a layer-5 domain-primitive capability any Service Boundary SKU can compose, not an eighth SKU (§3.3). Each tier in this document is grounded in source-of-truth ADRs and subsystem documents the buyer can re-read independently.
 
 ### 2. The Exeris Solution: Runtime-Owned Execution
 
@@ -346,7 +346,7 @@ The kernel currently ships at **v0.11.0 (2026-08-11)**, on a two-artifact releas
 | H2 2027 | **Edge Proxy SKU** — GA; **Bot Blocker SKU** — GA (depends on JA3/JA4 kernel proposal landing in `exeris-kernel`) |
 | H1 2028 | **IDP** and **Headless CMS API** SKUs — GA (simplest Service Boundary cap compositions) |
 | H2 2028 | **PIM** and **OMS** SKUs — GA |
-| 2028 | Context-Centric CRM data-model ADR; cross-cutting cap promoted to formal capability |
+| 2028 | Context-Centric CRM data-model ADR; the layer-5 domain-primitive cap promoted to formal capability |
 | H2 2029 | Context-Centric CRM — first product-form release |
 
 **Family Products (parallel, independent).** BudgetHQ enters **private beta H2 2026**, **GA H1 2027**. The BudgetHQ schedule is not subordinated to platform milestones — it is run as an independent SaaS product. See §8 for the structural role Family products play in the platform's capability development pipeline.

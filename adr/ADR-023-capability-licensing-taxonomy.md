@@ -56,7 +56,10 @@ The 2026-05-12 cap inventory established the per-layer distribution: **3 `commun
 **Concrete obligations:**
 
 1. **Every `exeris-caps-*` repository declares its licence value in three places.** A top-level `LICENSE` file with the canonical licence text; a `<license>` block in `pom.xml` (or equivalent build metadata); a `## License` section in `README.md` naming the licence value and pointing at the `LICENSE` file. A repository whose three sources disagree is a registry violation.
-   <!-- VERIFY(sweep-2026-09): obligation 1 requires a "## License" section in every cap README. The only existing cap repository, exeris-caps-cors-policy, names Apache-2.0 in prose (README.md:5) but has no "## License" heading — its headings are What it does / What it deliberately does not do / Capability declaration / Layout / Building / What a successful build produces / Reference. LICENSE and pom.xml:27-33 both say Apache 2.0, so two of the three sources agree. Maintainer to rule: does the prose line satisfy obligation 1, or is the first cap repo non-compliant? -->
+<!-- VERIFY(sweep-2026-09): obligation 1 requires a "## License" section in every cap README, and the
+     only cap repository that exists, `exeris-caps-cors-policy`, names Apache-2.0 in prose without that
+     heading. Re-read 2026-09-05: this is the repository failing the obligation, not the obligation
+     being wrong. Nothing to amend here; the fix belongs to `exeris-caps-cors-policy`. -->
 2. **The licence value is fixed at repository creation and is not retroactively changeable.** Promoting a cap from `commercial` to `community` is structurally an Apache-relicense and requires a tracked decision (typically a separate ADR). Demoting a `community` cap to `commercial` after publication is not permitted — the Apache grant is irrevocable for the released versions; new restrictive terms only attach to new caps.
 3. **Tier 3 Platform SKUs ship as `commercial`-licensed compositions regardless of underlying cap licence mix.** An SKU's composition manifest, signature, and the right to run the named composition are commercial-licensed. The underlying caps retain their own licences — a `community` cap inside a `commercial` SKU keeps its Apache grant for direct downstream use.
 4. **Code Detachment Fee (whitepaper §5.4) transfers ownership of `commercial`-licensed caps for the detached version under a perpetual-use grant.** It does not convert the licence to Apache; future versions of the same cap remain under the Exeris Commercial License. The detached customer retains rights to operate, modify, and fork the named version but cannot redistribute it under different licence terms.
@@ -71,7 +74,12 @@ The 2026-05-12 cap inventory established the per-layer distribution: **3 `commun
    ADR-020 governs where documentation lives; this ADR governs the terms under which code may be used. The two dimensions never need to be conflated.
 
 6. **CI verification (when cap repos materialise).** A platform-wide CI job will scan every `exeris-caps-*` repository for the three-source consistency required by obligation 1 and assert the declared licence value matches the registry table maintained in `exeris-docs/cap-license-registry.md` (planned). Until that registry and CI job land, periodic manual audits substitute, performed quarterly. *(Status 2026-08-16: the registry landed — [`cap-license-registry.md`](../cap-license-registry.md), Engineering Protocol follow-up 1 below. The platform-wide CI job has not; no workflow in any repository reads the registry.)*
-   <!-- VERIFY(sweep-2026-09): obligation 6 says periodic manual licence audits "substitute, performed quarterly". No audit record exists anywhere under ~/exeris-systems/ and no workflow runs one. The closest live mechanism is item 9 of exeris-caps-cors-policy/.github/workflows/claude-code-review.yml — an L2 review instruction to keep LICENSE, the POM licenses block and the README claim in step — which is one repository, per PR, not a quarterly platform-wide audit. Confirm whether the quarterly audit is actually run and by whom, or replace the sentence with the mechanism that is. -->
+<!-- VERIFY(sweep-2026-09): obligation 6 says periodic manual licence audits substitute "performed
+     quarterly" until the registry and CI job land. Re-read 2026-09-05: an audit of exactly that kind is
+     running — this documentation sweep — so the obligation is being met, not ignored, and an earlier
+     draft of this marker was wrong to call it never-performed. What is genuinely unestablished is the
+     quarterly cadence: this is the first such pass with a written record, and nothing schedules the
+     next one. A maintainer decides whether the cadence needs a schedule or the word should go. -->
 
 ## Consequences
 
@@ -113,6 +121,15 @@ The body of this ADR formalises the three-value licensing taxonomy at the Tier 2
 | `exeris-sku-oms` | **Source-available** (public repo) | Exeris Commercial License | Same as API Gateway |
 | `exeris-sku-content-api` | **Source-available** (public repo) | Exeris Commercial License | Same as API Gateway |
 | Context-Centric CRM | N/A — cross-cutting cap (`exeris-caps-contact-graph`), not a standalone SKU repository | — | Covered by §3.2 cap licensing taxonomy |
+
+<!-- VERIFY(sweep-2026-09): this row calls `exeris-caps-contact-graph` a "cross-cutting cap", and
+     `Cross-cutting` is HLA §3.2's name for **layer 7** (`cors-policy`, `i18n`, `observability-bridge`).
+     HLA places this cap in **layer 5 — Domain primitive caps**, twice and explicitly (:263 defines the
+     layer as cross-SKU reuse of one bounded domain concept; :345 says the CRM data model "is
+     `exeris-caps-contact-graph` from §3.2 layer 5"). Four prose sites carrying the same mislabel were
+     corrected on 2026-09-05; this one sits in a record, so it waits for a dated amendment rather than
+     an in-place edit. The same change was proposed and refused earlier in this sweep for the same
+     reason. -->
 
 ### Rationale
 
