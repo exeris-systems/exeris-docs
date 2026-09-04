@@ -36,7 +36,7 @@ Three levels in the schema's vocabulary. **A)** is enforced or non-negotiable; *
 
 Single numbering namespace across the ecosystem. The full rules are in [`adr-index.md`](adr-index.md) and formalized in [`adr/ADR-020-open-core-documentation-mirror-policy.md`](adr/ADR-020-open-core-documentation-mirror-policy.md). Essentials any AI session must follow:
 
-<!-- VERIFY(sweep-2026-09): the gates these standards cite are not yet wired into this repository. .github/workflows/ holds only claude-code-review.yml and claude.yml, and no workflow references registry_check.py, frontmatter_check.py or claude_md_check.py; the scripts live in an untracked shared tree reached via the .guardrails symlink to ~/exeris-systems/.guardrails. Until a caller workflow lands, no rule may be dropped from this file on the grounds that "CI reports it instead" (claude-md-schema.md rule 5). -->
+<!-- NOTE(sweep-2026-09): the gates these standards cite are not yet wired into this repository. .github/workflows/ holds only claude-code-review.yml and claude.yml, and no workflow references registry_check.py, frontmatter_check.py or claude_md_check.py; the scripts live in an untracked shared tree reached via the .guardrails symlink to ~/exeris-systems/.guardrails. Until a caller workflow lands, no rule may be dropped from this file on the grounds that "CI reports it instead" (claude-md-schema.md rule 5). -->
 
 - **Reserve the number first.** A new ADR adds its row to `adr-index.md` (PR or commit) **before** the ADR-content file lands. Numbering is chronological by decision date with reserved gap-fillers for backdated decisions.
 - **Filename pattern.** `ADR-NNN-<lowercase-kebab-title>.md` — 3-digit zero-padded, then `-`, then the title in lowercase kebab-case. Replace `&` with `and`; drop other punctuation. Examples: `ADR-023-capability-licensing-taxonomy.md`, `ADR-024-capability-composition-model.md`.
@@ -48,7 +48,7 @@ Single numbering namespace across the ecosystem. The full rules are in [`adr-ind
 
 When asked to "draft an ADR," check the question shape first: if upstream measurement is missing, suggest a Research; if option-comparison is missing, suggest an RFC; if the decision is already informally made, go straight to ADR. The three template shapes live in [`templates/`](templates/) and are not interchangeable (see `templates/README.md`).
 
-<!-- VERIFY(sweep-2026-09): this numbered list is load-bearing for two standards. docs-style-guide.md rule 10 seeds Vale existence rules from it by section name ("Common drift patterns"), and claims-and-evidence.md rule 4 makes items 10-13 error-level Vale rules, citing them by number. Item numbering and the section heading are therefore frozen: renaming the section, renumbering an item, or relocating the block requires editing both standards in the same PR, and standards/ is exempt from this sweep. Note the trap this creates: items 10, 11 and 13 are the sentences that name the forbidden figures in order to forbid them, so the Exeris Vale package must exempt this file (the RetractedFigures off/on comments below are the local mitigation) or the file that defines the rules will be the first to fail them. The same applies to whitepaper §4.1's retraction box. -->
+<!-- NOTE(sweep-2026-09): this numbered list is load-bearing for two standards. docs-style-guide.md rule 10 seeds Vale existence rules from it by section name ("Common drift patterns"), and claims-and-evidence.md rule 4 makes items 10-13 error-level Vale rules, citing them by number. Item numbering and the section heading are therefore frozen: renaming the section, renumbering an item, or relocating the block requires editing both standards in the same PR, and standards/ is exempt from this sweep. Note the trap this creates: items 10, 11 and 13 are the sentences that name the forbidden figures in order to forbid them, so the Exeris Vale package must exempt this file (the RetractedFigures off/on comments below are the local mitigation) or the file that defines the rules will be the first to fail them. The same applies to whitepaper §4.1's retraction box. -->
 
 ### B) Strong defaults
 
@@ -123,8 +123,6 @@ The binding standards live in [`standards/`](standards/) and are not restated he
 ## Auto-memory
 
 Persistent memory for this workspace lives at `~/.claude/projects/-home-arkstack-exeris-systems-exeris-docs/memory/`. Use it for **process feedback** and **user preferences** — not for project facts. Project facts belong in this CLAUDE.md (versioned, visible to humans and other AI tools) or in the canonical docs / ADRs.
-
-<!-- VERIFY(sweep-2026-09): this file now exceeds claude_md_check.py's SIZE_LIMIT of 16,384 bytes — it was 16,301 before this sweep, and the frontmatter block plus the VERIFY markers push it over, so the size warning now fires. claude-md-schema.md rule 6 then requires topical material to move to docs/ and be linked — but exeris-docs has no docs/ tree (ADR-085 §A.1 keeps adr/, rfc/, standards/, templates/ and the canonical documents at root instead). Maintainer to decide where the overflow goes before the schema reorganisation is applied; the "Common drift patterns" block is the largest movable candidate, and the marker above it says what moving it costs. -->
 
 ## The three-tier architecture (load-bearing — every doc edit must respect)
 
