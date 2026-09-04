@@ -1,0 +1,86 @@
+---
+title: Javadoc Conventions
+type: reference
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-04
+---
+
+# Javadoc Conventions
+
+Binding per ADR-085 §F. Applies to all Java sources; the hard gates apply to the **frozen and published surfaces**: `exeris-kernel-spi`, `exeris-sdk-annotations`, and every module published to Maven Central. Everything else is checked on changed files only.
+
+## Hard rules
+
+1. **Every public type, constructor, method, enum constant and record component on a gated module has a doc comment.** `[L1: maven-javadoc-plugin failOnWarnings=true on gated modules — port the exeris-sdk block; Checkstyle JavadocType/JavadocMethod scope=public]`
+2. **First sentence is a summary that stands alone**: third-person declarative, states the contract, does not repeat the name. `[L1: Checkstyle JavadocStyle checkFirstSentence]` `[L2]`
+   - ✗ `Returns the segment.` on `segment()`
+   - ✓ `Returns the backing memory as a read-only view whose lifetime is bound to this buffer's reference count.`
+3. **Tags, in this order:** `@param` (every parameter) → `@return` (every non-void) → `@throws` (checked, and unchecked a caller would reasonably catch) → `@since` → `@see` → `@deprecated`. Every tag has a description. `[L1: Checkstyle AtclauseOrder, NonEmptyAtclauseDescription]`
+4. **`@since` on every public element of a released module**, in `major.minor` form (`@since 0.12`, never `0.12.0`). `[L1: Checkstyle regexp — Spring's atSinceVersionConvention]`
+5. **`@author` and `@version` are banned.** Git is the author record. `[L1: Checkstyle Regexp]`
+6. **Contract tags (OpenJDK vocabulary, JDK-8008632):** `[L2]`
+   - `@implSpec` — what a valid implementation **must** do; written for the implementer on the other side of The Wall.
+   - `@apiNote` — guidance for callers: idioms, pitfalls, performance expectations that are part of the API's intent.
+   - `@implNote` — facts about *this* implementation that may change (Community driver behaviour, current buffer sizes).
+7. **Three contract lines on every SPI type that touches buffers, memory or threads**, as the last paragraph of the type comment, in this order and wording: `[L2]` `[L1 (planned): Checkstyle Regexp on `interface|class` under `spi/memory`, `spi/transport`, `spi/persistence`]`
+   ```
+   <p><b>Allocation:</b> zero-alloc on hot path | allocates (<what, when>)
+   <p><b>Thread confinement:</b> owner thread | any thread | virtual-thread-safe
+   <p><b>Ownership:</b> <who releases; retain/close semantics>
+   ```
+8. **Examples use `{@snippet}`**, never `<pre>{@code …}</pre>`; snippets longer than ~10 lines live in `snippet-files/` and are compiled by the module's tests. `[L1: doclint syntax on gated modules]` `[L2]`
+9. **Failure modes name the code.** A method that can raise an `ExerisKernelException` documents the `EX-*` code(s) in `@throws`. `[L2]`
+10. **Category B (generated) files carry the standard generated header and no hand-written Javadoc.** `[L1: pr-review Category-B check]`
+11. **Kernel Core, Community and tooling: rules 2–9 apply to changed files only.** No backfill mandate. `[L1: diff-aware javadoc-gate workflow]`
+
+## Prose rules (Oracle doc-comment conventions, adopted verbatim)
+
+- Write the description to be implementation-independent; state dependencies explicitly where they exist.
+- Use `{@code}` for identifiers, keywords and literals; `{@link}` sparingly (not for `java.lang`).
+- "If the doc comment merely repeats the API name in sentence form, it is not providing more information." Delete it and write the contract instead.
+- Document *what* and *under which conditions*, not *how* — `how` belongs in `@implNote` or the subsystem doc.
+
+## Example — `LoanedBuffer` (kernel SPI), before and after
+
+The current type comment already states the zero-copy contract and the reference-count lifecycle — that part is good and stays. What it lacks is the three contract lines, `@implSpec` for implementers, and it uses `<pre>{@code}` for examples.
+
+Add, at the end of the type comment:
+
+```java
+ * <p><b>Allocation:</b> zero-alloc on hot path — {@link #slice} and {@link #view}
+ * allocate no heap objects beyond the returned handle; pooling is the allocator's concern.
+ * <p><b>Thread confinement:</b> owner thread — a buffer is confined to the thread that
+ * obtained it from the allocator; a {@link #retain()}'d reference may be handed to another
+ * thread only through a transport or scheduler seam that documents the hand-off.
+ * <p><b>Ownership:</b> the holder of the last reference releases via {@link #close()};
+ * every {@code slice}/{@code view} increments the parent's count and must be closed.
+ *
+ * @implSpec Implementations must return the segment to the pool exactly once, on the
+ *           transition from reference count 1 to 0, and must throw
+ *           {@code IllegalStateException} ({@code EX-MEM-nnnn} — the code registered in
+ *           {@code KernelErrorCodes}; placeholder here) on any operation after that.
+ * @apiNote  Prefer {@code try-with-resources}; a missed {@code close()} is a silent leak
+ *           that only {@code LeakDetectionMode.PARANOID} will report.
+ * @since 0.9
+```
+
+Replace the usage block:
+
+```java
+ * {@snippet lang="java" :
+ * try (LoanedBuffer buf = allocator.allocate(AllocationHint.MEDIUM)) {
+ *     buf.segment().set(ValueLayout.JAVA_BYTE, 0, (byte) 0xFF);
+ *     transport.send(buf);   // @highlight substring="transport.send" : transport calls buf.retain()
+ * }
+ * }
+```
+
+## Filter (before you push a gated module)
+
+- Does the first sentence tell an implementer what they may assume, not what the method is called?
+- Is there a failure mode, and does it name the `EX-*` code?
+- If the type touches memory: are Allocation / Thread confinement / Ownership all three there?
+- Is anything in the comment something the *implementation* does rather than the *contract* requires? Move it to `@implNote`.
+- Did the module's tests compile the snippet?
