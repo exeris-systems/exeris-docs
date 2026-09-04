@@ -74,12 +74,6 @@ The 2026-05-12 cap inventory established the per-layer distribution: **3 `commun
    ADR-020 governs where documentation lives; this ADR governs the terms under which code may be used. The two dimensions never need to be conflated.
 
 6. **CI verification (when cap repos materialise).** A platform-wide CI job will scan every `exeris-caps-*` repository for the three-source consistency required by obligation 1 and assert the declared licence value matches the registry table maintained in `exeris-docs/cap-license-registry.md` (planned). Until that registry and CI job land, periodic manual audits substitute, performed quarterly. *(Status 2026-08-16: the registry landed — [`cap-license-registry.md`](../cap-license-registry.md), Engineering Protocol follow-up 1 below. The platform-wide CI job has not; no workflow in any repository reads the registry.)*
-<!-- VERIFY(sweep-2026-09): obligation 6 says periodic manual licence audits substitute "performed
-     quarterly" until the registry and CI job land. Re-read 2026-09-05: an audit of exactly that kind is
-     running — this documentation sweep — so the obligation is being met, not ignored, and an earlier
-     draft of this marker was wrong to call it never-performed. What is genuinely unestablished is the
-     quarterly cadence: this is the first such pass with a written record, and nothing schedules the
-     next one. A maintainer decides whether the cadence needs a schedule or the word should go. -->
 
 ## Consequences
 
