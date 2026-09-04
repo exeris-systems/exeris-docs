@@ -29,7 +29,6 @@ The platform is structured in three tiers, detailed in `high-level-architecture.
 | [`cap-author-guide.md`](cap-author-guide.md) | How to author a Tier 2 capability — the module class, `@Provides` / `@Requires` contracts, the four-phase lifecycle hooks, the build wiring, the cap-tier Wall. |
 | [`cap-license-registry.md`](cap-license-registry.md) | Per-capability licence, visibility and build status across the seven layers. |
 
-
 ## ADR registry conventions
 
 **Single numbering namespace** across the ecosystem. An ADR is identified by its number (`ADR-NNN`), not by its file path — reviewers and routines cite by number. The full rules are in [`adr-index.md`](adr-index.md), formalized in [`adr/ADR-020-open-core-documentation-mirror-policy.md`](adr/ADR-020-open-core-documentation-mirror-policy.md). The essentials:

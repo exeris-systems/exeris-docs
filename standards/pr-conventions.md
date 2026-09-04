@@ -18,7 +18,7 @@ Binding per ADR-085 §E. The template below is the organisation default (`exeris
 3. **Machine-read lines must parse:** `[L1: scripts/pr_body_check.py]`
    - `Scope class:` one of `runtime hot path | runtime non-hot | test-tooling | docs-only`
    - `Wall impact:` `none` or an edge in the form `<from-module> → <to-module>`
-   - `File categories:` subset of `A B C` or `n/a` (SDK-using repos only)
+   - `Generated files touched:` `yes`, `no` or `n/a` (SDK-using repos only) — a generated file edited by hand is the thing this asks about
    - `TCK obligation:` `satisfied | debt #<issue> | n/a`
    - `Compatibility impact:` `none | additive | breaking (ADR-NNN)`
    - `Evidence state:` `citable | unartifacted | n/a`
@@ -42,7 +42,7 @@ Result:
 ## Classification
 Scope class: <runtime hot path | runtime non-hot | test-tooling | docs-only>
 Wall impact: <none | from-module → to-module>
-File categories: <A B C | n/a>
+Generated files touched: <yes | no | n/a>
 TCK obligation: <satisfied | debt #N | n/a>
 Compatibility impact: <none | additive | breaking (ADR-NNN)>
 Cross-repo impact: <none | repo: what must change>

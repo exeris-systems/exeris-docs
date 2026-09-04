@@ -102,4 +102,4 @@ renderer yet, so they are refreshed by hand. `CLAUDE.md` is a pointer to this fi
 
 ## Auto-memory
 
-Persistent memory for this workspace lives at `~/.claude/projects/-home-arkstack-exeris-systems-exeris-docs/memory/`. Use it for **process feedback** and **user preferences** — not for project facts. Project facts belong in this CLAUDE.md (versioned, visible to humans and other AI tools) or in the canonical docs / ADRs.
+Persistent memory for this workspace lives at `~/.claude/projects/-home-arkstack-exeris-systems-exeris-docs/memory/`. Use it for **process feedback** and **user preferences** — not for project facts. Project facts belong in this file, in `.agents/`, or in the canonical documents and records — all versioned and visible to humans and to other tools.
