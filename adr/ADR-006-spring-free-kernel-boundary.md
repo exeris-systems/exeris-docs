@@ -114,13 +114,27 @@ together with the entry that corrects them. All six were verified against the wo
   `ExerisDataAutoConfigurationTest`. The Wall is enforced more broadly than the obligation says, by
   five classes rather than one; only the attribution was wrong.
 
-- **2026-09-05 — Two figures in Consequences have no artefact, and one is enterprise-private.** The
-  "~30 MB" of jar inflation from a transitive Spring dependency is measured nowhere: no campaign in
-  `exeris-benchmarks/docs/CLAIMS.md` measures artefact size, and the figure appears in no report. The
-  "< 5 µs PAQS shed decision" is an Enterprise performance-contract target whose only source is a
-  document in a private repository, asserted here in a public record — a target rather than a
-  measurement either way. Both are `unartifacted`; neither should be quoted as evidence, and the
-  argument each supports stands on its structure without them.
+- **2026-09-05 — The "~30 MB" jar figure is overstated; the "< 5 µs" figure is a contract target,
+  not an unsourced claim.** Two figures in Consequences were checked directly.
+
+  The Context clause says a transitive `org.springframework:*` pull "would inflate jar sizes by
+  ~30 MB". Measured 2026-09-05 against the local Maven repository, the Spring Framework set —
+  `spring-core`, `spring-beans`, `spring-context`, `spring-aop`, `spring-web`, `spring-webmvc`,
+  `spring-expression`, `spring-tx`, `spring-jdbc`, `spring-orm`, `spring-jcl`, newest version of each —
+  totals **9.02 MB**. Roughly 30 MB is reachable only with Spring Boot, its starters and their
+  transitive tree (Tomcat, Jackson, Micrometer and the rest), which is not what this clause describes.
+  Read the figure as the order of magnitude of a Boot application's dependency tree, not of the
+  framework jars the clause names. The argument does not depend on the number: the objection to
+  pulling Spring into the kernel is the release-cadence lock-in stated in the same sentence.
+
+  The "< 5 µs PAQS shed decision" is **not** an Enterprise-private assertion, which an earlier draft of
+  this entry claimed. It is a public, TCK-enforced design limit: `exeris-kernel/docs/whitepaper.md:156`
+  and `exeris-kernel/docs/modules/05-tck.md:71` both state `≤ 5 µs` with "Nanosecond timer in TCK" as
+  the enforcement, for Community and Enterprise alike; the Enterprise performance contract repeats it
+  as still binding rather than originating it. It is a contract target rather than a measurement —
+  `exeris-kernel-enterprise/docs/performance-contract.md:225` records that PAQS routing is not yet
+  wired, so nothing has been measured against it — and this ADR should write it `≤ 5 µs`, matching the
+  kernel.
 
 - **2026-09-05 — The declared Scope is not backed by stubs.** Scope binds `exeris-kernel`,
   `exeris-kernel-enterprise`, `exeris-sdk` and `exeris-spring-runtime`, and only `exeris-kernel`
