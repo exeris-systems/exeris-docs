@@ -1,3 +1,12 @@
+---
+title: "Research: [Short Title]"
+type: research
+visibility: public
+owning-repo: exeris-<repo>
+status: draft
+last-verified: YYYY-MM-DD
+---
+
 # Research: [Short Title]
 
 > **Branch:** `research/[slug]`
@@ -10,8 +19,8 @@
 
 ## Hypothesis
 
-> One paragraph. What do you believe is true, and why does it matter for Exeris Kernel?
-> Be specific — "I think X will reduce Y by Z% because W" is a good hypothesis.
+> One paragraph. What do you believe is true, and why does it matter for the owning repo (kernel, SDK, tooling, a capability)?
+> Be specific — "X will reduce Y by Z% under workload W" is a good hypothesis.
 > "Let's explore X" is not.
 
 ---
