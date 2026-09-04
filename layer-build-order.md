@@ -1,3 +1,12 @@
+---
+title: "Layer build order — what is actually unblocked, and what is waiting on whom"
+type: explanation
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-02
+---
+
 # Layer build order — what is actually unblocked, and what is waiting on whom
 
 The platform is built bottom-up, from kernel to Studio and platform integrations. That is the
