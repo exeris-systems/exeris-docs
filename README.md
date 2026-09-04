@@ -28,7 +28,7 @@ The platform is structured in three tiers, detailed in `high-level-architecture.
 | [`cap-author-guide.md`](cap-author-guide.md) | How to author a Tier 2 capability — the module class, `@Provides` / `@Requires` contracts, the four-phase lifecycle hooks, the build wiring, the cap-tier Wall. |
 | [`cap-license-registry.md`](cap-license-registry.md) | Per-capability licence, visibility and build status across the seven layers. |
 
-<!-- VERIFY(sweep-2026-09): ADR-085 is the ADR that would make `standards/` binding, and it is not accepted yet. Its header table reads **PROPOSED**, its frontmatter reads `status: draft`, and its registry row — added to `adr-index.md` during this sweep, at line 115 — reads `proposed (2026-09-04)`. Until the founder accepts it, no page in this repo may describe `standards/` as *binding*; the row above therefore names ADR-085 as the standards' origin without asserting that they bind anything yet. The row satisfies claude-md-schema.md rule 3 (every ADR named must have a registry row) as of this sweep — re-check it if the 085 row is reverted. -->
+<!-- VERIFY(sweep-2026-09): ADR-085 is the ADR that would make `standards/` binding, and it is not accepted yet. Its header table reads **PROPOSED**, its frontmatter reads `status: draft`, and its registry row — added to `adr-index.md` during this sweep, at line 115 — reads `proposed (2026-09-04)`. Until the maintainer accepts it, no page in this repo may describe `standards/` as *binding*; the row above therefore names ADR-085 as the standards' origin without asserting that they bind anything yet. The row satisfies claude-md-schema.md rule 3 (every ADR named must have a registry row) as of this sweep — re-check it if the 085 row is reverted. -->
 
 ## ADR registry conventions
 

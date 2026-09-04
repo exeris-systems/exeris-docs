@@ -292,7 +292,7 @@ Customers can elect to upgrade to a **Platform tier** subscription at any time, 
 
 At this layer the **Code Detachment Fee** is the one-time license that transfers SKU ownership permanently to the customer's repository fork (ADR-023 §"SKU Repository Source-Visibility Policy", obligation 9). For SMB-tier SKUs the fee is in the low five-figure euros, scaling with deployment size and SLA tier. This is the structural realization of the IP sovereignty promise from §6 — paying the fee unlocks not a runtime privilege but a property right.
 
-<!-- VERIFY(sweep-2026-09): the "low five-figure euros" Code Detachment Fee band appears here and again in §6, in a public buyer-facing document. ADR-023 states it is silent on pricing and defers the pricing model to Exeris's internal business strategy registry; ~/exeris-systems/CLAUDE.md rules that business decisions are referred to descriptively in public docs — which §6's opening paragraph already does. Whether a concrete price band may stand in public is a founder decision, so this sweep left both occurrences verbatim. -->
+<!-- VERIFY(sweep-2026-09): the "low five-figure euros" Code Detachment Fee band appears here and again in §6, in a public buyer-facing document. ADR-023 states it is silent on pricing and defers the pricing model to Exeris's internal business strategy registry; ~/exeris-systems/CLAUDE.md rules that business decisions are referred to descriptively in public docs — which §6's opening paragraph already does. Whether a concrete price band may stand in public is a maintainer decision, so this sweep left both occurrences verbatim. -->
 
 **What detachment includes per SKU source-visibility (per ADR-023 §"SKU Repository Source-Visibility Policy"):**
 
@@ -327,7 +327,7 @@ Exeris is currently at **TRL-3 (Validated Architectural Prototype)** at platform
 
 The kernel currently ships at **v0.11.0 (2026-08-11)**, on a two-artifact release line (`0.11.0` on JDK 25 LTS and `0.11.0-preview` on the newest available JDK); v0.12 is in progress. Milestones below are pinned to that velocity, and Spring Runtime / Kernel GA are deliberately co-scheduled because Spring Runtime's product release depends on a stable Kernel SPI contract.
 
-<!-- VERIFY(sweep-2026-09): §7's Q3 2026 row lists "TRL-4 integration-tested for kernel subsystem set" inside a horizon that closes 2026-09-30. Only exeris-kernel/docs/subsystems/crypto.md is at TRL-4; events, exceptions, config, transport, graph, security, telemetry and memory are all TRL-3, and bootstrap.md:524 records the crash-buffer TRL-4 requirement as not yet implemented. The Q4 row also carries an archaeology clause about the label it originally used. exeris-docs/CLAUDE.md drift pattern 13 reserves these horizons for a founder pass — a human must re-base the rows or accept them as targets. -->
+<!-- VERIFY(sweep-2026-09): §7's Q3 2026 row lists "TRL-4 integration-tested for kernel subsystem set" inside a horizon that closes 2026-09-30. Only exeris-kernel/docs/subsystems/crypto.md is at TRL-4; events, exceptions, config, transport, graph, security, telemetry and memory are all TRL-3, and bootstrap.md:524 records the crash-buffer TRL-4 requirement as not yet implemented. The Q4 row also carries an archaeology clause about the label it originally used. exeris-docs/CLAUDE.md drift pattern 13 reserves these horizons for a maintainer pass — a human must re-base the rows or accept them as targets. -->
 
 | Horizon | Milestone |
 |---|---|
