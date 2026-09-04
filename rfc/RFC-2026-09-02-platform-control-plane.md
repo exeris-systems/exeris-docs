@@ -1,3 +1,12 @@
+---
+title: "RFC-2026-09-02: The platform control plane — which operational concerns have no home in the three-tier model, where should they live, and what does that make public?"
+type: rfc
+visibility: public
+owning-repo: exeris-docs
+status: draft
+last-verified: 2026-09-02
+---
+
 # RFC-2026-09-02: The platform control plane — which operational concerns have no home in the three-tier model, where should they live, and what does that make public?
 
 | Field             | Value                                                                 |

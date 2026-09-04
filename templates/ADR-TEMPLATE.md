@@ -1,3 +1,13 @@
+---
+title: "ADR-NNN: <Short Title>"
+type: adr
+visibility: public
+owning-repo: exeris-<repo>
+status: draft
+last-verified: YYYY-MM-DD
+slug: adr/ADR-NNN
+---
+
 # ADR-NNN: <Short Title — verb-led where possible, e.g. "Adopt X", "Standardize on Y", "Replace Z with W">
 
 <!--
@@ -62,11 +72,27 @@ TEMPLATE USAGE NOTES — DELETE THIS BLOCK BEFORE COMMITTING.
 
 - <Adjacent decisions that might look like they belong here but don't. Naming them prevents scope creep at review time.>
 
+### 🚫 Non-Goals
+
+- <Outcomes this decision deliberately does not pursue, even though it could. Distinct from "not in scope": a non-goal is a road not taken on purpose (JEP 2 §Non-Goals).>
+
+### ⚠️ Risks and Assumptions
+
+- **Assumes:** <what must stay true for the decision to hold — a JDK feature staying in preview, a vendor limit, a measurement>
+- **Reversed by:** <the evidence that would overturn this ADR. If nothing would, this is a preference, not a decision.>
+- **Risk:** <what goes wrong if the assumption fails, and who notices first>
+
 ## Cross-references
 
 - ADR-NNN (Title) — <one-line reason for the link>
 - `<repo>/docs/<path>.md` — <what the linked doc covers>
 - <External resource — RFC, JEP, CVE, vendor doc>
+
+## Amendments
+
+<Omit until the first amendment. Then, one dated entry per change, newest first. The original decision text above is not rewritten; superseded paragraphs are marked, not deleted. The registry status becomes `accepted (YYYY-MM-DD, upd. YYYY-MM-DD)`.>
+
+- **YYYY-MM-DD — <title of amendment>.** <What changed, why, and which obligations it touches. Link the PR.>
 
 ## Engineering Protocol
 
