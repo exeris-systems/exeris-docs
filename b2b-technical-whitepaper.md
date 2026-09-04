@@ -210,7 +210,14 @@ This is a decision on the record, not an emergent property. ADR-013 §3 fixes th
 
 **Evidence status.** The saga matrix is being re-measured under contract v2; until it completes, this section publishes structure and status rather than multipliers.
 
-<!-- VERIFY(sweep-2026-09): §4.1's evidence table labels figure states with the benchmark lab's vocabulary (`comparison_eligible`, `exploratory`), while standards/claims-and-evidence.md rule 1 names the permitted states as `citable`, `unartifacted`, or absent. The two vocabularies have never been reconciled and standards/ is out of scope for this sweep. A human must map the lab's claim_scope values onto the standard's states, or amend the standard. -->
+<!-- VERIFY(sweep-2026-09): §4.1's evidence table labels figure states in the benchmark lab's
+     vocabulary (`comparison_eligible`, `exploratory`), while standards/claims-and-evidence.md rule 1
+     names the permitted states as `citable`, `unartifacted` or absent. Owner's reading, 2026-09-05:
+     `citable` and `comparison_eligible` are the same state under two names, and `unartifacted` has no
+     counterpart in the lab's vocabulary at all — claims-and-evidence.md was most likely written before
+     the lab settled its own labels. Deferred deliberately: the two vocabularies are to be unified in
+     one pass across the standard and exeris-benchmarks, not reconciled document by document. Until
+     then this table keeps the lab's labels, because the lab owns the artefacts it is citing. -->
 
 | Statement | Class | Source |
 |---|---|---|
