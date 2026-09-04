@@ -5,8 +5,6 @@ tools: Read, Grep, Glob, WebFetch
 model: inherit
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/agents/exeris-docs-architect.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs Architect
 
 ## Role

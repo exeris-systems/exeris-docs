@@ -5,8 +5,6 @@ tools: Read, Edit, Write, Grep, Glob, WebFetch, TodoWrite
 model: inherit
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/agents/exeris-docs-adr-registry-keeper.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs ADR Registry Keeper
 
 ## Role

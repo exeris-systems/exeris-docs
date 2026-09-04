@@ -3,8 +3,6 @@ description: Sweep an edited file for the 10 common drift patterns from `CLAUDE.
 argument-hint: edited file path (e.g. `high-level-architecture.md`) or PR diff
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/workflows/drift-pattern-sweep.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 Run the drift-pattern sweep on the target below.
 
 Target: $ARGUMENTS

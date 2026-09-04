@@ -3,8 +3,6 @@ name: exeris-docs-routing-planner
 description: Router/Planner skill for exeris-docs. Produces primary agent, secondary handoffs, execution order, validation gates, and minimal next action for a docs task.
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/skills/exeris-docs-routing-planner/SKILL.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs Routing Planner
 
 ## Purpose

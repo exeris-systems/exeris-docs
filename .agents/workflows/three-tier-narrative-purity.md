@@ -3,8 +3,6 @@ description: Audit a doc edit for three-tier narrative purity — Tier 1 substra
 argument-hint: doc edit / new section / framing claim to audit
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/workflows/three-tier-narrative-purity.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 Audit the change below for three-tier narrative purity.
 
 Change: $ARGUMENTS

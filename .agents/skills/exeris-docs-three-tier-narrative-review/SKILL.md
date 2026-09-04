@@ -3,8 +3,6 @@ name: exeris-docs-three-tier-narrative-review
 description: Three-tier narrative review for exeris-docs. Use whenever Tier 1 / Tier 2 / Tier 3 / Family-product framing appears in an edit, or when claims about engine swap / cap manifest / SKU runtime / Spring Runtime consumers surface.
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/skills/exeris-docs-three-tier-narrative-review/SKILL.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs Three-Tier Narrative Review
 
 ## Purpose

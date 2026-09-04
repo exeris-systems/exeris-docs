@@ -3,8 +3,6 @@ description: Verify visibility taxonomy (ADR-020) is two-valued (`public` / `ent
 argument-hint: ADR / doc / cap description that mentions visibility or license
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/workflows/visibility-taxonomy-check.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 Audit the visibility / license claim below.
 
 Change: $ARGUMENTS

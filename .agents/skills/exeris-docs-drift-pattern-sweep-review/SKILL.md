@@ -3,8 +3,6 @@ name: exeris-docs-drift-pattern-sweep-review
 description: Drift-pattern sweep review for exeris-docs. Use after any non-trivial HLA / whitepaper / large-doc edit to catch the 10 recurring drift patterns.
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/skills/exeris-docs-drift-pattern-sweep-review/SKILL.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs Drift-Pattern Sweep Review
 
 ## Purpose

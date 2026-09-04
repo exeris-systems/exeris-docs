@@ -3,8 +3,6 @@ description: Verify a new / amended ADR follows the registry discipline — numb
 argument-hint: ADR PR / new ADR file / index update to audit
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/workflows/adr-reservation-check.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 Audit the ADR change below against registry discipline.
 
 Change: $ARGUMENTS

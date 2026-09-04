@@ -3,8 +3,6 @@ name: exeris-docs-adr-registry-discipline-review
 description: ADR registry discipline review for exeris-docs. Use on every ADR PR — verifies number-first reservation, filename pattern, location-by-scope, visibility taxonomy, license taxonomy, and link stubs.
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/skills/exeris-docs-adr-registry-discipline-review/SKILL.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs ADR Registry Discipline Review
 
 ## Purpose
