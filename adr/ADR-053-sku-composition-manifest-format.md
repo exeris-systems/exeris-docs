@@ -4,7 +4,7 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-07-21
+last-verified: 2026-09-05
 slug: adr/ADR-053
 ---
 
@@ -26,7 +26,6 @@ ADR-024 defines a Tier 3 SKU as a named, signed, version-pinned composition of T
 
 The first SKU track (`exeris-sku-api-gateway`, per the 2026-07-21 gateway-caps implementation plan) now needs the format fixed before the first SKU repository is scaffolded. The surrounding machinery has meanwhile converged on JSON: the tooling pipeline already emits a deterministic **`cap-manifest.json`** (ADR-024 obligation 7), its canonical read-schema (`CapManifest`) and the one content-binding implementation live in **`exeris-sdk-composition-spec`**, and the boot-time asserter (`exeris-sdk-composition-runtime`) parses JSON via the Jackson 3 stack already present on every relevant classpath. Choosing anything other than JSON for the authored SKU manifest would introduce a second parser dependency (SnakeYAML / `jackson-dataformat-yaml` / a pkl runtime) into the tooling and the SKU-boot path, a second canonicalisation story for signing, and a format seam between the authored manifest and the emitted one.
 
-<!-- VERIFY(sweep-2026-09): maintainer decision, not an open question of fact. The Context paragraph and the "Zero new dependencies" trade-off both put Jackson 3 on the whole manifest path. Verified 2026-09-04: only the SKU-boot half is true. exeris-sdk-composition-runtime parses with Jackson 3 (CompositionStampAssertion.java:13-15; pom.xml:51-52 compile scope), but every exeris-tooling production module is Jackson 2 (CodegenPipeline.java:6 and :670; exeris-codegen-core/pom.xml:40-41; exeris-processor/pom.xml:44-45), and exeris-tooling-bom/pom.xml:202-209 states Jackson 3 is "Not pulled by production tooling modules". The JSON decision and the zero-new-dependencies argument both survive the correction — a Jackson databind stack is already on both classpaths. Rules 5 and 8 reserve the fix: amend under ## Amendments, correct as typo-class, or leave as written. -->
 
 This ADR answers: **in what format does an `exeris-sku-*` repository author its composition manifest?**
 
@@ -54,7 +53,7 @@ Authoring-ergonomics front-ends (a YAML view, a Studio editor at the `exeris-pla
 
 ### ⚠️ Trade-offs
 
-- **[-] JSON is less pleasant to hand-author than YAML** — no comments, more punctuation. Accepted: SKU manifests are short (10–15 cap coordinates + pins + config overrides), change rarely, are mostly machine-maintained (version-pin bumps), and the Studio control plane is the intended long-term authoring surface. A `$comment`-style schema field can carry annotations if genuinely needed.
+- **[-] JSON is less pleasant to hand-author than YAML** — no comments, more punctuation. Accepted: SKU manifests are short (10–15 cap coordinates + pins + config overrides *— counted 2026-09-05, the seven manifests in HLA §3.3 run 7 to 16; see the amendment below*), change rarely, are mostly machine-maintained (version-pin bumps), and the Studio control plane is the intended long-term authoring surface. A `$comment`-style schema field can carry annotations if genuinely needed.
 - **[-] Committing to a format before the first SKU exists risks discovering ergonomic gaps late.** Mitigated by obligation 1's scaffold clause: the *path and surrounding convention* are fixed by `exeris-sku-api-gateway`; only the *format* is locked here.
 
 ### 📋 What is NOT in scope
@@ -63,6 +62,29 @@ Authoring-ergonomics front-ends (a YAML view, a Studio editor at the `exeris-pla
 - **The signature algorithm** — still delegated to the `exeris-sku-*` repository convention per ADR-024 obligation 5.
 - **Studio / control-plane authoring UX** — an `exeris-platform` concern (ADR-024 obligation 8c), layered on top of the canonical JSON.
 - **`cap-manifest.json` itself** — already JSON and already governed by ADR-024 obligation 7 / the spec module; this ADR merely confirms format uniformity.
+
+## Amendments
+
+- **2026-09-05 — The "10–15 cap coordinates" figure is 7–16, and the Jackson claim was checked and
+  stands.** Two statements on this record were verified against source. (PR #91)
+
+  The Trade-offs bullet describes SKU manifests as "10–15 cap coordinates". Counted directly from the
+  seven manifests in `high-level-architecture.md` §3.3 — the table this ADR's format governs, labelled
+  there "full manifest" — the range is **7 to 16**: Bot Blocker 7, Edge Proxy 8, API Gateway 13,
+  Headless CMS API 14, and IDP, PIM and OMS 16 each. The manifests remain short and the trade-off it
+  supports is unaffected; only the range was wrong. The same sentence appears in
+  `b2b-technical-whitepaper.md` §3.2, corrected in this pull request, and in the HLA, corrected
+  earlier in it.
+
+  The Context and "Zero new dependencies" claims about Jackson 3 **hold**. `exeris-sdk-composition-runtime`,
+  the boot-time asserter this ADR names, imports `tools.jackson` exclusively — six imports, with
+  `tools.jackson.core:jackson-databind` declared in its pom — and `tools.jackson.core` is a declared
+  groupId in `exeris-tooling` as well, so "no new dependency" is accurate. One precision worth
+  recording rather than leaving implied: neither classpath is uniformly Jackson 3. `exeris-tooling`
+  carries 45 imports of the 2.x `com.fasterxml.jackson` namespace against 5 of the 3.x one, and the
+  classes that emit and stamp the manifest — `CompositionStamp`, `OutputWriter`, `VerifyCapabilitiesMojo`
+  and `CapabilityGraph` — import no Jackson at all. Read "already present on every relevant classpath"
+  as availability, which is what the trade-off needs, not as a statement that the whole path runs on 3.x.
 
 ## Cross-references
 

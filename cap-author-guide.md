@@ -359,7 +359,12 @@ enforcement is contractual per ADR-023, never technical.
 | No archetype | ADR-024 lists `mvn archetype:generate` for cap repos as planned scaffolding. It does not exist; this guide is the manual substitute. | open |
 | Processor extraction gaps | `@Encrypted` and `@RowLevelSecurity` are not consumed by any generator. Declaring them has **no effect** today. | `exeris-tooling` C2 |
 
-<!-- VERIFY(sweep-2026-09): the "Phase 5" label in the two rows above is the 2026-07-21 gateway-caps implementation plan's Phase 5 — the same phase ADR-053's Engineering Protocol item 1 and `exeris-tooling/ROADMAP.md` (lines 205 and 226) name for the `exeris-sku-api-gateway` scaffold and the canonical `composition.json` reader. The plan document itself is not in this checkout (`find /home/arkstack/exeris-systems -maxdepth 3 -iname '*gateway-caps*'` finds nothing), so a reader cannot resolve the label from here; and ADR-085's Engineering Protocol now uses "Phase 5" for an unrelated docs-rollout step in this same repository. Confirm whether the gateway-caps plan should be committed to `exeris-docs`, or these two rows should read "gateway-caps plan Phase 5" so the label is self-resolving. -->
+<!-- VERIFY(sweep-2026-09): the "Phase 5" label in the two rows above is the 2026-07-21
+     gateway-caps implementation plan's Phase 5, the same phase ADR-053's Engineering Protocol and
+     `exeris-tooling/ROADMAP.md` name. Deliberately left as written on 2026-09-05: the label is
+     consistent across all three, and renaming it here alone would break that. What is genuinely
+     open is whether that plan's phase numbering should be cited from a guide at all, or replaced
+     by the ROADMAP item it corresponds to — a maintainer call, not a documentation defect. -->
 
 That last row deserves emphasis: `-Aexeris.strict` audits attributes that are *extracted but
 unconsumed*, so an attribute the processor never reads at all is invisible to it. Treat the gap
