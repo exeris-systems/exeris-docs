@@ -19,7 +19,7 @@ slug: adr/ADR-002
 | **Date**        | 2025-10-15                                                                                                                                                          |
 | **Scope**       | platform (stack-level recommendation across all Exeris apps)                                                                                                        |
 | **Owning Repo** | `exeris-docs`                                                                                                                                                       |
-| **Compliance**  | [Strategic Pillar: No-Waste Compute](../../exeris-kernel/docs/whitepaper.md)                                                                                        |
+| **Compliance**  | [Strategic Pillar: No-Waste Compute](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/whitepaper.md)                                                                                        |
 
 ## Context and Problem Statement
 The "Polyglot Persistence" pattern (e.g., using Neo4j for Graph, Mongo for Docs, SQL for core) introduces massive operational complexity ("Integration Tax"), high licensing costs, and distributed transaction consistency issues.

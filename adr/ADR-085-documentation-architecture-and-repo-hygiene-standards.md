@@ -18,7 +18,7 @@ slug: adr/ADR-085
 | **Scope**       | platform (binds every Exeris repository — public open-core and private enterprise alike; portfolio products such as `budgetHQ` follow §B only) |
 | **Owning Repo** | `exeris-docs` |
 | **Driven By**   | Standardising documentation and repository hygiene across the organisation. The option comparison, the inventory of what the repositories do today and the reference analysis behind it are internal working material and are not part of this repository. |
-| **Compliance**  | [ADR-020](ADR-020-open-core-documentation-mirror-policy.md) (visibility & mirror policy), [ADR-025](../../exeris-ai-bridge/docs/adr/ADR-025-ai-agent-bridge.md) (agent surface reads repos, not the site), [ADR-065](../../exeris-kernel/docs/adr/ADR-065-spi-compatibility-gate.md) (compatibility gate) |
+| **Compliance**  | [ADR-020](ADR-020-open-core-documentation-mirror-policy.md) (visibility & mirror policy), [ADR-025](https://github.com/exeris-systems/exeris-ai-bridge/blob/main/docs/adr/ADR-025-ai-agent-bridge.md) (agent surface reads repos, not the site), [ADR-065](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/adr/ADR-065-spi-compatibility-gate.md) (compatibility gate) |
 
 ## Context and Problem Statement
 
