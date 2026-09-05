@@ -178,7 +178,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
   what a sign-off does and does not do. No gate config moves — §K.35's `[L1]` is the DCO App, which
   checks the trailer either way. Alternative considered and rejected: keeping "No CLA" and treating
   `exeris-kernel/CONTRIBUTING.md` as the defect, which would remove the only instrument that makes
-  the enterprise tier lawful for external contributions, on the authority of a documentation ADR.
+  the Enterprise tier lawful for external contributions, on the authority of a documentation ADR.
   (PR #95)
 
 - **2026-09-05 — cross-repo links are absolute and name a branch; §A.2's "relative links resolve
