@@ -12,6 +12,14 @@ on:
 concurrency:
   group: guardrails-${{ github.event.pull_request.number }}
   cancel-in-progress: true
+
+# A called workflow can only narrow the caller's permissions, never raise them, and this
+# repository's default token grants `pull-requests: none`. All three gates declare
+# `pull-requests: read`, so the caller has to grant it here or none of them starts.
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   docs:
     uses: exeris-systems/.github/.github/workflows/docs-lint.yml@main
