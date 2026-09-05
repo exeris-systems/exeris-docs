@@ -1,0 +1,38 @@
+# The whole per-repo footprint of ADR-085 §C.11. The gates themselves live once, in
+# exeris-systems/.github; this file is the opt-in.
+#
+# exeris-docs runs at full strictness rather than in ramp mode: the frontmatter backfill
+# landed with the 2026-09 sweep, and both the schema check and the required-section check
+# report zero errors over the record set today. A repo whose backfill has not landed keeps
+# `mode: ramp` and `section-check: false` until it has.
+name: guardrails
+on:
+  pull_request:
+    # labeled/unlabeled matter: adr-conventions rule 9 requires the `adr` label on a PR that
+    # amends an ADR, and this repository's records live at the root, so that gate fires here
+    # often. Without these, adding the label after a red run cannot turn it green.
+    types: [opened, edited, synchronize, ready_for_review, labeled, unlabeled]
+concurrency:
+  group: guardrails-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+# A called workflow can only narrow the caller's permissions, never raise them, and this
+# repository's default token grants `pull-requests: none`. All three gates declare
+# `pull-requests: read`, so the caller has to grant it here or none of them starts.
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  docs:
+    uses: exeris-systems/.github/.github/workflows/docs-lint.yml@main
+    with:
+      mode: strict
+      section-check: true
+      # This repository keeps its records at the root, not under docs/.
+      extra-paths: "adr rfc *.md"
+  commits:
+    uses: exeris-systems/.github/.github/workflows/commit-lint.yml@main
+  pr-body:
+    uses: exeris-systems/.github/.github/workflows/pr-body-check.yml@main
+  # No javadoc job: this repository ships no Java.
