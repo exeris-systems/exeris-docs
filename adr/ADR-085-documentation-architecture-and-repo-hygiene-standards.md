@@ -90,7 +90,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 18. **Prose rules are the Oracle doc-comment conventions**: summary first sentence; third-person declarative; implementation-independent; `@param` on every parameter, `@return` on every non-void method, `@throws` for checked exceptions and for unchecked ones a caller would catch; no restating the signature; `{@code}`/`{@link}` over HTML.
 19. **Tag vocabulary:** `@implSpec` for what an implementer must honour, `@apiNote` for caller guidance, `@implNote` for facts about the current implementation, `@since` on every public element of a released module. `@author` and `@version` are banned (Git is the author record). Examples use `{@snippet}`, never pasted `<pre>` blocks.
 20. **Contract lines on SPI types that touch buffers, memory or threads:** the type-level comment states, in this order, **Allocation** (`zero-alloc on hot path | allocates`), **Thread confinement** (`owner thread | any thread | virtual-thread-safe`), **Ownership** (who releases; `LoanedBuffer`/`MemorySegment` semantics).
-21. **Gate:** `maven-javadoc-plugin` with `failOnWarnings=true` on `exeris-kernel-spi`, `exeris-sdk-annotations` and every module published to Maven Central (the SDK configuration is the port target); Checkstyle Javadoc modules `JavadocType`, `JavadocMethod`, `JavadocStyle`, `NonEmptyAtclauseDescription`, `AtclauseOrder` (order `@param @return @throws @since @see @deprecated`) in `exeris-kernel-build-config`. Kernel Core and everything else: diff-aware only.
+21. **Gate:** `maven-javadoc-plugin` with `failOnWarnings=true` on `exeris-kernel-spi`, `exeris-sdk-annotations` and every module published to Maven Central (the SDK configuration is the port target); Checkstyle Javadoc modules `JavadocType`, `JavadocMethod`, `JavadocStyle`, `NonEmptyAtclauseDescription`, `AtclauseOrder` (order `@param @return @throws @since @see @deprecated`) and a warning-level regexp for history in a doc comment (§F.12), shipped in `exeris-systems/.github`. Kernel Core and everything else: diff-aware only.
 
 ### G. ADRs, RFCs and the registry
 
@@ -128,6 +128,16 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 ## Consequences
 
 ### ✅ Positive Outcomes
+
+- **2026-09-05 — §F.21's Javadoc gate becomes real, gains a history rule, and moves house.** The
+  Checkstyle Javadoc modules were described as living in `exeris-kernel-build-config`; they ship in
+  `exeris-systems/.github` and the gate reads them from the checkout, because a ruleset copied into
+  each repository is a ruleset that drifts. The module set gains a warning-level regexp for
+  `javadoc-conventions.md` rule 12, which until now carried an `[L1 (planned)]` marker — a claim
+  about a check that did not exist. It warns rather than fails because whether a sentence is
+  archaeology or a statement about the present is a reviewer's call, and its token list is anchored
+  by measurement: unanchored it fires 36 times on `exeris-kernel-spi`, 21 of those on `no longer`
+  alone and nearly all correct; anchored, twice, both genuine.
 
 - **[+] One URL space for the nine public repositories eligible under §A.3** without moving a single document; the ai-bridge and GitHub readers are unaffected because the site is a projection.
 - **[+] Drift becomes a build failure**, not a session finding: filenames, registry rows, private links, missing metadata and broken links stop at CI, where Quarkus's structural gates stop them.
