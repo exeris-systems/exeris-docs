@@ -33,7 +33,7 @@ TEMPLATE USAGE NOTES — DELETE THIS BLOCK BEFORE COMMITTING.
 | **Scope**       | platform \| per-repo \| cross-repo \| enterprise-private \| <subsystem> (e.g. `kernel/runtime`)  |
 | **Owning Repo** | `exeris-<repo>` <see ADR-020 §1 for the rule>                                                    |
 | **Driven By**   | <RFC link / ADR-NNN it amends / external incident / strategic pillar>                            |
-| **Compliance**  | [<Strategic Pillar / Whitepaper section>](relative-path-or-url)                                  |
+| **Compliance**  | `[<Strategic Pillar / Whitepaper section>](<relative-path-or-url>)`                                  |
 | **Supersedes**  | <ADR-NNN if this replaces a prior decision; omit row otherwise>                                  |
 
 ## Context and Problem Statement

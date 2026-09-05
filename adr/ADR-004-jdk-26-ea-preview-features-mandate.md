@@ -18,7 +18,7 @@ slug: adr/ADR-004
 | **Scope**       | platform (binds every Exeris repository — kernel, sdk, spring-runtime, tooling, enterprise)              |
 | **Owning Repo** | `exeris-docs`                                                                                            |
 | **Driven By**   | No-Waste Compute thesis; JDK 26 EA availability (work started 2025-09-16 when EA dropped)                |
-| **Compliance**  | [Strategic Pillar: No-Waste Compute](../../exeris-kernel/docs/whitepaper.md)                             |
+| **Compliance**  | [Strategic Pillar: No-Waste Compute](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/whitepaper.md)                             |
 
 > **Retrospective record.** The decision was made on 2025-12-26 and operationalized across all repositories well before this ADR was written. The formal record was authored on 2026-05-08 as part of the ADR registry bootstrap. The Date field reflects the actual decision date, not the authoring date.
 
@@ -86,7 +86,7 @@ A platform pinned at JDK 21 LTS (or even JDK 25 LTS) cannot honour these contrac
   describes a gate that does not exist — the only version floor in the ecosystem is
   `exeris-tooling`'s `requireJavaVersion` of `[25,)`, a minimum rather than a ceiling.
 
-  What replaced it: kernel [ADR-066](../../exeris-kernel/docs/adr/ADR-066-preview-clean-ga-baseline.md)
+  What replaced it: kernel [ADR-066](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/adr/ADR-066-preview-clean-ga-baseline.md)
   (accepted 2026-08-08, shipped 0.11.0) put the distributable line on a preview-clean JDK 25 LTS
   baseline with a separate `preview` branch; `exeris-spring-runtime` ADR-068 (2026-08-08) adopted the
   same two-track artefact model; `exeris-sdk` ADR-069 (2026-08-12) fixed the SDK's baseline to the

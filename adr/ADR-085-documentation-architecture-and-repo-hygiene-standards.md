@@ -18,7 +18,7 @@ slug: adr/ADR-085
 | **Scope**       | platform (binds every Exeris repository — public open-core and private enterprise alike; portfolio products such as `budgetHQ` follow §B only) |
 | **Owning Repo** | `exeris-docs` |
 | **Driven By**   | Standardising documentation and repository hygiene across the organisation. The option comparison, the inventory of what the repositories do today and the reference analysis behind it are internal working material and are not part of this repository. |
-| **Compliance**  | [ADR-020](ADR-020-open-core-documentation-mirror-policy.md) (visibility & mirror policy), [ADR-025](../../exeris-ai-bridge/docs/adr/ADR-025-ai-agent-bridge.md) (agent surface reads repos, not the site), [ADR-065](../../exeris-kernel/docs/adr/ADR-065-spi-compatibility-gate.md) (compatibility gate) |
+| **Compliance**  | [ADR-020](ADR-020-open-core-documentation-mirror-policy.md) (visibility & mirror policy), [ADR-025](https://github.com/exeris-systems/exeris-ai-bridge/blob/main/docs/adr/ADR-025-ai-agent-bridge.md) (agent surface reads repos, not the site), [ADR-065](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/adr/ADR-065-spi-compatibility-gate.md) (compatibility gate) |
 
 ## Context and Problem Statement
 
@@ -152,6 +152,33 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 - Business ADRs (`BUS-NNN`) and portfolio-product internal namespaces.
 
 ## Amendments
+
+- **2026-09-05 — cross-repo links are absolute and name a branch; §A.2's "relative links resolve
+  unchanged" is narrowed to intra-repo links.** The first live `docs-lint` run reported 118 broken
+  links in this repository, 92 of them in `adr-index.md`. Every one was a cross-repo reference
+  written as a sibling-layout path, the form `docs-style-guide.md` rule 8 mandated because §A.2
+  assumed the federation build would make it resolve. It resolves only in a workspace holding every
+  sibling repo, so on github.com and in a single-repo CI checkout all 118 were dead, and `site/`
+  holds no tracked files yet. No target was wrong; all 96 cross-repo targets exist. (The 97 org
+  URLs the repository now carries are those 96 plus one pre-existing link to a pull request,
+  which is not a cross-repo document reference.) A cross-repo link is now an
+  absolute `https://github.com/exeris-systems/<repo>/blob/<branch>/<path>` URL naming the branch
+  that carries the file. It is the only form correct on every surface at once: readable now, and
+  mechanically convertible later, whereas no build can repair a sibling path for github.com.
+  §A.2 is not rewritten — the layout mirroring it decides still governs intra-repo links and the
+  shape of a site URL. What it gains is an obligation: the federation build must rewrite these
+  org URLs to internal routes from the same `sources.yml`, so the site keeps in-site navigation.
+  Whether `onBrokenLinks` and `onBrokenMarkdownLinks` cover routes produced by a remark rewrite is
+  the design intent but is unverified, because `site/` does not exist; if they do not, the plugin
+  validates its own targets. Either way this is an acceptance obligation on `site/`, not an option.
+  Side effect: §23 becomes mechanically checkable, because a relative path carries no branch while
+  this form does — six kernel ADRs (071, 073, 074, 077, 080, 083) were rows claiming
+  `development/0.12.0` beside a link that does not resolve on `main`. Consequence for the gate: the
+  link check now leaves the checkout, and `lychee.toml` accepts 429, so a rate-limited run passes
+  silently — the lychee step needs `GITHUB_TOKEN` for the check to be real. Alternative considered
+  and rejected: keeping the relative form and excluding it from `lychee`, which leaves 92 registry
+  rows dead for every reader on github.com and removes the only check that would catch a wrong
+  path. (PR #93)
 
 - **2026-09-05 — `adr-conventions` rule 8 now names the decorated section headings the corpus uses.**
   Rule 8 was written on 2026-09-04 naming `### Non-Goals` and `### Risks and Assumptions` as literal
