@@ -41,7 +41,7 @@ Binding per ADR-085 §B and §J. Applies to every Markdown file under `docs/` in
     - *capability*, not *cap*, in prose (code identifiers excepted); *The Wall*; *Category B* (generated files; `A` and `C` are not Exeris terms — see ADR-085 §E.16); *hot path* (two words); *Community* / *Enterprise* capitalised as tiers.
     - Forbidden pairs from each repo's registered drift patterns (`.agents/policies/drift-patterns.md` in `exeris-docs`) are Vale `existence` rules: "Postgres-only graph", "replacing Neo4j", `exeris-kernel-community` as a sibling repo, "Axon" adjacent to a digit, "~60% CPU waste", ">160 GB", TRL-5 or higher for the platform aggregate.
     - Style rules seeded from the Quarkus package: sentence-case headings, no heading punctuation, sentence length ≤ 32 words (suggestion), no "in order to", no "utilize", American spelling.
-11. **English.** `[L2]`
+11. **English.** A document that is deliberately not — an internal working note, the landing's business report — says so in its filename: `<name>.pl.md`, `<NAME>_PL.md`, or a language directory. The prose linter turns every style off for those, because an English speller reading Polish reports one warning per word. Nothing published to the site is in this category. `[L2]` `[L1: vale/.vale.ini turns styles off for the marked names]`
 
 ## Voice
 

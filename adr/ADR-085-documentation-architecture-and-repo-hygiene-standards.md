@@ -83,6 +83,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 16. **One PR template for every repo**, starting with Motivation / Modification / Result and continuing with: **Scope class** (`runtime hot path | runtime non-hot | test-tooling | docs-only`), **Wall impact** (`none | <edge>`), **Generated files touched** (`yes | no`, SDK-using repos only), **TCK obligation** (`satisfied | debt #N | n/a`), **Compatibility impact** (`none | additive | breaking (ADR-NNN)`), **Cross-repo impact**, **ADRs referenced**, **Evidence state** for any number (`citable | unartifacted | n/a`), and an optional `Release note:` line.
 17. **The body checker verifies presence and parseability of the headings and trailer lines, nothing more.** Substance is reviewed, not linted.
+17a. **Issues are the input side of the same conventions** (added 2026-09-05, see Amendments). Four forms and no blank issues; issue titles use commit grammar so they can become pull-request titles unchanged; labels come from one organisation taxonomy applied additively; and a review finding the pull request does not resolve is filed as an issue before it merges, which is what makes the monthly audit able to count debt rather than estimate it. `standards/issue-conventions.md` holds the rules; `exeris-systems/.github` holds the forms, the taxonomy and the two workflows.
 
 ### F. Javadoc
 
@@ -153,6 +154,16 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 ## Amendments
 
+- **2026-09-05 — §E gains 17a: issues.** The ADR covered commits, pull requests, Javadoc, ADRs,
+  changelogs and agent files, and said nothing about the tracker they all flow from. §C.10 scopes
+  `standards/` to "the standards listed in §D–§I", so a tenth standard had no section to rest on:
+  `issue-conventions.md` was drafted citing a *proposed* §E.17a, which is not an authority. This
+  amendment writes it. Nothing already decided changes — §E.16 and §E.17 stand as written, and the
+  pull-request template is untouched. What is new is that the input side is now governed: the forms,
+  the label taxonomy, and the rule that a `[DOC DEBT]` or `[TCK DEBT]` finding becomes a filed issue
+  rather than a line in a PR thread. Alternative considered and rejected: leaving issues ungoverned
+  on the grounds that a solo repository has few of them — rejected because the monthly audit of §J is
+  specified to count debt, and it cannot count what was never filed. (PR #96)
 - **2026-09-05 — §K.35's "No CLA" is withdrawn; contributor licensing is not this ADR's to decide.**
   The sentence was written on 2026-09-04, one line inside a documentation-and-hygiene ADR, and it
   settled a commercial and IP question: whether a contributor licence agreement is asked for at all.
@@ -223,6 +234,8 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 ## Cross-references
 
 - ADR-020 (Open-Core Documentation Boundary & Cross-Repo Mirror Policy) — visibility model this ADR builds on; §A.3 and §G.24 make it machine-checked.
+- The forms, taxonomy and workflows §E.17a names live in `exeris-systems/.github`, which is an
+  organisation repository rather than a documentation one and so carries no ADR of its own.
 - ADR-025 (AI Agent Bridge) — the agent surface reads repos; §A keeps `<repo>/docs/**` and `adr-index.md` as the contract.
 - ADR-065 (SPI Compatibility Gate) — §H.28 adds the justified accepted-changes file.
 - ADR-008 (Open-Core Strategy), ADR-023 (Capability Licensing Taxonomy) — to be amended when the 0.12 licence change reaches `main`. The relicense itself is done: `development/0.12.0` carries plain Apache-2.0 and it ships with the 0.12 merge; `main` still carries Apache-2.0 + Commons Clause until then. §K reads as written from that merge onward.
