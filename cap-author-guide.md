@@ -20,7 +20,7 @@ implementation and an ADR disagree, this document follows the implementation and
 
 > **Read first:** [ADR-024](adr/ADR-024-capability-composition-model.md) (the contract),
 > [ADR-023](adr/ADR-023-capability-licensing-taxonomy.md) (which licence your cap carries),
-> [ADR-055](../exeris-tooling/docs/adr/ADR-055-cap-tier-wall-guard.md) (how the Wall is enforced).
+> [ADR-055](https://github.com/exeris-systems/exeris-tooling/blob/main/docs/adr/ADR-055-cap-tier-wall-guard.md) (how the Wall is enforced).
 
 - **JDK 25 LTS.** `exeris-sdk` and `exeris-tooling` both compile at `maven.compiler.release` 25, and
   `exeris-tooling`'s enforcer requires the JVM running Maven itself to be JDK 25 or newer — the
