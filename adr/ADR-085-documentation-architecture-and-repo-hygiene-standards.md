@@ -159,7 +159,9 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
   written as a sibling-layout path, the form `docs-style-guide.md` rule 8 mandated because §A.2
   assumed the federation build would make it resolve. It resolves only in a workspace holding every
   sibling repo, so on github.com and in a single-repo CI checkout all 118 were dead, and `site/`
-  holds no tracked files yet. No target was wrong; all 96 exist. A cross-repo link is now an
+  holds no tracked files yet. No target was wrong; all 96 cross-repo targets exist. (The 97 org
+  URLs the repository now carries are those 96 plus one pre-existing link to a pull request,
+  which is not a cross-repo document reference.) A cross-repo link is now an
   absolute `https://github.com/exeris-systems/<repo>/blob/<branch>/<path>` URL naming the branch
   that carries the file. It is the only form correct on every surface at once: readable now, and
   mechanically convertible later, whereas no build can repair a sibling path for github.com.
