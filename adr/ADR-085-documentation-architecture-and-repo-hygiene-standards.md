@@ -1,0 +1,188 @@
+---
+title: "ADR-085: Adopt a Federated Documentation Architecture and Repo-Hygiene Standards"
+type: adr
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-04
+slug: adr/ADR-085
+---
+
+# ADR-085: Adopt a Federated Documentation Architecture and Repo-Hygiene Standards
+
+| Attribute       | Value |
+|:----------------|:------|
+| **Status**      | **ACCEPTED** (2026-09-04) |
+| **Deciders**    | Arkadiusz Przychocki |
+| **Date**        | 2026-09-04 |
+| **Scope**       | platform (binds every Exeris repository — public open-core and private enterprise alike; portfolio products such as `budgetHQ` follow §B only) |
+| **Owning Repo** | `exeris-docs` |
+| **Driven By**   | Standardising documentation and repository hygiene across the organisation. The option comparison, the inventory of what the repositories do today and the reference analysis behind it are internal working material and are not part of this repository. |
+| **Compliance**  | [ADR-020](ADR-020-open-core-documentation-mirror-policy.md) (visibility & mirror policy), [ADR-025](../../exeris-ai-bridge/docs/adr/ADR-025-ai-agent-bridge.md) (agent surface reads repos, not the site), [ADR-065](../../exeris-kernel/docs/adr/ADR-065-spi-compatibility-gate.md) (compatibility gate) |
+
+## Context and Problem Statement
+
+Exeris documentation is ~3.4 MB of Markdown under `docs/` in the nine public core repositories alone (2026-09-04 inventory); the portfolio and results trees outside that scope add far more — `budgetHQ/docs/` is 10.4 MB on its own and `exeris-benchmarks/results/` another ~2 MB — with no site, no navigation across repos, no metadata on any file, and no lint of any kind. The inventory found: Conventional Commits practised at 67–96 % **where it matters**, but with no gate and subjects running to 131 characters in `exeris-tooling` and 184 in `exeris-benchmarks`; PR descriptions that are rich prose with none of the sections a reviewer can rely on; and agent-instruction files in four different section vocabularies.
+
+Five reference projects (OpenJDK, Spring, Quarkus, Micronaut, Netty) were read for how they close these gaps. They gate *structure* by machine — format, presence, ordering, API compatibility — and leave prose to reviewers; none validates PR bodies, none has a docs-type validator that errors, and Quarkus's optional Diátaxis attribute stalled at 22 % adoption. Exeris is ahead of all five on design records and evidence discipline and behind three of them on mechanical gates.
+
+The site-generator default in the plan (MkDocs Material) entered maintenance mode in November 2025; a one-day, 123-file build spike showed Docusaurus resolves **424 of the corpus's 489 relative links** natively — 87 %, zero plugins, zero MDX fixes; the remainder point outside the sampled corpus — while Starlight needed mandatory frontmatter, two plugins and an opt-in to Astro's now-legacy Markdown pipeline to reach the same 424. The canonical domain is `exeris.eu`, DNS is on Cloudflare, and the kernel Community tier moves to plain Apache-2.0 at 0.12.
+
+The cost of doing nothing is compounding: every new repo copies a slightly different `CLAUDE.md`, every ADR link from the registry is one merge away from a 404, and the first external contributor will land with no stated terms. This ADR answers: **where does Exeris documentation live, how is it built and published, what metadata and conventions do docs, Javadoc, commits and PRs carry, and which of those rules are enforced by machine?**
+
+## 🏁 The Decision
+
+**Documentation stays federated in each repository's `docs/` tree, is aggregated by a Docusaurus build in `exeris-docs` and published at `docs.exeris.eu` on Cloudflare Pages; every doc carries a validated frontmatter block; commits, PRs, Javadoc, ADRs and agent files follow the standards in `exeris-docs/standards/`; structure is gated in CI, prose by review.**
+
+The site is a projection. Source of truth remains annotated Markdown in Git, read directly by humans on GitHub and by agents through `exeris-ai-bridge`; the site never holds content that is not in a repo.
+
+**Concrete obligations:**
+
+### A. Where documentation lives and how the site is built
+
+1. **Each repo owns `docs/`.** Narrative and record docs for a repo live under `<repo>/docs/` (exeris-docs, having no code, keeps `adr/`, `rfc/`, `standards/`, `templates/` and its canonical documents at root). No repo copies another repo's documents; cross-repo references use ADR-020 link stubs or links.
+2. **The federation build mirrors the sibling layout.** `exeris-docs/site/` holds the Docusaurus configuration and a `sources.yml` listing, per repo: the Git URL, the **source branch**, and a whitelist of root files to include (`README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `ROADMAP.md`, `MIGRATION*.md`). The build clones each public source into `content/<repo-name>/` preserving the inner path, so relative links resolve unchanged.
+3. **Public sources only.** `sources.yml` may list only repos whose visibility is `public` under ADR-020. A private repo name in that file fails the build.
+4. **Generator and host.** Docusaurus with `markdown.format: 'detect'`; a local-search plugin; `onBrokenLinks` and `onBrokenMarkdownLinks` set to `throw` (see Engineering Protocol for the ramp). Hosted on Cloudflare Pages with per-PR preview deployments, at `docs.exeris.eu`. Switching host requires no ADR; switching hostname does.
+5. **Astro Starlight is the named alternative** if a full-corpus build exceeds 10 minutes in CI; MkDocs, Zensical and Antora are not to be adopted without a superseding ADR.
+
+### B. Format and metadata
+
+6. **Markdown is the only documentation source format.** No AsciiDoc, no generator-specific MDX components in files that live in repos (`.mdx` is permitted only inside `exeris-docs/site/`).
+7. **Every file under `docs/` and every canonical exeris-docs document carries a frontmatter block** validated in CI:
+
+   ```yaml
+   ---
+   title: <string>                       # required
+   type: <enum>                          # required — see 8
+   visibility: public | enterprise-private   # required
+   owning-repo: <repo-name>              # required
+   status: draft | active | stale | superseded | retracted   # required for records; default active
+   last-verified: YYYY-MM-DD             # required
+   slug: <path>                          # optional; fixes the site URL
+   ---
+   ```
+   Missing or invalid `title`, `type`, `visibility`, `owning-repo` or `last-verified` is a **build error**, not a warning.
+8. **`type` enumeration** (extend by amending this ADR): `adr`, `adr-link`, `rfc`, `research`, `design-note`, `subsystem`, `module`, `tutorial`, `howto`, `reference`, `explanation`, `operations`, `release-notes`, `changelog`, `roadmap`, `benchmark-report`, `claims`, `methodology`, `refactor-note`, `working-note`, `migration-guide`. Narrative docs use the four Diátaxis values (`tutorial`, `howto`, `reference`, `explanation`); everything else is an Exeris record kind.
+9. **Working artefacts do not live at repo root.** Reports, refactor notes, session notes and crash dumps go under `docs/working-notes/` (type `working-note`, git-ignored or committed per repo policy) or are deleted; repo root holds only community files (`README`, `CONTRIBUTING`, `SECURITY`, `LICENSE*`, `CHANGELOG`, `ROADMAP`, `MIGRATION*`, `AGENTS.md`) and build files. Thin provider adapters such as `CLAUDE.md` are allowed only when required by a supported client.
+
+### C. Standards home and shared configuration
+
+10. **`exeris-docs/standards/` is the single home of the standards** listed in §D–§I, one file per artefact kind plus `checklists/`. Repos link to them from `CONTRIBUTING.md`; they never copy them (ADR-020 applies to standards as it does to ADRs).
+11. **`exeris-systems/.github` (organisation repository) holds the shared enforcement**: default `CONTRIBUTING.md` and `PULL_REQUEST_TEMPLATE.md`, reusable workflows (`docs-lint`, `commit-lint`, `pr-body-check`, `javadoc-gate`), the Vale style package, `markdownlint` and `commitlint` configuration, and the frontmatter/registry validator scripts. Each repo calls the reusable workflows; it does not re-implement them.
+
+### D. Commit messages
+
+12. **Conventional Commits.** Subject `type(scope): summary`. Allowed types: `feat fix docs chore refactor test build ci perf release report research revert`. `wip` never reaches a protected branch. Scope is the module or scenario name (`kernel-spi`, `sdk-model`, `entity-read-by-id`); domain prefixes such as `destructive:` or `fuzz:` become scopes (`test(fuzz): …`).
+13. **Subject ≤ 100 characters**, imperative, no trailing period. Longer narrative moves to the body.
+14. **Body structure for `feat`, `fix`, `perf`, `refactor`, `release`:** the body contains the labelled sections `Motivation:`, `Modification:`, `Result:` (Netty form). Other types may use free prose.
+15. **Trailers are grammar, not prose:** `Closes #N` / `Fixes #N`; `Refs: ADR-NNN` whenever an ADR is touched or relied on; `Claim: <id>` when a benchmark claim changes state; `Co-authored-by:` for AI assistance is kept as provenance (see §I).
+
+### E. Pull requests
+
+
+16. **One PR template for every repo**, starting with Motivation / Modification / Result and continuing with: **Scope class** (`runtime hot path | runtime non-hot | test-tooling | docs-only`), **Wall impact** (`none | <edge>`), **Generated files touched** (`yes | no`, SDK-using repos only), **TCK obligation** (`satisfied | debt #N | n/a`), **Compatibility impact** (`none | additive | breaking (ADR-NNN)`), **Cross-repo impact**, **ADRs referenced**, **Evidence state** for any number (`citable | unartifacted | n/a`), and an optional `Release note:` line.
+17. **The body checker verifies presence and parseability of the headings and trailer lines, nothing more.** Substance is reviewed, not linted.
+
+### F. Javadoc
+
+18. **Prose rules are the Oracle doc-comment conventions**: summary first sentence; third-person declarative; implementation-independent; `@param` on every parameter, `@return` on every non-void method, `@throws` for checked exceptions and for unchecked ones a caller would catch; no restating the signature; `{@code}`/`{@link}` over HTML.
+19. **Tag vocabulary:** `@implSpec` for what an implementer must honour, `@apiNote` for caller guidance, `@implNote` for facts about the current implementation, `@since` on every public element of a released module. `@author` and `@version` are banned (Git is the author record). Examples use `{@snippet}`, never pasted `<pre>` blocks.
+20. **Contract lines on SPI types that touch buffers, memory or threads:** the type-level comment states, in this order, **Allocation** (`zero-alloc on hot path | allocates`), **Thread confinement** (`owner thread | any thread | virtual-thread-safe`), **Ownership** (who releases; `LoanedBuffer`/`MemorySegment` semantics).
+21. **Gate:** `maven-javadoc-plugin` with `failOnWarnings=true` on `exeris-kernel-spi`, `exeris-sdk-annotations` and every module published to Maven Central (the SDK configuration is the port target); Checkstyle Javadoc modules `JavadocType`, `JavadocMethod`, `JavadocStyle`, `NonEmptyAtclauseDescription`, `AtclauseOrder` (order `@param @return @throws @since @see @deprecated`) in `exeris-kernel-build-config`. Kernel Core and everything else: diff-aware only.
+
+### G. ADRs, RFCs and the registry
+
+22. **Filenames:** `ADR-NNN-<kebab>.md`, `ADR-NNN.link.md`, `RFC-YYYY-MM-DD-<kebab>.md`, `RESEARCH-YYYY-MM-DD-<kebab>.md` — regex-gated in every repo; the `DESIGN-` prefix and space-separated names are retired.
+23. **Registry-row-first, and the row's link must resolve on the branch the registry names.** A row whose file is not on that branch carries status `pending merge`; the link checker treats a registry link that does not resolve as an error.
+24. **Private targets are never relative links.** A public registry row for `enterprise-private` content states the owning repo and *(content private)*; it does not link into the private repo.
+25. **Amendments are logged, not silent.** An ADR amended in place gains a dated entry in an `## Amendments` section; the registry status shows `upd. YYYY-MM-DD`. Immutability à la Quarkus is explicitly not adopted.
+26. **Template additions:** ADR gains `Non-Goals` and `Risks and Assumptions` subsections; RFCs that propose an SPI surface gain `Testing`. A PR that adds or amends an ADR carries the `adr` label.
+
+### H. Changelog and compatibility
+
+27. Every repo that publishes an artefact keeps `CHANGELOG.md` in Keep-a-Changelog form with a mandatory `Breaking` section per release that agrees with the japicmp/revapi report; tooling adds one.
+28. Accepted incompatible changes are recorded in a justified `accepted-api-changes.json` next to the compatibility tool (Micronaut/Netty pattern); ADR-065 remains the gate.
+
+### I. Agent-facing files and AI provenance
+
+29. **`AGENTS.md` is the canonical agent-instruction entry point per repo; `.agents/` is the canonical semantic source.** `AGENTS.md` is concise and points to policies, Agent Skills (`.agents/skills/*/SKILL.md`), role profiles, workflows and authoritative references. Provider directories (`.claude/`, `.github/`, `.codex/`, `.cursor/`, `.gemini/`) are thin adapters or provider-owned operational configuration, never independently authored copies of project rules. Rules already enforced by CI are not repeated in agent files. The precise schema and migration policy live in `../standards/agents-md-schema.md` (historical filename retained for stable links).
+30. **AI provenance policy:** AI-assisted commits keep the `Co-authored-by:` trailer; the human author is accountable for every line and must be able to defend it in review; agents do not open PRs or file issues without a named human author. Recorded in `standards/ai-provenance.md`, linked from every `CONTRIBUTING.md`.
+
+### J. Enforcement layering
+
+31. **L1 (CI, hard):** commit format (`commitlint`); PR body headings; frontmatter schema; ADR/RFC filename regex and registry-row presence; link check (`lychee`) including public→private path detection; Javadoc gates of §F.21; japicmp (ADR-065); Category-B files edited without regeneration marker.
+32. **L1 (CI, warning):** Vale with the Exeris style (seeded from Quarkus's package plus the terminology in each repository's registered drift patterns (`exeris-docs/.agents/policies/drift-patterns.md`)); `markdownlint`.
+33. **L2 (Claude review):** a `docs-guardrails-review` step added to the `pr-review.md` router — a Claude Project document maintained outside the git repositories, whose patch is drafted and staged alongside the guardrail bundle together with the review routine itself; findings adopt a new bracketed severity tag **`[DOC DEBT]`**, added after the existing `[TCK DEBT]` tag in that document.
+34. **L3 (checklists):** `standards/checklists/{pre-pr,doc-page,adr,release-notes}.md`, each ≤ 10 questions. Not gated.
+
+### K. Contributor terms
+
+35. **DCO.** External contributions require a `Signed-off-by` trailer, enforced by the DCO GitHub App with organisation members exempt. `CONTRIBUTING.md` states the licence each module is offered under. No CLA.
+
+### L. Explicitly deferred
+
+36. Enterprise-private documentation site (trigger: first commercial customer needing docs outside the repo; path: Cloudflare Access on a second Pages project). Versioned docs per release line (trigger: Kernel 1.0 GA). Both require an amendment, not a new ADR.
+
+## Consequences
+
+### ✅ Positive Outcomes
+
+- **[+] One URL space for the nine public repositories eligible under §A.3** without moving a single document; the ai-bridge and GitHub readers are unaffected because the site is a projection.
+- **[+] Drift becomes a build failure**, not a session finding: filenames, registry rows, private links, missing metadata and broken links stop at CI, where Quarkus's structural gates stop them.
+- **[+] The kernel's Javadoc reaches the standard the SDK already meets**, and SPI contracts state allocation, threading and ownership in a form implementers can rely on — a differentiator no reference project has.
+- **[+] Agent instructions have one source per repo**, ending the four-way duplication found in the inventory.
+- **[+] External contribution has stated terms** on the day the licence PR lands.
+
+### ⚠️ Trade-offs
+
+- **[-] Frontmatter on ~250 public files and ~1,150 in budgetHQ.** A scripted backfill (title from H1, type from directory, `last-verified` = last commit date) is required before the error-level gate can be enabled; until then the validator runs in warning mode on unchanged files and error mode on changed ones.
+- **[-] ~160 kernel doclint findings, across `spi`, `core` and `community` combined** (`exeris-kernel/pom.xml`, release-profile comment). The SPI-only subset that §F.21's gate actually requires has not been counted separately and must be measured before `failOnWarnings` is turned on there. Bounded, but real work on a module under active 0.12 development.
+- **[-] Subject-length and body-structure rules will reject the current house style** for `feat`/`fix` commits until authors and skills adopt the three-section body. Expect a fortnight of friction.
+- **[-] Docusaurus builds are slower than a static-Markdown pipeline**, and its React toolchain is a new dependency for a JVM organisation; mitigated by CI caching and by the named Starlight alternative.
+- **[-] Cloudflare concentrates DNS, public site and future private site**; GitHub Pages remains a same-day fallback because the hostname is owned.
+- **[-] Every repo gains a workflow caller and a PR template**; twenty small PRs, one per repo, plus the org `.github` repo.
+
+### 📋 What is NOT in scope
+
+- The content and voice of any individual document; the review checklists (L3) are filters, not rules, and live outside this ADR.
+- The claims/evidence methodology (`exeris-benchmarks/docs/CLAIMS.md`) — referenced, not changed.
+- The 0.12 licence change itself (kernel release work) and the copyright-holder update after the sp. z o.o. registration.
+- Landing-site domains (`exeris.systems`, `exeris-kernel.io`) — landing work; only `docs.exeris.eu` is fixed here.
+- Business ADRs (`BUS-NNN`) and portfolio-product internal namespaces.
+
+## Amendments
+
+- **2026-09-05 — `adr-conventions` rule 8 now names the decorated section headings the corpus uses.**
+  Rule 8 was written on 2026-09-04 naming `### Non-Goals` and `### Risks and Assumptions` as literal
+  strings. The ADR corpus does not write headings that way: 74 of its 80 files carry a leading emoji,
+  `### 🏁 The Decision` 61 times, `### ⚠️ Trade-offs` 47, `### ✅ Positive Outcomes` 45 and
+  `### 📋 What is NOT in scope` 38. The template the rule was written alongside already used the same
+  form for the two new sections, so the rule created an exception in one file rather than describing
+  the practice. It now names `### 🚫 Non-Goals` and `### ⚠️ Risks and Assumptions` and says which
+  existing headings it is matching. Nothing about which sections an ADR must carry changes, and no
+  gate config moves — rule 8 is `[L2]`. Alternative considered and rejected: stripping the emoji from
+  all 74 files, a corpus-wide diff across five repositories for a style the owner authored
+  deliberately. (PR #91)
+
+## Cross-references
+
+- ADR-020 (Open-Core Documentation Boundary & Cross-Repo Mirror Policy) — visibility model this ADR builds on; §A.3 and §G.24 make it machine-checked.
+- ADR-025 (AI Agent Bridge) — the agent surface reads repos; §A keeps `<repo>/docs/**` and `adr-index.md` as the contract.
+- ADR-065 (SPI Compatibility Gate) — §H.28 adds the justified accepted-changes file.
+- ADR-008 (Open-Core Strategy), ADR-023 (Capability Licensing Taxonomy) — to be amended when the 0.12 licence change reaches `main`. The relicense itself is done: `development/0.12.0` carries plain Apache-2.0 and it ships with the 0.12 merge; `main` still carries Apache-2.0 + Commons Clause until then. §K reads as written from that merge onward.
+- The option comparison behind §A, §J and §K — internal working material, not part of this repository.
+- The Phase 0 inventory of what the repositories do today, the reference analysis of OpenJDK, Spring, Quarkus, Micronaut and Netty, and the generator spike — evidence. All three are local-only working material and are deliberately not part of the repository, so they are named rather than linked.
+- External: Oracle "How to Write Doc Comments for the Javadoc Tool"; JDK-8008632 (`@apiNote`/`@implSpec`/`@implNote`); Conventional Commits 1.0; Keep a Changelog 1.1; Diátaxis; Netty "Writing a commit message".
+
+## Engineering Protocol
+
+Existing repos do **not** comply; this ADR is prescriptive. Migration owner: founder. Target window: standards and gates within four weeks of acceptance (plan Phases 3–4), rollout over the following four (Phase 5).
+
+1. **Registry (before acceptance):** reserve 085 in `adr-index.md`; add the cross-repo-stubs row listing `.link.md` stubs in every public repo (`exeris-kernel`, `exeris-sdk`, `exeris-spring-runtime`, `exeris-tooling`, `exeris-platform`, `exeris-ai-bridge`, `exeris-benchmarks`, `exeris-caps-cors-policy`) and *(private repo)* markers for the enterprise repos; mark rows 071/073/074/077/080/083 `pending merge` or merge `development/0.12.0` docs to `main`; replace ADR-018's relative link into `exeris-telemetry-spec` with a *(content private)* marker.
+2. **Phase 3 — standards** (`exeris-docs/standards/`): `commit-conventions.md`, `pr-conventions.md`, `javadoc-conventions.md`, `docs-style-guide.md`, `readme-skeleton.md`, `adr-conventions.md`, `changelog-conventions.md`, `agents-md-schema.md`, `ai-provenance.md`, `claims-and-evidence.md` (thin), `checklists/*.md`; extend the kernel skills `exeris-pr-preflight`, `exeris-docs-adr-check`, `exeris-adr-register` rather than adding a new surface; update `ADR-TEMPLATE.md` and `RFC-TEMPLATE.md` per §G.26.
+3. **Phase 4 — enforcement** (`exeris-systems/.github`): reusable workflows and configs of §C.11; frontmatter validator modelled on Quarkus's `YamlMetadataGenerator` (errors to the step summary, exit 1); registry validator (§G.23–24); `docs-guardrails-review.md` routine and the `[DOC DEBT]` line in `pr-review.md`; DCO app installed at organisation level.
+4. **Phase 5 — rollout:** pilot `exeris-sdk` (Javadoc: already passes) and `exeris-kernel` (commit/PR gates) in warning mode for two weeks, then hard; fan out via workflow callers; frontmatter backfill script run per repo; site live at `docs.exeris.eu` from `sources.yml` with strict link mode enabled once item 1 is done.
+5. **Phase 6 — upkeep:** `docs-guardrails-audit.md` monthly routine (re-run the Phase 0 inventory script, diff, report `[DOC DEBT]` count and age); `doc-drift-check.md` written to use `last-verified`.
+6. **Domain cleanup (tracked as `[DOC DEBT]`):** JSON-schema `$id` in `exeris-benchmarks` (`exeris.io` → `exeris.eu`, schema version bump + changelog); landing targets aligned to `exeris.eu` before the landing ships.
+7. **Acceptance criterion for closing this ADR's protocol:** every public repo has the PR template, a `CONTRIBUTING.md` linking the standards and the DCO paragraph, a schema-conformant `AGENTS.md` and `.agents/` where it exposes reusable agent behaviour, frontmatter on every file under `docs/`, the four reusable workflows green, and the site building with `onBrokenMarkdownLinks: 'throw'`.

@@ -4,7 +4,7 @@
 # (ADR-023) taxonomy discipline.
 #
 # The authoritative prose (which value means what, the cap census, the SKU
-# source-visibility split) lives once in ../../CLAUDE.md § "Capability layer" and
+# source-visibility split) lives once in ../../.agents/references/capability-layer.md and
 # § "ADR registry conventions", and in adr/ADR-020 / adr/ADR-023. This script only
 # locates candidate lines — it does NOT restate the census.
 #

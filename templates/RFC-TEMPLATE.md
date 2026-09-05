@@ -1,3 +1,12 @@
+---
+title: "RFC-YYYY-MM-DD: <Short Title>"
+type: rfc
+visibility: public
+owning-repo: exeris-<repo>
+status: draft
+last-verified: YYYY-MM-DD
+---
+
 # RFC-YYYY-MM-DD: <Short Title — describes the question, not the answer>
 
 <!--
@@ -6,7 +15,7 @@ TEMPLATE USAGE NOTES — DELETE THIS BLOCK BEFORE COMMITTING.
 1. RFCs are **exploration documents**. They precede ADRs. The output of an RFC is an ACCEPTED RFC (a recommended direction) which then becomes one or more ADRs that lock the decision in.
 2. RFC IDs use a date prefix (YYYY-MM-DD) not sequential numbers. They're chronological exploration; sequential ADR numbers come AFTER acceptance.
 3. RFCs MAY live outside this repo (an external system, an issue tracker, a discussion thread). When external, an ADR's "Driven By" field links to the RFC URL. Use this template either way — it's the structure that matters, not the host.
-4. The Investigation section absorbs research-phase content. There is no separate "Research" document type.
+4. The Investigation section carries the evidence behind the option comparison. A falsifiable hypothesis that needs its own measurement campaign is a RESEARCH document instead (`RESEARCH-TEMPLATE.md`; filename `RESEARCH-YYYY-MM-DD-<kebab>.md`, branch-scoped on `research/<slug>` — see `templates/README.md`).
 5. RFC status flow: DRAFT → IN-REVIEW → ACCEPTED → (one or more ADRs) | REJECTED | WITHDRAWN.
 6. An RFC is too long if you can't read it in 15 minutes. If options analysis is sprawling, split into multiple RFCs.
 7. Don't write an RFC for a decision the team has already informally made — go straight to ADR.
@@ -76,6 +85,10 @@ A good RFC question is binary or has a small enumerable set of answers. "How do 
 ### Option C (do nothing): <What if we don't decide?>
 
 <Always include the do-nothing option. If "do nothing" is acceptable, the RFC should probably be withdrawn.>
+
+## Testing
+
+<Required when the RFC proposes an SPI surface, a wire format, or a contract consumers will implement (JEP 2 §Testing). How will the recommended option be verified — which `Abstract*Tck`, which property tests, which benchmark scenario? What cannot be tested before implementation, and what is the fallback? Omit the section for decisions with no testable surface, and say so in §Recommendation.>
 
 ## Recommendation
 

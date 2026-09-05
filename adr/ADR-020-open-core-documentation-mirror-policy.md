@@ -1,3 +1,13 @@
+---
+title: "ADR-020: Open-Core Documentation Boundary & Cross-Repo Mirror Policy"
+type: adr
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-05
+slug: adr/ADR-020
+---
+
 # ADR-020: Open-Core Documentation Boundary & Cross-Repo Mirror Policy
 
 | Attribute       | Value                                                                                                       |
@@ -23,7 +33,7 @@ Exeris is distributed as **open-core**: a set of public repositories that any co
 ADRs and architectural documents move freely across both sides. Some examples:
 - ADR-001 (Cloud Native) lives in `exeris-docs` and applies to every repo, public and private.
 - ADR-007 (Next-Gen Runtime) lives in `exeris-kernel` (public) and binds `exeris-kernel-enterprise` (private).
-- ADR-018 (Observability Tooling Repo Split) lives in `exeris-kernel-enterprise` (private), is enterprise-private content, but its number is publicly registered in this index and consumed by `exeris-telemetry-spec` (public) via a `.link.md` stub.
+- ADR-018 (Observability Tooling Repo Split) lives in `exeris-kernel-enterprise` (private), is enterprise-private content, but its number is publicly registered in `adr-index.md` and consumed by `exeris-telemetry-spec` (public) via a `.link.md` stub.
 
 Without a clear policy, three classes of bug recur:
 
@@ -60,6 +70,18 @@ When a document owned by repo A is referenced by repos B, C, ..., each consuming
 - States in one short paragraph why the consuming repo cares.
 - Lists "when to consult" triggers relevant to the consuming repo.
 
+<!-- VERIFY(sweep-2026-09): §1 and §2 are breached by three tracked files, and not by the one the
+     sweep first suspected. `exeris-kernel-enterprise/docs-open-core/` is NOT a violation: its 24
+     files are untracked, appear in zero commits on zero branches, and are not gitignored — local
+     scratch dated 2026-06-14, never mirrored anywhere. What does breach the policy is
+     `exeris-kernel-enterprise/docs/adr/`, which holds full-content tracked copies of three
+     kernel-owned public ADRs — ADR-007 (518 lines against the kernel's 118), ADR-008 (199) and
+     ADR-009 (241) — where §1 allows one authoritative copy and §2 a `.link.md` stub. The same
+     directory already holds correct stubs for ADR-001, 020, 033, 034, 036 and 080, and its
+     enterprise-owned ADR-018 and ADR-019 are legitimately full. So this is a bounded legacy of the
+     three oldest cross-repo entries, not a standing practice. All five of the older files also use
+     space-separated names against adr-conventions rule 1. Fixing them belongs to that repository,
+     which is outside this sweep. -->
 Stubs are **navigation aids**, not content. They MUST NOT replicate the authoritative content. A stub that drifts into a half-summary is a policy violation.
 
 ### 3. Visibility taxonomy (canonical)
@@ -84,6 +106,7 @@ A CI job verifies cross-repo consistency:
 - No two repos contain full-content copies of the same logically-identical document. (Detection heuristic: identical `# Title` headers in `docs/adr/` files across repos trigger a review flag; identical content under non-overlay filenames triggers a hard failure.)
 - Every ADR file under `<repo>/docs/adr/` matches a row in `exeris-docs/adr-index.md` (either as authoritative copy or as `.link.md` stub) — orphan ADR files in any repo are a policy violation.
 
+<!-- VERIFY(sweep-2026-09): §5 bullet 3 (no two repos hold full-content copies of the same document) has no implementation four months after acceptance — a grep for identical/duplicate/full-content/hashlib/md5/sha256 heuristics over .guardrails/orggh/scripts/ and workflows/ finds nothing. Bullets 2 and 4 are implemented in registry_check.py but bullet 2's on-disk resolution is SKIPPED as the docs-lint workflow invokes it (no --siblings-root; the script then warns "link resolution skipped"). Bullet 1 is not covered by any gate: .link.md stubs name their target as backticked plain text, not a markdown link, so lychee has nothing to check, and lychee.toml excludes the private repos outright. No repo calls docs-lint.yml yet (exeris-docs/.github/workflows/ holds only claude-code-review.yml and claude.yml). The ADR's own next sentence already concedes "Until the job lands, periodic manual audits substitute", so nothing here is false — but the maintainer should decide whether the implementation status becomes a dated ## Amendments entry, a ROADMAP item, or a withdrawal of bullet 3. -->
 The drift-detection job runs in CI for `exeris-docs` and aggregates results across repos. Until the job lands, periodic manual audits (like the 2026-05-07 pass) substitute.
 
 ## Consequences
@@ -109,8 +132,8 @@ The drift-detection job runs in CI for `exeris-docs` and aggregates results acro
 ## Cross-references
 
 - ADR-008 (Open-Core Strategy) — the strategic framing this policy serves.
-- ADR-007 (Next-Gen Runtime Architecture) — example of a kernel-owned ADR consumed by enterprise via the boundary this policy formalises.
-- ADR-018 (Observability Tooling Repo Split) — established the `.link.md` stub pattern that this ADR generalises.
+- ADR-007 (Next-Gen Runtime Architecture) — example of a kernel-owned ADR consumed by enterprise via the boundary this policy formalizes.
+- ADR-018 (Observability Tooling Repo Split) — established the `.link.md` stub pattern that this ADR generalizes.
 - ADR-001 (Cloud Native) — first ADR migrated under this policy (PR on 2026-05-07 moved the authoritative copy to `exeris-docs/adr/` with link stubs in consuming repos).
 - `adr-index.md` Rules §Visibility — updated alongside this ADR's acceptance to remove `public-staged` and reflect the two-value taxonomy.
 
@@ -124,3 +147,27 @@ Open follow-ups (tracked separately):
 
 - Implement the cross-repo drift-detection CI job in `exeris-docs` (or as a release-gate workflow). Until it lands, periodic manual audits substitute.
 - Each repo's CLAUDE.md (or CONTRIBUTING.md) should reference this ADR when discussing where new documentation belongs.
+
+## Amendments
+
+**2026-09-04 — `exeris-telemetry-spec` is enterprise-private; its final disposition is open.**
+The Context enumeration above lists `exeris-telemetry-spec` among the public open-core repositories
+and omits it from the private list. That does not describe the repository. Verified 2026-09-04: the
+GitHub repository is `PRIVATE` and carries no recognised licence (`gh repo view` reports
+`visibility=PRIVATE`, `license=none`), it holds no `LICENSE` file, and its own `README.md` states
+"License: Exeris Enterprise (proprietary)". The shared validator's `PRIVATE_REPOS` set and
+`adr-index.md`'s row 018 already treat it as private, which is why a relative link into it was an
+error rather than a style nit.
+
+ADR-018 §Consequences records the split as making Repo C **publishable** — "can be released as an
+open-spec artifact, enabling third-party decoders" — which is an option the split unlocked, not one
+that has been exercised. Read the Context enumeration accordingly: `exeris-telemetry-spec` belongs
+to the private set for every purpose this ADR governs, including the `(content private)` marker rule
+and the ban on relative links from public files.
+
+**Whether it stays there is not settled.** A wire-format specification that third parties are meant
+to implement has an obvious argument for publication, and ADR-018 anticipated it. Making that change
+is an act — choosing a licence, reversing the README's proprietary declaration, moving the
+repository across the open-core boundary — and belongs to the decision that takes it, not to this
+amendment. Until then the documents describe what is, and this entry keeps the open question visible
+rather than resolved by silence.

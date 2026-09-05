@@ -1,6 +1,6 @@
 # exeris-docs
 
-Central documentation hub for the Exeris Systems ecosystem. This repository holds the artifacts that are intentionally cross-cutting — the ADR registry, the platform-scope ADRs, the High-Level Architecture, the customer-facing whitepaper, the decision-document templates, and the execution-plan trail behind major restructures. Per-repo documentation (subsystem docs, repo-specific ADRs, build notes) lives next to the code it describes in the owning repository.
+Central documentation hub for the Exeris Systems ecosystem. This repository holds the artifacts that are intentionally cross-cutting — the ADR registry, the platform-scope ADRs, the High-Level Architecture, the customer-facing whitepaper, the RFCs, the documentation standards, and the decision-document templates. Per-repo documentation (subsystem docs, repo-specific ADRs, build notes) lives next to the code it describes in the owning repository.
 
 The ecosystem itself is organized as **~20 sibling repositories under `~/exeris-systems/`** — `exeris-kernel`, `exeris-kernel-enterprise`, `exeris-sdk`, `exeris-spring-runtime`, `exeris-tooling`, `exeris-platform`, `exeris-benchmarks`, `exeris-telemetry-spec`, `exeris-enterprise-observability`, plus Family products and supporting repos. The ecosystem-wide map and routing rules live in `~/exeris-systems/CLAUDE.md`.
 
@@ -10,7 +10,7 @@ The platform is structured in three tiers, detailed in `high-level-architecture.
 
 - **Tier 1 — Substrate.** The Exeris kernel (SPI + Core + Community/Enterprise drivers, ADR-007) plus `exeris-sdk` and `exeris-tooling` for the build-time pipeline (ADR-015). `exeris-spring-runtime` ships as an **independent Tier 1 product** for customers doing brownfield Spring migration — the platform itself does not use it.
 - **Tier 2 — Capability Ecosystem.** `exeris-caps-*` repositories — composable, build-time-validated modules with `@Provides` / `@Requires` contracts. Spring-free; the cap-tier Wall (extension of ADR-006) is enforced by the codegen pipeline.
-- **Tier 3 — Vertical SaaS SKUs (Platform SKUs).** First-party cap compositions sold as products — API Gateway, Edge Proxy, Bot Blocker, IDP, PIM, OMS, Headless CMS API, Context-Centric CRM. Kernel-direct API surface (`@ExerisDomain` + `@Action` + `rest-emission` codegen); no Spring.
+- **Tier 3 — Vertical SaaS SKUs (Platform SKUs).** First-party cap compositions sold as products — API Gateway, Edge Proxy, Bot Blocker, IDP, PIM, OMS, Headless CMS API. (Context-Centric CRM is a §3.2 layer-5 domain-primitive capability, `exeris-caps-contact-graph`, not a standalone SKU repository — ADR-023.) Kernel-direct API surface (`@ExerisDomain` + `@Action` + `rest-emission` codegen); no Spring.
 
 **Family products** (BudgetHQ being the first) are commercially independent SaaS products built by Exeris Systems on the platform; they are structurally distinct from Platform SKUs and are detailed in HLA §9. BudgetHQ is the singular Spring-on-Exeris Family product (dogfooding `exeris-spring-runtime` as a product). All future Family products will be pure-Exeris on SDK + tooling.
 
@@ -22,8 +22,12 @@ The platform is structured in three tiers, detailed in `high-level-architecture.
 | [`b2b-technical-whitepaper.md`](b2b-technical-whitepaper.md) | Buyer-facing summary — three-tier structure, empirical evidence, deployment models, sovereignty/IP framing, roadmap. |
 | [`adr-index.md`](adr-index.md) | The central tech ADR registry. Single numbering namespace (`ADR-NNN`) across the entire ecosystem. |
 | [`layer-build-order.md`](layer-build-order.md) | Cross-repo ordering constraints between the platform layers — what is unblocked now, what waits on whose release, and what waits on a decision. A dated snapshot; re-verify rows when editing them. |
-| [`adr/`](adr/) | Platform-scope tech ADRs that live in this repo (ADR-001, ADR-002, ADR-004, ADR-006, ADR-020). Per-repo ADRs live next to their owning code. |
+| [`adr/`](adr/) | Platform-scope tech ADRs that live in this repo (ADR-001, ADR-002, ADR-004, ADR-006, ADR-020, ADR-023, ADR-024, ADR-053). Per-repo ADRs live next to their owning code. |
 | [`templates/`](templates/) | Decision-document templates: `RESEARCH-TEMPLATE.md`, `RFC-TEMPLATE.md`, `ADR-TEMPLATE.md`. See lifecycle notes in [`templates/README.md`](templates/README.md). |
+| [`rfc/`](rfc/) | Platform-scope RFCs — multi-option strategic questions whose output is a recommendation, not a decision. No central registry. |
+| [`standards/`](standards/) | The documentation, commit, PR, Javadoc, ADR, changelog and agent-file standards for every Exeris repository (ADR-085). Repos link here; they never copy. |
+| [`cap-author-guide.md`](cap-author-guide.md) | How to author a Tier 2 capability — the module class, `@Provides` / `@Requires` contracts, the four-phase lifecycle hooks, the build wiring, the cap-tier Wall. |
+| [`cap-license-registry.md`](cap-license-registry.md) | Per-capability licence, visibility and build status across the seven layers. |
 
 ## ADR registry conventions
 
@@ -42,8 +46,8 @@ Capability licensing taxonomy (`community` / `commercial` / `enterprise-private`
 Three shapes for three question kinds — they live in [`templates/`](templates/) and are not interchangeable:
 
 - **Research** (`RESEARCH-TEMPLATE.md`) — falsifiable hypothesis ("Does X reduce Y by Z%?"). Lab-notebook shape, JMH / JFR / profiling-driven. Branch-scoped on `research/<slug>` in any repo's `docs/research/`. No central registry.
-- **RFC** (`RFC-TEMPLATE.md`) — multi-option strategic question ("Should we choose A, B, or C?"). Filename: `RFC-YYYY-MM-DD <Short Title>.md`. No central registry. Output is a recommendation that may produce one or more ADRs.
-- **ADR** (`ADR-TEMPLATE.md`) — a decision already made. Filename: `ADR-NNN <Short Title>.md`. Enters the registry.
+- **RFC** (`RFC-TEMPLATE.md`) — multi-option strategic question ("Should we choose A, B, or C?"). Filename: `RFC-YYYY-MM-DD-<kebab>.md`. No central registry. Output is a recommendation that may produce one or more ADRs.
+- **ADR** (`ADR-TEMPLATE.md`) — a decision already made. Filename: `ADR-NNN-<lowercase-kebab-title>.md`. Enters the registry.
 
 When drafting an ADR, check the question shape first: if upstream measurement or option comparison is missing, write a Research or an RFC before going straight to ADR.
 
@@ -62,7 +66,7 @@ If a task spans repos, the owning repo holds the authoritative copy and other af
 
 ## Language
 
-The codebase is English-first. All documentation in this repository — ADRs, registries, templates, the HLA, the whitepaper — is in English. Conversations with the founder happen in Polish, but persisted artifacts are English. Legacy Polish-language refactor notes inside `exeris-kernel-enterprise/docs/adr/` are deliberately not promoted to the unified ADR registry.
+The codebase is English-first. All documentation in this repository — ADRs, registries, templates, the HLA, the whitepaper — is in English. Conversations with the founder happen in Polish, but persisted artifacts are English. Legacy Polish-language refactor notes inside `exeris-kernel-enterprise/docs/refactor-notes/` are deliberately not promoted to the unified ADR registry.
 
 ## When to open this repo (vs. a sub-repo)
 

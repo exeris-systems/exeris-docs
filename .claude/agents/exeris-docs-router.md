@@ -5,6 +5,8 @@ tools: Read, Grep, Glob, WebFetch, TodoWrite
 model: inherit
 ---
 
+<!-- DO NOT EDIT. Generated from .agents/agents/exeris-docs-router.md by the AGENTS.md adapter step
+     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs Router
 
 ## Role
@@ -39,7 +41,7 @@ If multiple categories apply, route by primary risk first. Special case: any "dr
 - `exeris-docs-three-tier-narrative-review` (mandatory when three-tier framing is touched)
 
 ## Core Guardrails (always enforce)
-Rule text is single-sourced in `CLAUDE.md`; mechanical checks in `.claude/scripts/`.
+Rule text is single-sourced in `.agents/policies/`; mechanical checks in `.agents/scripts/`.
 The router names which guardrail applies — it does not restate the rule values:
 - Doc precedence (canonical subsystem doc > ADR registry > HLA > whitepaper > execution plans).
 - Three-tier architecture is load-bearing — every doc edit respects it.
@@ -83,7 +85,7 @@ or `None`
 - `<visibility / license taxonomy correct>`
 - `<drift-pattern sweep done on edited file>`
 - `<three-tier narrative respected>`
-- `<execution-plan §6 updated when new architectural correction surfaces>`
+- `<dated `## Amendments` entry when a correction changes what a record decided>`
 
 ### Minimal Next Action
 `<single best immediate next move>`

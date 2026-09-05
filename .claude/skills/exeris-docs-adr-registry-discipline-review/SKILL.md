@@ -3,6 +3,8 @@ name: exeris-docs-adr-registry-discipline-review
 description: ADR registry discipline review for exeris-docs. Use on every ADR PR — verifies number-first reservation, filename pattern, location-by-scope, visibility taxonomy, license taxonomy, and link stubs.
 ---
 
+<!-- DO NOT EDIT. Generated from .agents/skills/exeris-docs-adr-registry-discipline-review/SKILL.md by the AGENTS.md adapter step
+     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs ADR Registry Discipline Review
 
 ## Purpose
@@ -11,7 +13,7 @@ pattern correct; location matches scope; visibility two-valued; license a
 separate three-valued axis; cross-repo link stubs present.
 
 **Single source.** The rules (taxonomy values, location-by-scope, filename
-pattern, the cap census) live once in `CLAUDE.md` § "ADR registry conventions" +
+pattern, the cap census) live once in `.agents/policies/adr-registry.md` (see" +
 § "Capability layer", and in `adr-index.md`, `adr/ADR-020`, `adr/ADR-023`. This
 skill does NOT restate them — it runs the scripts and reads those sources.
 (This skill subsumes the old standalone visibility/license check — there is no
@@ -30,13 +32,13 @@ separate visibility skill.)
 
 ## Review Procedure
 1. **Number-first** — `adr-index.md` row added BEFORE / WITH the content file.
-   Run `.claude/scripts/adr-filename-check.sh <adr-file>` (checks the filename
+   Run `.agents/scripts/adr-filename-check.sh <adr-file>` (checks the filename
    pattern AND that the number is already in the index). Content-without-index is a regression.
 2. **Location-by-scope** — platform → `exeris-docs/adr/`; per-repo →
    `<repo>/docs/adr/`; cross-repo → owning repo + `ADR-NNN.link.md` stubs in every
    affected repo; enterprise-private → `<enterprise-repo>/docs/adr/` (number still
-   publicly registered). Confirm against `CLAUDE.md`.
-3. **Visibility + license** — run `.claude/scripts/taxonomy-check.sh` on the
+   publicly registered). Confirm against `.agents/policies/adr-registry.md`.
+3. **Visibility + license** — run `.agents/scripts/taxonomy-check.sh` on the
    changed files; adjudicate candidates. Visibility two-valued (no live
    `public-staged`); license three-valued; the two axes not conflated. Read
    `adr/ADR-020` / `adr/ADR-023` if a value is in question.

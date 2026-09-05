@@ -3,6 +3,8 @@ name: exeris-docs-routing-planner
 description: Router/Planner skill for exeris-docs. Produces primary agent, secondary handoffs, execution order, validation gates, and minimal next action for a docs task.
 ---
 
+<!-- DO NOT EDIT. Generated from .agents/skills/exeris-docs-routing-planner/SKILL.md by the AGENTS.md adapter step
+     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs Routing Planner
 
 ## Purpose
@@ -25,7 +27,7 @@ Given a classified task (see `exeris-docs-task-classifier`), produce a minimal, 
 - `MULTI_DOMAIN` → start with `router` triage, list all dominant handoffs.
 
 ## Default Validation Gates
-Rule definitions live in `CLAUDE.md`; mechanical checks live in `.claude/scripts/`.
+Rule definitions live in `.agents/policies/`; mechanical checks live in `.agents/scripts/`.
 This list names *which* gate applies, not the rule text.
 - Document shape decided (Research / RFC / ADR) when "draft a decision doc" → `exeris-docs-document-shape-classifier`.
 - ADR number reserved before content + filename pattern → `adr-filename-check.sh` / `exeris-docs-adr-registry-discipline-review`.

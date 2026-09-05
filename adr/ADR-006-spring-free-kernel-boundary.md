@@ -1,3 +1,13 @@
+---
+title: 'ADR-006: Spring-Free Kernel Boundary ("The Wall")'
+type: adr
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-05
+slug: adr/ADR-006
+---
+
 # ADR-006: Spring-Free Kernel Boundary ("The Wall")
 
 | Attribute       | Value                                                                                                         |
@@ -8,7 +18,8 @@
 | **Scope**       | cross-repo (binds `exeris-kernel`, `exeris-kernel-enterprise`, `exeris-sdk`, `exeris-spring-runtime`)         |
 | **Owning Repo** | `exeris-docs` (cross-repo platform copy; the seam this ADR governs is implemented in `exeris-spring-runtime`) |
 | **Driven By**   | Abandonment of the original Spring-as-platform model; ADR-007 update (2026-02-22) clarified runtime ownership |
-| **Compliance**  | [Strategic Pillar: Clean IP & Detachment](../../exeris-kernel/docs/architecture.md), `module-boundaries.md`   |
+| **Compliance**  | Strategic Pillar: Clean IP & Detachment — [Whitepaper §6 Sovereignty & IP Ownership](../b2b-technical-whitepaper.md), `module-boundaries.md` |
+
 
 ## Context and Problem Statement
 
@@ -60,6 +71,77 @@ This is The Wall, expressed as architectural law.
 - This ADR does not require applications to drop Spring. Most Exeris applications continue to use Spring as their application framework — the platform supports that explicitly.
 - This ADR does not preclude other framework adapters. A future `exeris-quarkus-runtime` or `exeris-micronaut-runtime` would follow the same pattern.
 
+## Amendments
+
+Each entry records a claim the code contradicts. The obligations above are not rewritten; read them
+together with the entry that corrects them. All six were verified against the working tree on
+2026-09-05. (PR #91)
+
+- **2026-09-05 — Obligation 2 names a service that is not service-loaded.** The obligation lists
+  `TelemetrySink` among the `ServiceLoader`-discovered providers. No `META-INF/services` file for it
+  exists anywhere in `exeris-kernel`; the telemetry service files are
+  `eu.exeris.kernel.spi.telemetry.TelemetryProvider` and `…KernelTelemetryProvider`. Sinks are
+  constructed by the discovered provider, not discovered themselves. Read the list as
+  `PersistenceProvider, TransportProvider, MemoryProvider, GraphProvider, SecurityProvider,
+  ConfigProvider, TelemetryProvider`.
+
+- **2026-09-05 — Obligation 3 describes an entry point and a boot order that do not exist.**
+  `KernelBootstrap` has no `bootstrap()` method — the string appears zero times in the class — and the
+  entry point is `public void boot(Runnable kernelMain)` at
+  `exeris-kernel-core/…/bootstrap/KernelBootstrap.java:133`. There is no six-node
+  `Config → Memory → Exceptions → {Security, Persistence} → {Graph, Transport} → {Events, Flow}` DAG
+  and no `Exceptions` subsystem: ordering is the three-phase `BootstrapPhase` enum — `FOUNDATION`,
+  `SERVICES`, `RUNTIME` — each phase resolved in dependency-safe rounds. Which subsystem sits in which
+  phase is deliberately not restated here: `BootstrapPhase`'s javadoc and
+  `exeris-kernel/docs/subsystems/bootstrap.md` disagree with each other, and reconciling them belongs
+  to the kernel, not to this record.
+
+- **2026-09-05 — Obligation 4's `HttpServletRequest` example is contested, not settled.** Three
+  sources in `exeris-spring-runtime` point two ways. `ADR-011:49` reserves a "Narrow
+  `*.compat.servlet.*` bridge for legacy `HttpServletRequest`";
+  `exeris-spring-runtime-web/pom.xml:34` says "Compatibility mode (Phase 2) will add an opt-in MVC
+  dispatch bridge"; and `docs/phases/phase-2-spring-compat.md:137` marks `HttpServletRequest` and
+  `HttpServletResponse` "Banned in all modes (`jakarta.servlet.*` not on classpath)". No such adapter
+  exists today. The example is withdrawn from this obligation until that repository settles its own
+  contradiction; the rest of obligation 4 stands — `DataSource`, `PlatformTransactionManager` and
+  `Environment` are bridged through the named adapter modules.
+
+- **2026-09-05 — Obligation 5 credits the wrong test with the runtime bans.**
+  `PureModeClasspathGuardTest` is real and ships across the runtime's modules, but its assertions are
+  the servlet API, Netty and Reactor, WebFlux server abstractions, and `DispatcherServlet` — not
+  Tomcat, Jetty, Undertow or HikariCP. Those are carried by `WallIntegrityTest`,
+  `ExerisBootstrapIntegrationTest`, `ModuleBoundaryTest`, `DataModuleBoundaryTest` and
+  `ExerisDataAutoConfigurationTest`. The Wall is enforced more broadly than the obligation says, by
+  five classes rather than one; only the attribution was wrong.
+
+- **2026-09-05 — The "~30 MB" jar figure is overstated; the "< 5 µs" figure is a contract target,
+  not an unsourced claim.** Two figures in Consequences were checked directly.
+
+  The Context clause says a transitive `org.springframework:*` pull "would inflate jar sizes by
+  ~30 MB". Measured 2026-09-05 against the local Maven repository, the Spring Framework set —
+  `spring-core`, `spring-beans`, `spring-context`, `spring-aop`, `spring-web`, `spring-webmvc`,
+  `spring-expression`, `spring-tx`, `spring-jdbc`, `spring-orm`, `spring-jcl`, newest version of each —
+  totals **9.02 MB**. Roughly 30 MB is reachable only with Spring Boot, its starters and their
+  transitive tree (Tomcat, Jackson, Micrometer and the rest), which is not what this clause describes.
+  Read the figure as the order of magnitude of a Boot application's dependency tree, not of the
+  framework jars the clause names. The argument does not depend on the number: the objection to
+  pulling Spring into the kernel is the release-cadence lock-in stated in the same sentence.
+
+  The "< 5 µs PAQS shed decision" is **not** an Enterprise-private assertion, which an earlier draft of
+  this entry claimed. It is a public, TCK-enforced design limit: `exeris-kernel/docs/whitepaper.md:156`
+  and `exeris-kernel/docs/modules/05-tck.md:71` both state `≤ 5 µs` with "Nanosecond timer in TCK" as
+  the enforcement, for Community and Enterprise alike; the Enterprise performance contract repeats it
+  as still binding rather than originating it. It is a contract target rather than a measurement —
+  `exeris-kernel-enterprise/docs/performance-contract.md:225` records that PAQS routing is not yet
+  wired, so nothing has been measured against it — and this ADR should write it `≤ 5 µs`, matching the
+  kernel.
+
+- **2026-09-05 — The declared Scope is not backed by stubs.** Scope binds `exeris-kernel`,
+  `exeris-kernel-enterprise`, `exeris-sdk` and `exeris-spring-runtime`, and only `exeris-kernel`
+  carries `docs/adr/ADR-006.link.md`. The other three are missing. Tracked as `[DOC DEBT]`, one pull
+  request per repository; `adr-conventions` rule 5 makes stub coverage an `[L2]` review obligation
+  rather than a CI gate, so this does not reopen the decision.
+
 ## Cross-references
 
 - ADR-001 (Cloud Native & Agnostic) — sets up the Code Detachment business model that this Wall protects.
@@ -73,3 +155,4 @@ This is The Wall, expressed as architectural law.
 ## Engineering Protocol
 
 Once this decision is ACCEPTED, the existing `WallIntegrityTest` and `PureModeClasspathGuardTest` suites are the canonical enforcement. PRs that disable or weaken these tests must cite this ADR and either explain why the change preserves the Wall or propose a superseding ADR.
+

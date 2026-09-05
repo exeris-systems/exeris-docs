@@ -73,12 +73,14 @@ A single Research effort or RFC may produce multiple ADRs.
 
 - **Filenames.** Lowercase kebab-case for the title slug; the `ADR-NNN` / `RFC-YYYY-MM-DD` prefix keeps its original casing.
   - ADR: `ADR-NNN-<lowercase-kebab-title>.md` (3-digit zero-padded; e.g. `ADR-001-cloud-native-and-agnostic-infrastructure-strategy.md`).
+  - ADR link stub: `ADR-NNN.link.md` in a consuming repo's `docs/adr/` (ADR-020 §2).
   - RFC: `RFC-YYYY-MM-DD-<lowercase-kebab-title>.md` (date prefix; same kebab title rule).
-  - Research: `<short-slug>.md` on a `research/<slug>` branch.
+  - Research: `RESEARCH-YYYY-MM-DD-<lowercase-kebab-title>.md` in the owning repo's `docs/research/`, on a `research/<slug>` branch. `RESEARCH.md` — the framework doc — is the one filename the gate exempts.
   - **Title slug rules.** Replace `&` with `and`. Drop other punctuation (`+`, `:`, `(`, `)`, `,`, etc.). Collapse runs of whitespace/hyphens to a single `-`. The slug should be machine-grep-able and copy-paste-safe in URLs (no `%20`, no `%26`).
 - **Numbering.** ADR numbers are reserved in [`../adr-index.md`](../adr-index.md) before content is written. RFC IDs are the date the RFC opens — no central registry. Research has no central registry — it's branch-scoped.
 - **Status discipline.** ADRs in PROPOSED and RFCs in DRAFT should accept, reject, or withdraw within a couple of weeks. Research with `Status: active` for more than one milestone should conclude, park, or abandon.
-- **Language.** All ADRs are in English — body content, section headings, frontmatter table labels, everything. The canonical frontmatter labels are `Attribute` / `Value`. The same English-only rule applies to RFCs that drive ADRs, the index, and this README. Research lab-notebook content may be informal. Repo-local working notes (refactor archaeology, internal R&D) may be in any language but never enter the ADR namespace.
+- **Language.** All ADRs are in English — body content, section headings, header-table labels, YAML frontmatter values, everything. The canonical header-table labels are `Attribute` / `Value`. The same English-only rule applies to RFCs that drive ADRs, the index, and this README. Research lab-notebook content may be informal. Working notes that are never committed — refactor archaeology, internal R&D, a scratch pass over a corpus — may be in any language; nothing that stays off the remote is bound by a documentation standard. Once a note enters a repository it is English like everything else under `docs/` ([`docs-style-guide.md`](../standards/docs-style-guide.md) rule 11), and it never enters the ADR namespace either way.
+
 
 ## Cross-references
 

@@ -1,1 +1,7 @@
 .idea/
+
+# Working material. Directories starting with "_" are local-only by convention — the
+# documentation validators skip them (scripts/_common.py walk_md) and they hold the
+# Phase 0 inventory, the reference research and the org-github bundle, none of which
+# is repository content. Same rule as exeris-kernel's docs/release/ working notes.
+standards/_*/

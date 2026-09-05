@@ -3,16 +3,18 @@ description: Verify visibility taxonomy (ADR-020) is two-valued (`public` / `ent
 argument-hint: ADR / doc / cap description that mentions visibility or license
 ---
 
+<!-- DO NOT EDIT. Generated from .agents/workflows/visibility-taxonomy-check.md by the AGENTS.md adapter step
+     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 Audit the visibility / license claim below.
 
 Change: $ARGUMENTS
 
 The authoritative values, the cap census, and the SKU source-visibility split
-live once in `CLAUDE.md` § "Capability layer", and in `adr/ADR-020` (visibility)
+live once in `.agents/references/capability-layer.md`, and in `adr/ADR-020` (visibility)
 and `adr/ADR-023` (license). Read those — this command does not restate the census.
 
 Steps:
-1. Run `.claude/scripts/taxonomy-check.sh $ARGUMENTS` (when a file is in scope).
+1. Run `.agents/scripts/taxonomy-check.sh $ARGUMENTS` (when a file is in scope).
    It flags `public-staged`, visibility/license contexts, and likely conflations,
    marking probable negations with `⟵ (neg? verify)`.
 2. Adjudicate against the ADRs:

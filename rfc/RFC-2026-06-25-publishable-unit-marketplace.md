@@ -1,4 +1,36 @@
+---
+title: "RFC-2026-06-25: Publishable-unit / marketplace surface — what does the ecosystem need beyond the composition model (ADR-024) and the licensing taxonomy (ADR-023), and which repo owns each part?"
+type: rfc
+visibility: public
+owning-repo: exeris-docs
+status: draft
+last-verified: 2026-06-25
+---
+
 # RFC-2026-06-25: Publishable-unit / marketplace surface — what does the ecosystem need beyond the composition model (ADR-024) and the licensing taxonomy (ADR-023), and which repo owns each part?
+
+
+> **Since this was written — 2026-09-05.** The RFC is a dated map and its body is unchanged; four of
+> the things it maps have moved, and a reader weighing its still-open Recommendation should know before
+> using them.
+>
+> - **The composition runtime left `exeris-platform`.** The Affected-Repos row credits that repo with
+>   "the composition runtime that already exists per ADR-024". ADR-024's own amendment of the same day,
+>   *Composition Runtime Placement*, moved the boot conductor and stamp assertion to the SDK and recast
+>   `exeris-platform` as the deploy-time control plane. Verified: only `target/` output remains under
+>   `exeris-platform/exeris-platform-composition-runtime`, the module appears nowhere in that repo's
+>   `pom.xml`, and `exeris-sdk` now carries `exeris-sdk-composition-runtime`, `-spec` and `-lifecycle`.
+>   `exeris-platform/CLAUDE.md` records the retirement.
+> - **The first capability repository exists.** Three passages state that no `exeris-caps-*` repository
+>   is on disk and that the first is an H1-2027 target. `exeris-caps-cors-policy` was scaffolded on
+>   2026-08-16 and committed its emitted cap manifest on 2026-08-18, ahead of that target.
+> - **The presentation RFC is no longer in review.** The front-facet row marks the SDK presentation RFC
+>   `IN-REVIEW`; it was accepted. Whether "designed, build-gated" still describes that row's Status was
+>   not checked here and is left as written.
+>
+> None of this changes the Recommendation or the build-gate verdict, which is why the body stands as
+> the record of what was known on 2026-06-25.
+
 
 | Field             | Value                                                                 |
 |:------------------|:----------------------------------------------------------------------|
@@ -30,7 +62,7 @@ This RFC's deliverable is therefore the **map of the marketplace direction + the
 
 ### Prior art
 
-- **Within the ecosystem (already decided)** — ADR-024 (composition model), ADR-023 (licensing taxonomy, contractual enforcement), ADR-015 (codegen emission, `exeris-tooling`), ADR-020 (open-core doc boundary), HLA §4 (capability composition) + §3.2 SKU families, whitepaper §3.2 (cap inventory with licence tiers) / §5.4 / §6 (detachment + sovereignty). These *are* the marketplace's backbone; this RFC adds nothing to them.
+- **Within the ecosystem (already decided)** — ADR-024 (composition model), ADR-023 (licensing taxonomy, contractual enforcement), ADR-015 (codegen emission, `exeris-tooling`), ADR-020 (open-core doc boundary), HLA §4 (capability composition) + §3.3 SKU compositions, whitepaper §3.2 (cap inventory with licence tiers) / §5.4 / §6 (detachment + sovereignty). These *are* the marketplace's backbone; this RFC adds nothing to them.
 - **Within the SDK source model** — `@CapabilityModule` (pure marker, no name/metadata — by ADR-024 decision), `@Provides` / `@Requires` / `@CapabilityLifecycle` (the backend-facet composition surface, 0.4.0); `@ExerisDomain` + `@Action` (the data/API backend facet, ADR-003); the presentation IR (the front facet, the SDK RFC). Between them, a unit's *content* is already (or will be) fully source-describable. What is **not** describable from source today is a unit's *catalog/discovery presentation* — the human-facing "what is this, what does it give me, what does it look like" a buyer or Studio browses before composing.
 - **The design-now/build-on-usage discipline** — the universe and declarative-behaviour precedents: settle the shape, ship behind a real consumer (or reserved with an honesty note) only when the informing usage lands.
 - **External shape-setters** — every plugin/extension marketplace (VS Code Marketplace, JetBrains, npm, Shopify/WordPress) separates three concerns the platform has already separated too: **(1) the contract** (what the unit provides/requires — ADR-024 here), **(2) the licence/commerce** (pricing, terms — ADR-023 + private business policy here), and **(3) the listing/catalog** (display name, summary, category, media, screenshots — *the only one with no home in the ecosystem yet*). The consistent lesson: the listing is a thin, separate descriptor; folding it into the contract manifest (concern 1) is the classic mistake.

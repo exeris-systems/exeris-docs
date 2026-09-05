@@ -3,9 +3,9 @@
 # check-consistency.sh — anti-drift guard for the .claude/ toolkit itself.
 #
 # Single-source invariant: doctrine that ROTS (the cap census, specific cap
-# names, TRL levels, the SKU enumeration) must live ONLY in ../../CLAUDE.md and
+# names, TRL levels, the SKU enumeration) must live ONLY in ../../.agents/ and
 # the ADRs. Skills / commands / agents must REFERENCE it, not restate it — so
-# that when CLAUDE.md changes there is exactly one site to update.
+# that when a policy or reference changes there is exactly one site to update.
 #
 # This is a TRUE gate (unlike drift-sweep/taxonomy-check, which are locators):
 # its rules are unconditional. A hit is a real violation -> exit 1.
@@ -14,11 +14,11 @@
 # review skill must be allowed to say what it checks for. It targets only the
 # rotting specifics (numbers, named census, TRL values).
 #
-# Scope: .claude/{skills,commands,agents} + .claude/README.md.
-# Excluded: .claude/scripts/ (the allowed home of the greppable patterns) and
-#           CLAUDE.md (the allowed home of the prose + census).
+# Scope: the generated provider adapters under .claude/{skills,commands,agents} + .claude/README.md.
+# Excluded: .agents/scripts/ (the allowed home of the greppable patterns) and
+#           ../../.agents/ and ../../AGENTS.md (the allowed home of the prose + census).
 #
-# Usage:  .claude/scripts/check-consistency.sh
+# Usage:  .agents/scripts/check-consistency.sh
 # Exit:   0 = clean, 1 = violation(s).
 
 set -uo pipefail
@@ -40,10 +40,10 @@ fi
 
 # "ID|LABEL|EREGEX" — each match is a restated rotting fact.
 RULES=(
-  'A|Hard-coded cap census magnitude (belongs only in CLAUDE.md / ADR-023)|\b([3-9]|[0-9]{2,})[[:space:]]+caps\b'
-  'B|SKU split count e.g. 6/7 (belongs only in CLAUDE.md / ADR-023)|[0-9][[:space:]]*/[[:space:]]*7\b'
-  'C|Named census cap (enumerate only in CLAUDE.md / ADR-023)|bot-fingerprinting|cors-policy|observability-bridge'
-  'D|Hard-coded TRL level (rots; state only in CLAUDE.md / whitepaper)|TRL[- ]?[0-9]'
+  'A|Hard-coded cap census magnitude (belongs only in .agents/references/capability-layer.md / ADR-023)|\b([3-9]|[0-9]{2,})[[:space:]]+caps\b'
+  'B|SKU split count e.g. 6/7 (belongs only in .agents/references/capability-layer.md / ADR-023)|[0-9][[:space:]]*/[[:space:]]*7\b'
+  'C|Named census cap (enumerate only in .agents/references/capability-layer.md / ADR-023)|bot-fingerprinting|cors-policy|observability-bridge'
+  'D|Hard-coded TRL level (rots; state only in the whitepaper)|TRL[- ]?[0-9]'
 )
 
 violations=0
@@ -67,7 +67,7 @@ done
 echo
 if [ "$violations" -gt 0 ]; then
   echo "check-consistency: $violations restated-doctrine violation(s) — FAIL"
-  echo "Move the rotting fact back to CLAUDE.md / the ADR and reference it instead."
+  echo "Move the rotting fact back to .agents/ or the ADR and reference it instead."
   exit 1
 fi
 echo "check-consistency: CLEAN (no restated rotting doctrine under .claude/)"

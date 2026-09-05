@@ -1,3 +1,13 @@
+---
+title: "ADR-001: Cloud Native & Agnostic Infrastructure Strategy"
+type: adr
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-05
+slug: adr/ADR-001
+---
+
 # ADR-001: Cloud Native & Agnostic Infrastructure Strategy
 
 | Attribute       | Value                                                                               |
@@ -7,7 +17,7 @@
 | **Date**        | 2025-10-10                                                                          |
 | **Scope**       | platform (stack-level recommendation across all Exeris apps)                        |
 | **Owning Repo** | `exeris-docs`                                                                       |
-| **Compliance**  | [Strategic Pillar: Clean IP & Detachment](../../exeris-kernel/docs/architecture.md) |
+| **Compliance**  | Strategic Pillar: Clean IP & Detachment — [Whitepaper §6 Sovereignty & IP Ownership](../b2b-technical-whitepaper.md) |
 
 ## Context and Problem Statement
 
@@ -68,7 +78,7 @@ Redis is listed in the infrastructure stack, but its role relative to the Exeris
 | Question                                        | Answer                                                                                                                                                                                                                                                                                                        |
 |:------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Is Redis an internal Kernel mechanism?**      | **No.** The Exeris Kernel (`exeris-kernel-*` modules) has zero runtime dependency on Redis. The kernel is a single-process runtime that manages its own off-heap memory and state via `MemoryAllocator` and `LoanedBuffer`. It does not use Redis for internal coordination.                                  |
-| **Is Saga/Flow coordination backed by Redis?**  | **No.** Flow Engine (L4) Saga state is persisted to the primary datastore (PostgreSQL) via the `CitadelRepository` SPI. Redis is not used for distributed Saga coordination at TRL-3/TRL-4.                                                                                                                   |
+| **Is Saga/Flow coordination backed by Redis?**  | **No.** Flow Engine (L4) Saga state, when snapshot persistence is enabled (`flow.persistenceEnabled`, the `FlowEngineConfig` component of the same name), is persisted to the primary datastore (PostgreSQL in the platform-default stack) through the `FlowSnapshotStore` SPI — the Community binding is `JdbcFlowSnapshotStore`, which writes the `exeris_saga_state` table through a `PersistenceEngine` and falls back to the in-heap `CommunityFlowSnapshotStore` when no engine is bootstrapped. Redis is not used for distributed Saga coordination at TRL-3/TRL-4.                                                                                                                   |
 | **What is Redis used for?**                     | Redis is a **recommended application-tier cache** for business logic built on top of the Kernel — e.g., session caches, rate-limit counters, and distributed locks for application-level workflows. It is an operational recommendation, not a kernel dependency.                                             |
 | **Will Redis ever become a Kernel dependency?** | Only if a future ADR explicitly introduces a `DistributedStateProvider` SPI with a Redis-backed implementation in `exeris-kernel-community`. No such ADR exists at this time. Any such change must pass The Wall audit (Redis client imports must not appear in `exeris-kernel-spi` or `exeris-kernel-core`). |
 

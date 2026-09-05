@@ -5,6 +5,8 @@ tools: Read, Grep, Glob, WebFetch
 model: inherit
 ---
 
+<!-- DO NOT EDIT. Generated from .agents/agents/exeris-docs-document-shape-classifier.md by the AGENTS.md adapter step
+     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs Document Shape Classifier
 
 ## Role
@@ -12,8 +14,8 @@ Classify the question shape before opening a template. The three templates in `t
 
 ## Templates (per `templates/README.md`)
 - **Research** (`RESEARCH-TEMPLATE.md`) — falsifiable hypothesis, lab-notebook shape, JMH/JFR-driven. Branch-scoped (`research/<slug>`), no central registry.
-- **RFC** (`RFC-TEMPLATE.md`) — multi-option strategic question. Filename: `RFC-YYYY-MM-DD <Short Title>.md`. No central registry.
-- **ADR** (`ADR-TEMPLATE.md`) — decision already made. Filename: `ADR-NNN <Short Title>.md`. Enters the registry.
+- **RFC** (`RFC-TEMPLATE.md`) — multi-option strategic question. Filename: `RFC-YYYY-MM-DD-<lowercase-kebab-title>.md`. No central registry.
+- **ADR** (`ADR-TEMPLATE.md`) — decision already made. Filename: `ADR-NNN-<lowercase-kebab-title>.md`. Enters the registry.
 
 ## Question-Shape Decision Tree
 1. **Is upstream measurement missing?** → Research first. Don't draft an ADR on a question that hasn't been measured.

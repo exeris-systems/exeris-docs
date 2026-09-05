@@ -1,0 +1,55 @@
+# Composition and delivery metadata for this repository's agent material.
+# agents-md-schema.md rules 5 and 8: profiles and workflows compose by reference, and any imported
+# bundle is version-pinned. This repository imports nothing yet — the organisation bundle does not
+# exist as a published artefact, and a floating import would be a rule-8 violation, not a shortcut.
+version: 1
+repository: exeris-docs
+imports: []
+
+policies:
+  - policies/adr-registry.md
+  - policies/editing-large-documents.md
+  - policies/drift-patterns.md
+
+references:
+  - references/three-tier-architecture.md
+  - references/capability-layer.md
+  - references/graph-subsystem.md
+  - references/bootstrap-dag.md
+
+skills:
+  - skills/exeris-docs-adr-registry-discipline-review
+  - skills/exeris-docs-document-shape-classifier
+  - skills/exeris-docs-drift-pattern-sweep-review
+  - skills/exeris-docs-routing-planner
+  - skills/exeris-docs-task-classifier
+  - skills/exeris-docs-three-tier-narrative-review
+
+agents:
+  - agents/exeris-docs-router.md
+  - agents/exeris-docs-architect.md
+  - agents/exeris-docs-adr-registry-keeper.md
+  - agents/exeris-docs-document-shape-classifier.md
+  - agents/exeris-docs-implementer.md
+
+workflows:
+  - workflows/adr-reservation-check.md
+  - workflows/drift-pattern-sweep.md
+  - workflows/three-tier-narrative-purity.md
+  - workflows/visibility-taxonomy-check.md
+
+scripts:
+  # Plain shell, provider-agnostic: they read this repository's Markdown and locate candidates.
+  # They live here rather than under a provider directory because several skills, profiles and
+  # workflows call them, and a canonical file must not depend on an adapter (rules 2 and 7).
+  - scripts/drift-sweep.sh
+  - scripts/adr-filename-check.sh
+  - scripts/taxonomy-check.sh
+  - scripts/check-consistency.sh
+
+adapters:
+  # No renderer exists yet; the Claude adapters are refreshed by hand and carry a do-not-edit marker.
+  claude:
+    target: .claude
+    generated: true
+    renderer: none

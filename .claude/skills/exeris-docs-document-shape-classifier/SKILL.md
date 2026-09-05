@@ -3,13 +3,15 @@ name: exeris-docs-document-shape-classifier
 description: Document shape classifier for exeris-docs. Use whenever a user asks to "draft an ADR / RFC / research note" — confirms Research / RFC / ADR / refactor-note is the right shape, and selects the right template.
 ---
 
+<!-- DO NOT EDIT. Generated from .agents/skills/exeris-docs-document-shape-classifier/SKILL.md by the AGENTS.md adapter step
+     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs Document Shape Classifier (skill)
 
 ## Purpose
 Classify the question shape before opening a template. The three templates are NOT interchangeable; refactor-only changes are NOT decision docs at all.
 
 **Single source.** Template shapes, filenames, and selection rules live once in
-`templates/README.md` (and `CLAUDE.md` § "Decision-document templates"). This
+`templates/README.md` (and `AGENTS.md` and `templates/README.md`). This
 skill applies the decision tree below and points at the right file — read
 `templates/README.md` for the authoritative shape definitions.
 

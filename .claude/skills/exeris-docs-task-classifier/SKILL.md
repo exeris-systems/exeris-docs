@@ -3,6 +3,8 @@ name: exeris-docs-task-classifier
 description: Router/Planner triage skill for exeris-docs. Classifies task type (document shape / ADR registry / narrative integrity / large-doc edit / drift sweep), scope, severity, and recommends primary agent.
 ---
 
+<!-- DO NOT EDIT. Generated from .agents/skills/exeris-docs-task-classifier/SKILL.md by the AGENTS.md adapter step
+     (agents-md-schema.md rule 7). Edit the source, not this file. -->
 # Exeris Docs Task Classifier
 
 ## Purpose

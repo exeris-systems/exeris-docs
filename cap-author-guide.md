@@ -1,14 +1,35 @@
+---
+title: Capability Author Guide
+type: howto
+visibility: public
+owning-repo: exeris-docs
+status: active
+last-verified: 2026-09-04
+---
+
 # Capability Author Guide
 
-**Status:** living document · **Scope:** platform · **Owns:** ADR-024 open follow-up 4
+**Scope:** platform · **Discharges:** [ADR-024](adr/ADR-024-capability-composition-model.md) open
+follow-up 4 (cap-author documentation set)
 
 How to build an `exeris-caps-*` repository that the build-time pipeline will validate and a SKU
 will boot. Everything here is derived from the shipped implementation, not from intent — where the
 implementation and an ADR disagree, this document follows the implementation and says so.
 
+## Prerequisites
+
 > **Read first:** [ADR-024](adr/ADR-024-capability-composition-model.md) (the contract),
 > [ADR-023](adr/ADR-023-capability-licensing-taxonomy.md) (which licence your cap carries),
 > [ADR-055](../exeris-tooling/docs/adr/ADR-055-cap-tier-wall-guard.md) (how the Wall is enforced).
+
+- **JDK 25 LTS.** `exeris-sdk` and `exeris-tooling` both compile at `maven.compiler.release` 25, and
+  `exeris-tooling`'s enforcer requires the JVM running Maven itself to be JDK 25 or newer — the
+  codegen plugin loads into Maven's own JVM.
+- **Maven 3.9 or newer** (`exeris-tooling`'s `requireMavenVersion` rule).
+- **`exeris-sdk`, plus `exeris-tooling-bom`, `exeris-processor` and `exeris-codegen-maven-plugin`,
+  installed into your local repository** — see "Build the tooling dependency without credentials"
+  in §5. The published artefacts live on GitHub Packages, so building these from source is what
+  keeps a cap build credential-free.
 
 ---
 
@@ -66,16 +87,20 @@ flagged.
 ```java
 package eu.exeris.caps.corspolicy;
 
+import eu.exeris.caps.corspolicy.api.CorsPolicy;
 import eu.exeris.sdk.annotation.capability.CapabilityModule;
 import eu.exeris.sdk.annotation.capability.Provides;
-import eu.exeris.sdk.annotation.capability.Requires;
 
 @CapabilityModule
 @Provides(service = CorsPolicy.class, version = "1.0.0")
-@Requires(service = ObservabilityBridge.class, versionRange = "[1.0.0,2.0.0)", optional = true)
 public final class CorsPolicyModule {
 }
 ```
+
+That is the whole of the shipped reference cap: one `@Provides`, no `@Requires`, no lifecycle class.
+`@Requires` syntax is in the attribute table below — declare one only when a service you actually
+consume is provided by another cap, because an empty or speculative `@Requires` puts a false edge in
+the composition DAG and changes the derived `initOrder` for every SKU that includes the cap.
 
 **Attribute surface — the whole of it:**
 
@@ -91,8 +116,9 @@ loads the class — it records the name. `version` and `versionRange` are asymme
 provider states one version, a consumer accepts a range.
 
 **An unversioned provide is not the same as version `"0.0.0"`.** The content binding normalizes a
-null version to the empty string — `service@`, distinct from `service@0.0.0`. Getting this wrong
-was a real bug in a now-retired parallel implementation.
+null version to the empty string — `service@`, distinct from `service@0.0.0`. The distinction is
+load-bearing: the content binding hashes that exact string, so an implementation that emits
+`service@null` computes a different SHA-256 and false-fails every deploy.
 
 ---
 
@@ -144,7 +170,7 @@ All four are no-ops by default — **implement the subset you need**.
 | `eu.exeris:exeris-sdk-annotations` | compile | always — the four annotations |
 | `eu.exeris:exeris-kernel-spi` | compile | whenever you touch a kernel SPI |
 | `eu.exeris:exeris-sdk-composition-lifecycle` | compile | only with `@CapabilityLifecycle` |
-| `org.junit.jupiter:junit-jupiter`, `org.assertj:assertj-core` | test | only with `exeris.tests=true` |
+| `org.junit.jupiter:junit-jupiter`, `org.assertj:assertj-core` | test | whenever the cap has tests of its own; also required by `-Dexeris.tests=true`, which makes the generator emit tests that import exactly these two |
 
 `exeris-sdk-composition-lifecycle` is enforcer-proven to have **zero dependencies**, so taking it
 adds exactly one jar.
@@ -171,15 +197,15 @@ adds exactly one jar.
 
 **Binding both is not optional, and the reason is not obvious.** At `generate-sources` the
 `capability_*.json` on disk is by construction the *previous* build's output — the processor only
-refreshes it during `compile`. Historically a graph failure hard-failed there, which deadlocked the
-build on its own stale input: the `@Requires` edit that would fix the graph could never take
-effect, because the build died on the file it was about to replace.
+refreshes it during `compile`. A graph failure that hard-fails there deadlocks the build on its own
+stale input: the `@Requires` edit that fixes the graph can never take effect, because the build dies
+on the file it is about to replace.
 
-`GenerateMojo` now scans the project's build plugins for a bound `verify-capabilities` execution at
-`process-classes` **or later**. If it finds one, a graph failure at `generate-sources` degrades to a
-warning and the authoritative verdict comes from that gate, against metadata the processor emitted
-*this* build. If it does not — or if you rebind the gate to an earlier phase, where it would itself
-see stale input — the historical hard-fail is kept, deadlock included.
+`GenerateMojo` scans the project's build plugins for a bound `verify-capabilities` execution at
+`process-classes` **or later**. When it finds one, a graph failure at `generate-sources` degrades to
+a warning and the authoritative verdict comes from that gate, against metadata the processor emitted
+*this* build. When it does not — or when you rebind the gate to an earlier phase, where it would
+itself see stale input — `generate-sources` fails the build, deadlock included.
 
 ### First build: seed the metadata
 
@@ -196,12 +222,12 @@ would silently wipe committed output.
 
 ### Versions
 
-Track the released lines: **SDK 0.10.0**, **kernel 0.11.0**, **tooling 0.7.0** (released
-2026-08-18). Pin all three to release tags rather than tracking `main` — in both your POM and your
-CI checkout refs. tooling's `main` moved to `0.8.0-SNAPSHOT` in the same step that cut `v0.7.0`, so
-a cap that asked for `0.7.0-SNAPSHOT` and checked out `main` began resolving a version nothing
-produces any more, without a single commit landing in the cap itself. An immutable ref also stops an
-unrelated upstream commit from turning your build red.
+Track the released lines: **SDK 0.11.0** (2026-08-26), **kernel 0.11.0** (2026-08-12), **tooling
+0.8.0** (2026-09-01). Pin all three to release tags rather than tracking `main` — in both your POM
+and your CI checkout refs. Each repo's `main` already carries the next line (`0.12.0-SNAPSHOT` in
+the SDK, `0.9.0-SNAPSHOT` in tooling), so a cap that pins a SNAPSHOT and checks out `main` resolves
+a version nothing produces any more, without a single commit landing in the cap itself. An immutable
+ref also stops an unrelated upstream commit from turning your build red.
 
 A cap still *builds* tooling from source, because the published artefacts live on GitHub Packages
 and resolving them reintroduces the credential this whole recipe exists to avoid. Pinning the ref
@@ -326,12 +352,19 @@ enforcement is contractual per ADR-023, never technical.
 
 | Gap | Effect | Status |
 |---|---|---|
-| `compositionVersion` is never wired | Every plugin-driven build stamps `"0.0.0"`, so the release-identity half of the stamp is inert. The asserter tolerates it by design. | `exeris-tooling` U3 |
+| `compositionVersion` is read from a property nothing sets | `CodegenPipeline` reads the `exeris.composition.version` system property and falls back to `CompositionStamp.UNVERSIONED` (`"0.0.0"`); nothing in the plugin or the parent POMs passes it, so a build that does not set it on the command line stamps `"0.0.0"` and the release-identity half of the stamp is inert. The asserter tolerates it by design. | untracked — no open `exeris-tooling` ROADMAP item |
 | Manifest is emitted to a *source* root | It is not on the runtime classpath. Delivering it to a running SKU is a SKU-scaffold concern. | SKU scaffold, Phase 5 |
-| No cross-service resolution | A legitimate cross-service `@Requires` hard-fails with "no `@CapabilityModule` provides it". `optional = true` is the documented workaround, and it misrepresents a hard requirement. | `exeris-tooling` T12/T17, 0.8.0 |
+| No cross-service resolution | A legitimate cross-service `@Requires` hard-fails with "no `@CapabilityModule` provides it". `optional = true` is the documented workaround, and it misrepresents a hard requirement. | `exeris-tooling` T12/T17, 0.9.0 |
 | No `composition.json` reader | The authored SKU manifest (ADR-053) has no canonical reader yet. | SKU scaffold, Phase 5 |
-| No archetype | ADR-024 promises `mvn archetype:generate` for cap repos. It does not exist; this guide is the manual substitute. | open |
-| Processor extraction gaps | `@Encrypted` and `@RowLevelSecurity` are not consumed by any generator. Declaring them has **no effect** today. | `exeris-tooling` C1/C2 |
+| No archetype | ADR-024 lists `mvn archetype:generate` for cap repos as planned scaffolding. It does not exist; this guide is the manual substitute. | open |
+| Processor extraction gaps | `@Encrypted` and `@RowLevelSecurity` are not consumed by any generator. Declaring them has **no effect** today. | `exeris-tooling` C2 |
+
+<!-- VERIFY(sweep-2026-09): the "Phase 5" label in the two rows above is the 2026-07-21
+     gateway-caps implementation plan's Phase 5, the same phase ADR-053's Engineering Protocol and
+     `exeris-tooling/ROADMAP.md` name. Deliberately left as written on 2026-09-05: the label is
+     consistent across all three, and renaming it here alone would break that. What is genuinely
+     open is whether that plan's phase numbering should be cited from a guide at all, or replaced
+     by the ROADMAP item it corresponds to — a maintainer call, not a documentation defect. -->
 
 That last row deserves emphasis: `-Aexeris.strict` audits attributes that are *extracted but
 unconsumed*, so an attribute the processor never reads at all is invisible to it. Treat the gap
@@ -352,3 +385,20 @@ list as a lower bound.
 - [ ] JDK 25, no `--enable-preview`
 - [ ] `LICENSE` matches the cap's ADR-023 row
 - [ ] `cap-manifest.json` emitted with `validated: true` and a `sha256:` binding
+
+---
+
+## Where this does not apply
+
+- **Tier 1 substrate.** Native-bypass transport — QUIC/HTTP/3, `io_uring`, IOCP — is a kernel driver
+  implementation in `exeris-kernel` or `exeris-kernel-enterprise`, not a cap. There is no
+  `exeris-caps-quic-*` or `exeris-caps-io-uring-*` repository, and nothing here describes how to
+  build one ([HLA §3.2](high-level-architecture.md), "Note on transport implementations").
+- **Host-runtime selection.** A cap never chooses a web framework, a server, or a DI container, and
+  no cap `@Requires` `exeris-spring-runtime`. §6 fails the build on the import rather than on the
+  intent.
+- **SKU-side concerns.** Delivering `cap-manifest.json` to a running SKU, and authoring the SKU's
+  own `composition.json` ([ADR-053](adr/ADR-053-sku-composition-manifest-format.md)), belong to the
+  SKU scaffold — see §8.
+- **Anything a static scan cannot see.** Reflective reach-through and string constants are outside
+  the Wall by design (§6, "Not caught"). The Wall is an import-boundary guard, not a sandbox.
