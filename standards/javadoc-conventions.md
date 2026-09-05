@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-04
+last-verified: 2026-09-05
 ---
 
 # Javadoc Conventions
@@ -34,6 +34,11 @@ Binding per ADR-085 §F. Applies to all Java sources; the hard gates apply to th
 9. **Failure modes name the code.** A method that can raise an `ExerisKernelException` documents the `EX-*` code(s) in `@throws`. `[L2]`
 10. **Category B (generated) files carry the standard generated header and no hand-written Javadoc.** `[L1: pr-review Category-B check]`
 11. **Kernel Core, Community and tooling: rules 2–9 apply to changed files only.** No backfill mandate. `[L1: diff-aware javadoc-gate workflow]`
+12. **Javadoc carries no history.** A doc comment states the contract as it is today. Documentation has places for history — `CHANGELOG`, release notes, an ADR's `## Amendments`, a retraction box, a refactor note — and a doc comment is not one of them. The only temporal tags are `@since` (when the element appeared) and `@deprecated` (since when, and what replaces it). "Previously returned null", "fixed in 0.8.1", "after the io_uring refactor", bug or PR numbers, "this used to…" all go; where they carry knowledge, they go to the release notes or an ADR. A comment that argues *why* the contract is shaped this way is a missing ADR link rather than a paragraph — `@see ADR-NNN` is right, the story is not. `[L1 (warning): Checkstyle RegexpSingleline]` `[L2]`
+    - **The line is the invariant, not its origin.** *"The ring is initialised by the transport owner thread, never by a persistence path"* is the contract and stays, however it was learned. *"This fixes the head-of-line blocking we hit in h1 when the PostgreSQL path initialised the ring"* is history and goes; if that invariant deserves a *why*, it gets `@see ADR-NNN`, or the trade-off goes to `docs/subsystems/transport.md`.
+    - **The gate warns, it does not fail.** Whether a sentence is archaeology or a statement about the present is a reviewer's call: *"the buffer is no longer valid after `close()`"* is a correct sentence about now.
+    - **The regex is narrow by measurement.** Each token is anchored to the verb that makes it past-referential. On `exeris-kernel-spi` the unanchored list (`previously|used to|fixed in|no longer|historically`) fires **36** times, **21** of them on `no longer` alone and nearly all legitimate; anchored, it fires **twice**, both genuine — a narrated downstream incident and a before-and-after account of a lost compile-time guarantee. `no longer` and a bare `previously` are therefore not matched. The miss is deliberate: a check that is wrong twenty times out of twenty-one is a check people learn to ignore.
+    - **A sweep that is unsure records a `VERIFY` and moves on.** Deciding whether a sentence is contract or archaeology is review work, not sweep work.
 
 ## Prose rules (Oracle doc-comment conventions, adopted verbatim)
 
@@ -84,3 +89,4 @@ Replace the usage block:
 - If the type touches memory: are Allocation / Thread confinement / Ownership all three there?
 - Is anything in the comment something the *implementation* does rather than the *contract* requires? Move it to `@implNote`.
 - Did the module's tests compile the snippet?
+- Is there a sentence about the past? Move it to release notes or an ADR and leave `@since`/`@deprecated`/`@see` behind.

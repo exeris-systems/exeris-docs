@@ -90,7 +90,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 18. **Prose rules are the Oracle doc-comment conventions**: summary first sentence; third-person declarative; implementation-independent; `@param` on every parameter, `@return` on every non-void method, `@throws` for checked exceptions and for unchecked ones a caller would catch; no restating the signature; `{@code}`/`{@link}` over HTML.
 19. **Tag vocabulary:** `@implSpec` for what an implementer must honour, `@apiNote` for caller guidance, `@implNote` for facts about the current implementation, `@since` on every public element of a released module. `@author` and `@version` are banned (Git is the author record). Examples use `{@snippet}`, never pasted `<pre>` blocks.
 20. **Contract lines on SPI types that touch buffers, memory or threads:** the type-level comment states, in this order, **Allocation** (`zero-alloc on hot path | allocates`), **Thread confinement** (`owner thread | any thread | virtual-thread-safe`), **Ownership** (who releases; `LoanedBuffer`/`MemorySegment` semantics).
-21. **Gate:** `maven-javadoc-plugin` with `failOnWarnings=true` on `exeris-kernel-spi`, `exeris-sdk-annotations` and every module published to Maven Central (the SDK configuration is the port target); Checkstyle Javadoc modules `JavadocType`, `JavadocMethod`, `JavadocStyle`, `NonEmptyAtclauseDescription`, `AtclauseOrder` (order `@param @return @throws @since @see @deprecated`) in `exeris-kernel-build-config`. Kernel Core and everything else: diff-aware only.
+21. **Gate:** `maven-javadoc-plugin` with `failOnWarnings=true` on `exeris-kernel-spi`, `exeris-sdk-annotations` and every module published to Maven Central (the SDK configuration is the port target); Checkstyle Javadoc modules `JavadocType`, `JavadocMethod`, `JavadocStyle`, `NonEmptyAtclauseDescription`, `AtclauseOrder` (order `@param @return @throws @since @see @deprecated`) ~~in `exeris-kernel-build-config`~~ *(superseded 2026-09-05: the modules ship in `exeris-systems/.github` and the gate reads them from the checkout — see `## Amendments`)* *(added 2026-09-05: and a warning-level regexp for history in a doc comment, `javadoc-conventions.md` rule 12)*. Kernel Core and everything else: diff-aware only.
 
 ### G. ADRs, RFCs and the registry
 
@@ -112,7 +112,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 ### J. Enforcement layering
 
-31. **L1 (CI, hard):** commit format (`commitlint`); PR body headings; frontmatter schema; ADR/RFC filename regex and registry-row presence; link check (`lychee`) including public→private path detection; Javadoc gates of §F.21; japicmp (ADR-065); Category-B files edited without regeneration marker.
+31. **L1 (CI, hard):** commit format (`commitlint`); PR body headings; frontmatter schema; ADR/RFC filename regex and registry-row presence; link check (`lychee`) including public→private path detection; the Javadoc gates of §F.21 *(amended 2026-09-05: except its history regexp, which is warning-level by design and does not fail a build — see `## Amendments`)*; japicmp (ADR-065); Category-B files edited without regeneration marker.
 32. **L1 (CI, warning):** Vale with the Exeris style (seeded from Quarkus's package plus the terminology in each repository's registered drift patterns (`exeris-docs/.agents/policies/drift-patterns.md`)); `markdownlint`.
 33. **L2 (Claude review):** a `docs-guardrails-review` step added to the `pr-review.md` router — a Claude Project document maintained outside the git repositories, whose patch is drafted and staged alongside the guardrail bundle together with the review routine itself; findings adopt a new bracketed severity tag **`[DOC DEBT]`**, added after the existing `[TCK DEBT]` tag in that document.
 34. **L3 (checklists):** `standards/checklists/{pre-pr,doc-page,adr,release-notes}.md`, each ≤ 10 questions. Not gated.
@@ -154,6 +154,20 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 ## Amendments
 
+- **2026-09-05 — §F.21's Javadoc gate gains a history check, and its modules are recorded where they
+  actually live.** Two changes, one of them a correction. `javadoc-conventions.md` rule 12 ("Javadoc
+  carries no history") carried an `[L1 (planned)]` marker, which is the notation for an enforcement
+  that exists naming one that does not. It is now a Checkstyle `RegexpSingleline` at **warning**
+  severity: whether a sentence is archaeology or a statement about the present is a reviewer's call,
+  and the token list is anchored by measurement — unanchored, `previously|used to|fixed in|no
+  longer|historically` fires 36 times on `exeris-kernel-spi`, 21 of those on `no longer` alone and
+  nearly all correct; anchored to the verb that makes each token past-referential, twice, both
+  genuine. Separately, §F.21 located the Checkstyle Javadoc modules in `exeris-kernel-build-config`;
+  they ship in `exeris-systems/.github` and the gate reads them from the checkout, because a ruleset
+  copied into each repository is a ruleset that drifts. The old location is struck, not deleted.
+  Alternative considered and rejected: shipping rule 12's token list as written, at error level —
+  rejected because a check wrong twenty times out of twenty-one is a check people learn to ignore,
+  and the corpus said that is what this one would be. (PR #97)
 - **2026-09-05 — §E gains 17a: issues.** The ADR covered commits, pull requests, Javadoc, ADRs,
   changelogs and agent files, and said nothing about the tracker they all flow from. §C.10 scopes
   `standards/` to "the standards listed in §D–§I", so a tenth standard had no section to rest on:
