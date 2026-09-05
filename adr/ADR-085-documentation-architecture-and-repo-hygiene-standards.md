@@ -112,7 +112,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 ### J. Enforcement layering
 
 31. **L1 (CI, hard):** commit format (`commitlint`); PR body headings; frontmatter schema; ADR/RFC filename regex and registry-row presence; link check (`lychee`) including public→private path detection; Javadoc gates of §F.21; japicmp (ADR-065); Category-B files edited without regeneration marker.
-32. **L1 (CI, warning):** Vale with the Exeris style (seeded from Quarkus's package plus the terminology in `exeris-docs/CLAUDE.md` *Common drift patterns*); `markdownlint`.
+32. **L1 (CI, warning):** Vale with the Exeris style (seeded from Quarkus's package plus the terminology in each repository's registered drift patterns (`exeris-docs/.agents/policies/drift-patterns.md`)); `markdownlint`.
 33. **L2 (Claude review):** a `docs-guardrails-review` step added to the `pr-review.md` router — a Claude Project document maintained outside the git repositories, whose patch is drafted and staged alongside the guardrail bundle together with the review routine itself; findings adopt a new bracketed severity tag **`[DOC DEBT]`**, added after the existing `[TCK DEBT]` tag in that document.
 34. **L3 (checklists):** `standards/checklists/{pre-pr,doc-page,adr,release-notes}.md`, each ≤ 10 questions. Not gated.
 

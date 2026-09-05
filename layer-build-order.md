@@ -32,7 +32,7 @@ them are edges *between* repositories.
 | **`relationships` in `exeris/domainDescribe`** | an ADR — ADR-025 pins that method's wire shape for the agent bridge | process latency, not implementation |
 | **Studio live editing** | kernel 0.12 (ADR-084, WebSocket provider SPI) | another repository's release |
 | **Presentation IR / the CMS lane** | the presentation RFC's build gate (emitter + corpus) | partly self-created — see below |
-| **Real SKU composition in Studio** | `exeris-caps-*` repositories; first is an H1-2027 target per ADR-024's Engineering Protocol | distant |
+| **Real SKU composition in Studio** | `exeris-caps-*` repositories; the first, `exeris-caps-cors-policy`, was scaffolded 2026-08-16 and committed its cap manifest 2026-08-18, ahead of ADR-024's H1-2027 target | distant |
 
 ## Why the first row is first
 

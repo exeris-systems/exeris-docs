@@ -11,7 +11,7 @@ whitepaper, ADRs, and any cross-cutting doc. Drift here cascades — catch it ea
 
 **Single source.** The canonical framing (Tier 1 substrate / Tier 2 capability
 ecosystem / Tier 3 SKUs / Family products as a separate axis) lives once in
-`CLAUDE.md` § "The three-tier architecture" and § "Capability layer", and in
+`.agents/references/three-tier-architecture.md` and `.agents/references/capability-layer.md`, and in
 `high-level-architecture.md` §§2.2/3/4/5 + whitepaper §3. This skill does NOT
 restate it — read those sections for the authoritative wording, and use
 `.claude/scripts/drift-sweep.sh` to locate the greppable failure modes (the
@@ -55,4 +55,4 @@ Check each claim against the canonical sections above. The load-bearing tests:
 - Never approve an *assertion* (not negation) of `exeris-caps-quic-*` / `exeris-caps-io-uring-*`.
 - Never approve a SKU claiming Spring Runtime, or a cap `@Requires: exeris-spring-runtime`.
 - Never approve "platform uses Spring Runtime" or "Family products run on Spring Runtime" framing.
-- Never adjudicate from memory — read the canonical `CLAUDE.md` / HLA sections.
+- Never adjudicate from memory — read the canonical `.agents/references/` page and the HLA section it names.

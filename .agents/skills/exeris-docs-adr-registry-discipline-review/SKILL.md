@@ -11,7 +11,7 @@ pattern correct; location matches scope; visibility two-valued; license a
 separate three-valued axis; cross-repo link stubs present.
 
 **Single source.** The rules (taxonomy values, location-by-scope, filename
-pattern, the cap census) live once in `CLAUDE.md` § "ADR registry conventions" +
+pattern, the cap census) live once in `.agents/policies/adr-registry.md` (see" +
 § "Capability layer", and in `adr-index.md`, `adr/ADR-020`, `adr/ADR-023`. This
 skill does NOT restate them — it runs the scripts and reads those sources.
 (This skill subsumes the old standalone visibility/license check — there is no
@@ -35,7 +35,7 @@ separate visibility skill.)
 2. **Location-by-scope** — platform → `exeris-docs/adr/`; per-repo →
    `<repo>/docs/adr/`; cross-repo → owning repo + `ADR-NNN.link.md` stubs in every
    affected repo; enterprise-private → `<enterprise-repo>/docs/adr/` (number still
-   publicly registered). Confirm against `CLAUDE.md`.
+   publicly registered). Confirm against `.agents/policies/adr-registry.md`.
 3. **Visibility + license** — run `.claude/scripts/taxonomy-check.sh` on the
    changed files; adjudicate candidates. Visibility two-valued (no live
    `public-staged`); license three-valued; the two axes not conflated. Read

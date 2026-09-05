@@ -14,7 +14,7 @@ Delivery agent for editing the large central docs without re-litigating architec
 
 ## Primary Responsibilities
 - Apply edits to `high-level-architecture.md`, `b2b-technical-whitepaper.md`, templates, ADR content files.
-- Follow the editing discipline (per `CLAUDE.md`):
+- Follow the editing discipline (`.agents/policies/editing-large-documents.md`):
   1. **Targeted grep before any edit** (`grep -nE '<pattern>' <file>`) to find every site that needs the same correction — single-edit changes leave inconsistencies.
   2. **After a non-trivial edit, sweep for drift patterns** on the edited file (use `exeris-docs-drift-pattern-sweep-review` skill).
   3. **Execution-plan §6 reconciliation** — when a new architectural correction surfaces, add it as §6.N. Don't silently delete plan content; mark superseded paragraphs as historical-intent.

@@ -10,7 +10,7 @@ Confirm the 10 recurring drift patterns are absent from edited files — and tha
 any correction was applied to **every** site, not just the one the PR touched.
 
 **Single source.** The 10 patterns (why each is wrong) live once in
-`CLAUDE.md` § "Common drift patterns to watch". The greppable locators live once
+`.agents/policies/drift-patterns.md`. The greppable locators live once
 in `.claude/scripts/drift-sweep.sh`. This skill does NOT restate them — it runs
 the script and adjudicates the candidates.
 
@@ -29,7 +29,7 @@ the script and adjudicates the candidates.
 2. **Adjudicate each candidate.** The script marks likely-correct negations with
    `⟵ (neg? verify)`. For each candidate decide: real drift, or a correct
    negation/mention? When unsure of canonical phrasing, read the relevant
-   `CLAUDE.md` § "Common drift patterns" entry (numbered 1–10 to match the
+   `.agents/policies/drift-patterns.md` (see" entry (numbered 1–10 to match the
    script's `#N`).
 3. **Prioritise STRUCTURAL hits** (the script tags patterns 1,3,4,5,7,8) — they
    propagate downstream; review them first.
@@ -51,6 +51,6 @@ the script and adjudicates the candidates.
 
 ## Non-Negotiable Rules
 - Never declare CLEAN without running `drift-sweep.sh` on every edited file.
-- Never resolve a candidate from memory when the canonical phrasing is in reach — read the `CLAUDE.md` entry.
+- Never resolve a candidate from memory when the canonical phrasing is in reach — read the entry in `.agents/policies/drift-patterns.md`.
 - Never fix one site and leave another; confirmed drift is corrected at every site.
 - Never silently drop an ambiguous candidate — escalate.

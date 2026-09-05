@@ -416,7 +416,7 @@ SKUs are organized into two families plus one cross-cutting data model. Each fam
 | PIM | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission / graphql-emission codegen) | Marginal — Community driver typically sufficient | Cloud or on-prem |
 | OMS | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission codegen) + kernel-level (L4 Flow saga state) | Marginal — Community driver typically sufficient | Cloud; distributed saga state requires Postgres |
 | Headless CMS API | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission / graphql-emission codegen) | Marginal — Community driver typically sufficient | Cloud or edge-co-located for read replicas |
-| Context-Centric CRM data model | Cross-cutting cap | Composed by Service Boundary SKUs; not standalone | N/A (cap-layer, driver-agnostic) | N/A (cap-layer) |
+| Context-Centric CRM data model | Layer-5 domain-primitive cap | Composed by Service Boundary SKUs; not standalone | N/A (cap-layer, driver-agnostic) | N/A (cap-layer) |
 
 <!-- VERIFY(sweep-2026-09): the '>50k RPS' threshold on the API Gateway row in §5 has no public report path and no figure state. No io_uring or HTTP/3 campaign exists in exeris-benchmarks: origin/main results/reports/ holds seven top-level .md reports, all entity-read-by-id work plus the 2026-05-01 aggregate. H3 results exist only in exeris-benchmarks-enterprise, which is enterprise-private, so docs-style-guide rule 6 forbids this public page citing a path into it. Maintainer must decide whether to drop the threshold or publish a citable Enterprise-driver figure. -->
 <!-- VERIFY(sweep-2026-09): 'sub-ms failover' on the Edge Proxy row in §5 has no measurement behind it in either benchmark repository — exeris-benchmarks origin/main carries only entity-read-by-id reports and the 2026-05-01 aggregate, and exeris-benchmarks-enterprise carries health-probe and entity-read scenarios, none of them a multi-region failover run. There is also no exeris-sku-edge-proxy repository to measure (confirmed against the GitHub org listing, not only the workstation). Maintainer call: drop it or schedule the campaign. -->
@@ -444,7 +444,7 @@ ADR-020's two-valued visibility taxonomy (`public` / `enterprise-private`) gover
 | SDK / Tooling | `exeris-sdk`, `exeris-tooling` | — |
 | Platform / Studio | `exeris-platform` (Studio core, LSP, studio backend) | `exeris-platform-enterprise` (planned — multi-env promotion, design-time RBAC, audit dashboards, multi-tenant org) |
 | Benchmarks | `exeris-benchmarks` (Community, cross-runtime, no H3) | `exeris-benchmarks-enterprise` — H3 track per ADR-016 (*scope document planned; current README is a placeholder*) |
-| Observability | *(none today — see note)* | `exeris-telemetry-spec` (wire format; publishable as an open spec per ADR-018, repository private today), `exeris-enterprise-observability` (decoder, CLI, forensics) |
+| Observability | *(no Community driver today)* | `exeris-telemetry-spec` (wire format; publishable as an open spec per ADR-018, repository private today), `exeris-enterprise-observability` (decoder, CLI, forensics) |
 
 
 ### 6.2 Tier 2 — Capability Ecosystem

@@ -3,7 +3,7 @@
 # adr-filename-check.sh — deterministic gate for ADR filename pattern + number
 # reservation order.
 #
-# Rules live once in ../../CLAUDE.md § "ADR registry conventions" and adr-index.md.
+# Rules live once in ../../.agents/policies/adr-registry.md and adr-index.md.
 # This script enforces only the mechanical parts:
 #   - filename matches ADR-NNN-<lowercase-kebab-title>.md (3-digit zero-padded)
 #   - the ADR number already has a row in adr-index.md (reserve-number-first)

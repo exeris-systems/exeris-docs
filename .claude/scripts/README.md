@@ -7,17 +7,17 @@ commands, and agents **call** these scripts — they do not restate the patterns
 
 The **prose** half of the doctrine (why each pattern is wrong, the cap census,
 the SKU split, the three-tier narrative) lives once in
-[`../../CLAUDE.md`](../../CLAUDE.md) and the ADRs it points at. Scripts locate;
+[`../../AGENTS.md`](../../AGENTS.md) and `../../.agents/` and the ADRs it points at. Scripts locate;
 prose explains; the skill/agent adjudicates.
 
 ## Scripts
 
 | Script | Purpose | Exit 0 / 1 / 2 |
 |---|---|---|
-| `drift-sweep.sh <file>…` | Locate candidate lines for the 10 drift patterns (CLAUDE.md § Common drift patterns). | clean / candidates-found / usage |
+| `drift-sweep.sh <file>…` | Locate candidate lines for the 13 registered drift patterns (.agents/policies/drift-patterns.md). | clean / candidates-found / usage |
 | `taxonomy-check.sh <file>…` | Locate visibility (ADR-020) + license (ADR-023) candidate lines. | clean / candidates-found / usage |
 | `adr-filename-check.sh <adr-file>` | Verify `ADR-NNN-<lowercase-kebab>.md` + number reserved in `adr-index.md`. | pass / fail / usage |
-| `check-consistency.sh` | Anti-drift guard: fail if any `.claude/` file hard-codes doctrine that must live only in CLAUDE.md/scripts. | clean / violation / — |
+| `check-consistency.sh` | Anti-drift guard: fail if any `.claude/` file hard-codes doctrine that must live only in `.agents/`/scripts. | clean / violation / — |
 
 ## Locator, not auto-fail (drift-sweep + taxonomy-check)
 

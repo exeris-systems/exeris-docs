@@ -9,7 +9,7 @@ description: Document shape classifier for exeris-docs. Use whenever a user asks
 Classify the question shape before opening a template. The three templates are NOT interchangeable; refactor-only changes are NOT decision docs at all.
 
 **Single source.** Template shapes, filenames, and selection rules live once in
-`templates/README.md` (and `CLAUDE.md` § "Decision-document templates"). This
+`templates/README.md` (and `AGENTS.md` and `templates/README.md`). This
 skill applies the decision tree below and points at the right file — read
 `templates/README.md` for the authoritative shape definitions.
 

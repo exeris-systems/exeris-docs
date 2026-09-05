@@ -3,7 +3,7 @@
 # drift-sweep.sh — candidate locator for the 10 recurring drift patterns.
 #
 # Single source of the *greppable* drift locators. The prose explanation of WHY
-# each pattern is wrong lives once in ../../CLAUDE.md § "Common drift patterns to
+# each pattern is wrong lives once in ../../.agents/policies/drift-patterns.md (§
 # watch". This script does not restate that prose — it only surfaces candidate
 # lines fast so a reviewer (the drift-pattern-sweep skill, or a human) can
 # adjudicate drift vs. a correct negation/mention.
@@ -19,7 +19,7 @@
 # Usage:
 #   scripts/drift-sweep.sh <file> [<file> ...]
 #
-# Class (prioritisation only, per CLAUDE.md): STRUCTURAL patterns (1,3,4,5,7,8)
+# Class (prioritisation only, per the policy): STRUCTURAL patterns (1,3,4,5,7,8)
 # propagate downstream — review them first.
 #
 # Exit codes:
@@ -39,7 +39,7 @@ fi
 # correctly stating the rule rather than committing the drift.
 NEG_CUE="(\bno\b|\bnot\b|\bnever\b|n't|\bwithout\b|deprecated|\bexcludes?\b|forbid|prohibit|must not|cannot|there is no|do(es)? not|instead of|rather than|replaced?|legacy|wrong)"
 
-# Pattern table: "ID|CLASS|LABEL|EREGEX"  (IDs match CLAUDE.md 1..10)
+# Pattern table: "ID|CLASS|LABEL|EREGEX"  (IDs match the policy list 1..13)
 PATTERNS=(
   '1|STRUCTURAL|Postgres-only graph / replacing Neo4j (kernel is dual-engine)|replacing Neo4j|Postgres[- ]only|only graph engine|drop(ping|s)? Neo4j'
   '2|local|exeris-kernel-community framed as a sibling repo (it is a Maven module)|exeris-kernel-community'

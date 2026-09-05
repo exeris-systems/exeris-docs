@@ -8,7 +8,7 @@ Audit the visibility / license claim below.
 Change: $ARGUMENTS
 
 The authoritative values, the cap census, and the SKU source-visibility split
-live once in `CLAUDE.md` § "Capability layer", and in `adr/ADR-020` (visibility)
+live once in `.agents/references/capability-layer.md`, and in `adr/ADR-020` (visibility)
 and `adr/ADR-023` (license). Read those — this command does not restate the census.
 
 Steps:

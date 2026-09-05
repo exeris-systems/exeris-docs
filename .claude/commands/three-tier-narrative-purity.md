@@ -11,7 +11,7 @@ Change: $ARGUMENTS
 
 The canonical framing (Tier 1 substrate / Tier 2 capability ecosystem / Tier 3
 kernel-direct SKUs / Family products as a separate axis) lives once in
-`CLAUDE.md` § "The three-tier architecture" + § "Capability layer", and in
+`.agents/references/three-tier-architecture.md` and `.agents/references/capability-layer.md`, and in
 `high-level-architecture.md` §§2.2/3/4/5 + whitepaper §3. Read those for the
 authoritative wording — this command does not restate them.
 

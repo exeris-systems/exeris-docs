@@ -17,7 +17,7 @@ Adapted from the arkstack voice checklist for a project voice: same purpose, no 
 4. **Rejected.** For any design description: is there one sentence on what was rejected and what it cost?
 5. **Concrete subject.** Is the subject of most sentences a module, a seam, an ADR or a code — not "the kernel" or "the platform"?
 6. **Numbers.** Does every figure carry a report path and a state, with the qualifier next to it?
-7. **Terminology.** capability not cap; hot path; Category A/B/C; Community/Enterprise tiers — did Vale pass at warning level, and did you read the warnings rather than dismiss them?
+7. **Terminology.** capability not cap; hot path; Category B for generated files (`A` and `C` are not Exeris terms); Community/Enterprise tiers — did Vale pass at warning level, and did you read the warnings rather than dismiss them?
 8. **Headings.** Are they nouns that make the page findable, not labels that make it sound finished?
 9. **Frontmatter.** Is `last-verified` the date you *checked the code*, not the date you edited prose?
 10. **Anonymity test.** Could this page have been written for any JVM project? Then it says nothing about Exeris — add the constraint that makes it ours.

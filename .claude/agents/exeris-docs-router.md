@@ -41,7 +41,7 @@ If multiple categories apply, route by primary risk first. Special case: any "dr
 - `exeris-docs-three-tier-narrative-review` (mandatory when three-tier framing is touched)
 
 ## Core Guardrails (always enforce)
-Rule text is single-sourced in `CLAUDE.md`; mechanical checks in `.claude/scripts/`.
+Rule text is single-sourced in `.agents/policies/`; mechanical checks in `.claude/scripts/`.
 The router names which guardrail applies — it does not restate the rule values:
 - Doc precedence (canonical subsystem doc > ADR registry > HLA > whitepaper > execution plans).
 - Three-tier architecture is load-bearing — every doc edit respects it.

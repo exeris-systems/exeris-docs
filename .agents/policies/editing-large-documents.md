@@ -14,5 +14,5 @@ Strong defaults. Depart from one only with a stated reason in the pull request.
 The whitepaper and the HLA are long and heavily cross-referenced. When editing them:
 
 - Run a targeted grep before any edit (`grep -nE '<pattern>' high-level-architecture.md` etc.) to find every site that needs the same correction. Single-edit changes leave inconsistencies.
-- After a non-trivial edit, sweep for the drift-patterns list above on the edited file.
-- Don't silently delete superseded content — mark superseded paragraphs, don't rewrite them in place. The record-side form of the same discipline is [`standards/adr-conventions.md`](standards/adr-conventions.md) rule 7.
+- After a non-trivial edit, sweep the edited file for every pattern in `.agents/policies/drift-patterns.md`.
+- Don't silently delete superseded content — mark superseded paragraphs, don't rewrite them in place. The record-side form of the same discipline is [`standards/adr-conventions.md`](../../standards/adr-conventions.md) rule 7.
