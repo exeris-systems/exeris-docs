@@ -4,7 +4,7 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-04
+last-verified: 2026-09-05
 slug: adr/ADR-085
 ---
 
@@ -119,7 +119,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 ### K. Contributor terms
 
-35. **DCO.** External contributions require a `Signed-off-by` trailer, enforced by the DCO GitHub App with organisation members exempt. `CONTRIBUTING.md` states the licence each module is offered under. No CLA.
+35. **DCO.** External contributions require a `Signed-off-by` trailer, enforced by the DCO GitHub App with organisation members exempt. `CONTRIBUTING.md` states the licence each module is offered under *(added 2026-09-05: and the contributor-terms instrument that repository asks for, if any — a decision owned by the private business decision registry, not by this ADR)*. ~~No CLA.~~ *(withdrawn 2026-09-05 — see `## Amendments`.)*
 
 ### L. Explicitly deferred
 
@@ -164,6 +164,33 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
   rather than a line in a PR thread. Alternative considered and rejected: leaving issues ungoverned
   on the grounds that a solo repository has few of them — rejected because the monthly audit of §J is
   specified to count debt, and it cannot count what was never filed. (PR #96)
+- **2026-09-05 — §K.35's "No CLA" is withdrawn; contributor licensing is not this ADR's to decide.**
+  The sentence was written on 2026-09-04, one line inside a documentation-and-hygiene ADR, and it
+  settled a commercial and IP question: whether a contributor licence agreement is asked for at all.
+  Two rules already said it could not. Business decisions — legal, IP, financial, procurement — are
+  kept in the private business decision registry, and a public tech ADR invokes such a policy
+  descriptively rather than deciding it. That registry held no decision on contributor terms when
+  §K.35 was written, so the sentence was not even restating one; the contribution policy is
+  recorded there as of this amendment. And §C.10 makes `standards/` the home of the standards
+  listed in §D–§I, while `ai-provenance.md` is created by §I.30, whose mandate is exactly three
+  things: the `Co-authored-by:` trailer, human accountability, and agents not opening pull
+  requests. Contribution terms are in none of them.
+  The substance was wrong for an open-core organisation as well. A DCO sign-off and a contributor
+  licence agreement are not alternatives and do not overlap: the trailer certifies origin per commit
+  and grants nothing, while the agreement is the instrument that grants the right to place a
+  contribution in the Enterprise tier — a right Apache-2.0 §5 inbound-equals-outbound does not
+  supply, which is the entire reason an open-core project asks for one. The founder's contribution
+  strategy of 2026-05-13 targets both, and `exeris-kernel`'s `CONTRIBUTING.md` had stated the
+  agreement and its reasoning since before this ADR was written, so §K.35 contradicted a live
+  repository policy it never cited.
+  What changes: §K.35 keeps the `Signed-off-by` requirement and the obligation that `CONTRIBUTING.md`
+  states the licence each module is offered under, gains the obligation to state the contributor-terms
+  instrument, and loses "No CLA"; `ai-provenance.md` loses its "Not a CLA" bullet and rule 7 now says
+  what a sign-off does and does not do. No gate config moves — §K.35's `[L1]` is the DCO App, which
+  checks the trailer either way. Alternative considered and rejected: keeping "No CLA" and treating
+  `exeris-kernel/CONTRIBUTING.md` as the defect, which would remove the only instrument that makes
+  the Enterprise tier lawful for external contributions, on the authority of a documentation ADR.
+  (PR #95)
 
 - **2026-09-05 — cross-repo links are absolute and name a branch; §A.2's "relative links resolve
   unchanged" is narrowed to intra-repo links.** The first live `docs-lint` run reported 118 broken
