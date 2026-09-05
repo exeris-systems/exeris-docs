@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-05
+last-verified: 2026-09-04
 ---
 
 # Pull Request Conventions
@@ -24,7 +24,7 @@ Binding per ADR-085 §E. The template below is the organisation default (`exeris
    - `Evidence state:` `citable | unartifacted | n/a`
    - `Closes #N` / `Refs: ADR-NNN` lines as in the commit trailer grammar
 4. **Draft PRs are exempt** from rules 2–3 until marked ready. `[L1]`
-5. **Labels:** `adr` on any PR that adds or amends an ADR `[L1: scripts/pr_body_check.py]`; `docs-only` when *Scope class* is docs-only (routes review to the docs step only) `[L2]`
+5. **Labels:** `adr` on any PR that adds or amends an ADR; `docs-only` when *Scope class* is docs-only (routes review to the docs step only). `[L2]`
 6. **Dependabot / bot PRs** carry the template in reduced form (`Motivation` only) and skip Claude review. `[L1: workflow condition]`
 
 ## The template
