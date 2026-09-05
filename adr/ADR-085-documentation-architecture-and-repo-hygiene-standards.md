@@ -118,7 +118,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 ### K. Contributor terms
 
-35. **DCO.** External contributions require a `Signed-off-by` trailer, enforced by the DCO GitHub App with organisation members exempt. `CONTRIBUTING.md` states the licence each module is offered under, and the contributor-terms instrument that repository asks for, if any — a decision owned by the private business decision registry, not by this ADR. ~~No CLA.~~ *(withdrawn 2026-09-05 — see `## Amendments`.)*
+35. **DCO.** External contributions require a `Signed-off-by` trailer, enforced by the DCO GitHub App with organisation members exempt. `CONTRIBUTING.md` states the licence each module is offered under *(added 2026-09-05: and the contributor-terms instrument that repository asks for, if any — a decision owned by the private business decision registry, not by this ADR)*. ~~No CLA.~~ *(withdrawn 2026-09-05 — see `## Amendments`.)*
 
 ### L. Explicitly deferred
 
@@ -167,7 +167,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
   The substance was wrong for an open-core organisation as well. A DCO sign-off and a contributor
   licence agreement are not alternatives and do not overlap: the trailer certifies origin per commit
   and grants nothing, while the agreement is the instrument that grants the right to place a
-  contribution in the commercial tier — a right Apache-2.0 §5 inbound-equals-outbound does not
+  contribution in the Enterprise tier — a right Apache-2.0 §5 inbound-equals-outbound does not
   supply, which is the entire reason an open-core project asks for one. The founder's contribution
   strategy of 2026-05-13 targets both, and `exeris-kernel`'s `CONTRIBUTING.md` had stated the
   agreement and its reasoning since before this ADR was written, so §K.35 contradicted a live
