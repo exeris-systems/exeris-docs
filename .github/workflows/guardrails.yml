@@ -8,7 +8,10 @@
 name: guardrails
 on:
   pull_request:
-    types: [opened, edited, synchronize, ready_for_review]
+    # labeled/unlabeled matter: adr-conventions rule 9 requires the `adr` label on a PR that
+    # amends an ADR, and this repository's records live at the root, so that gate fires here
+    # often. Without these, adding the label after a red run cannot turn it green.
+    types: [opened, edited, synchronize, ready_for_review, labeled, unlabeled]
 concurrency:
   group: guardrails-${{ github.event.pull_request.number }}
   cancel-in-progress: true
