@@ -163,7 +163,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
   the label taxonomy, and the rule that a `[DOC DEBT]` or `[TCK DEBT]` finding becomes a filed issue
   rather than a line in a PR thread. Alternative considered and rejected: leaving issues ungoverned
   on the grounds that a solo repository has few of them — rejected because the monthly audit of §J is
-  specified to count debt, and it cannot count what was never filed. (PR #95)
+  specified to count debt, and it cannot count what was never filed. (PR #96)
 
 - **2026-09-05 — cross-repo links are absolute and name a branch; §A.2's "relative links resolve
   unchanged" is narrowed to intra-repo links.** The first live `docs-lint` run reported 118 broken
