@@ -11,7 +11,7 @@ any correction was applied to **every** site, not just the one the PR touched.
 
 **Single source.** The 10 patterns (why each is wrong) live once in
 `.agents/policies/drift-patterns.md`. The greppable locators live once
-in `.claude/scripts/drift-sweep.sh`. This skill does NOT restate them — it runs
+in `.agents/scripts/drift-sweep.sh`. This skill does NOT restate them — it runs
 the script and adjudicates the candidates.
 
 ## When to Use
@@ -25,7 +25,7 @@ the script and adjudicates the candidates.
 
 ## Review Procedure
 1. **Run the locator** on every edited file:
-   `.claude/scripts/drift-sweep.sh <file>…`
+   `.agents/scripts/drift-sweep.sh <file>…`
 2. **Adjudicate each candidate.** The script marks likely-correct negations with
    `⟵ (neg? verify)`. For each candidate decide: real drift, or a correct
    negation/mention? When unsure of canonical phrasing, read the relevant

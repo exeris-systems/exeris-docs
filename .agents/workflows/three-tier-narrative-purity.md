@@ -14,9 +14,9 @@ kernel-direct SKUs / Family products as a separate axis) lives once in
 authoritative wording — this command does not restate them.
 
 Steps:
-1. If a file is in scope, run `.claude/scripts/drift-sweep.sh $ARGUMENTS` — the
+1. If a file is in scope, run `.agents/scripts/drift-sweep.sh $ARGUMENTS` — the
    STRUCTURAL patterns (#1,#3,#4,#5,#8) are exactly the tier-misassignment ones —
-   and `.claude/scripts/taxonomy-check.sh $ARGUMENTS` for the license/visibility axes.
+   and `.agents/scripts/taxonomy-check.sh $ARGUMENTS` for the license/visibility axes.
 2. Adjudicate each candidate against the canonical sections. Load-bearing checks:
    Enterprise engine swap = Tier 1 driver swap (not Tier 2 cap-manifest); SKUs
    kernel-direct (no SKU claims Spring Runtime); no cap `@Requires:

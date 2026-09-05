@@ -8,7 +8,7 @@ Run the drift-pattern sweep on the target below.
 Target: $ARGUMENTS
 
 Steps:
-1. Run the locator: `.claude/scripts/drift-sweep.sh $ARGUMENTS`
+1. Run the locator: `.agents/scripts/drift-sweep.sh $ARGUMENTS`
    (It holds the 10 greppable patterns and marks likely-correct negations with
    `⟵ (neg? verify)`. Exit 1 = candidates found → review required, NOT "broken".)
 2. Adjudicate each candidate as real drift vs. a correct negation/mention. For

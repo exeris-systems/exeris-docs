@@ -25,7 +25,7 @@ Given a classified task (see `exeris-docs-task-classifier`), produce a minimal, 
 - `MULTI_DOMAIN` → start with `router` triage, list all dominant handoffs.
 
 ## Default Validation Gates
-Rule definitions live in `.agents/policies/`; mechanical checks live in `.claude/scripts/`.
+Rule definitions live in `.agents/policies/`; mechanical checks live in `.agents/scripts/`.
 This list names *which* gate applies, not the rule text.
 - Document shape decided (Research / RFC / ADR) when "draft a decision doc" → `exeris-docs-document-shape-classifier`.
 - ADR number reserved before content + filename pattern → `adr-filename-check.sh` / `exeris-docs-adr-registry-discipline-review`.

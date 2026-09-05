@@ -9,13 +9,13 @@ Change: $ARGUMENTS
 
 The rules live once in `.agents/policies/adr-registry.md` (see" and
 `adr/ADR-020-open-core-documentation-mirror-policy.md`; the mechanical checks live
-in `.claude/scripts/`. Read those — this command does not restate the rule text.
+in `.agents/scripts/`. Read those — this command does not restate the rule text.
 
 Steps:
-1. Run `.claude/scripts/adr-filename-check.sh <adr-file>` — verifies the filename
+1. Run `.agents/scripts/adr-filename-check.sh <adr-file>` — verifies the filename
    matches `ADR-NNN-<lowercase-kebab-title>.md` AND that the number already has a
    row in `adr-index.md` (reserve-number-first). Exit 1 = real violation.
-2. Run `.claude/scripts/taxonomy-check.sh <changed-files>` for visibility (ADR-020,
+2. Run `.agents/scripts/taxonomy-check.sh <changed-files>` for visibility (ADR-020,
    two-valued; no live `public-staged`) and license (ADR-023, three-valued; not
    conflated with visibility).
 3. Confirm by hand against `.agents/policies/adr-registry.md`:

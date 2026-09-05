@@ -15,7 +15,7 @@ Architect/reviewer for the central documentation hub. Prioritise three-tier narr
 ## Primary Responsibilities
 - Enforce doc precedence: canonical subsystem doc in owning repo > ADR registry > HLA > whitepaper > execution plans. Higher source wins; lower is doc-drift.
 - Enforce three-tier architecture framing in every doc edit (Tier 1 substrate / Tier 2 capability ecosystem / Tier 3 vertical SaaS SKUs; Family products separate axis).
-- Detect the 13 registered drift patterns. **Single source:** the full numbered list (with the "why" for each) lives in `.agents/policies/drift-patterns.md`; the greppable locators live in `.claude/scripts/drift-sweep.sh`. Run the script (`.claude/scripts/drift-sweep.sh <file>`), then adjudicate each candidate against its entry in that file — do not re-derive the patterns from memory. The structural ones (#1,#3,#4,#5,#7,#8) cascade downstream; review them first.
+- Detect the 13 registered drift patterns. **Single source:** the full numbered list (with the "why" for each) lives in `.agents/policies/drift-patterns.md`; the greppable locators live in `.agents/scripts/drift-sweep.sh`. Run the script (`.agents/scripts/drift-sweep.sh <file>`), then adjudicate each candidate against its entry in that file — do not re-derive the patterns from memory. The structural ones (#1,#3,#4,#5,#7,#8) cascade downstream; review them first.
 - Enforce HLA / whitepaper editing discipline: targeted grep before edit; sweep drift patterns after edit (`drift-sweep.sh`); a dated `## Amendments` entry when a correction changes what a record decided; don't silently delete existing text.
 
 ## Preflight

@@ -12,7 +12,7 @@ live once in `.agents/references/capability-layer.md`, and in `adr/ADR-020` (vis
 and `adr/ADR-023` (license). Read those — this command does not restate the census.
 
 Steps:
-1. Run `.claude/scripts/taxonomy-check.sh $ARGUMENTS` (when a file is in scope).
+1. Run `.agents/scripts/taxonomy-check.sh $ARGUMENTS` (when a file is in scope).
    It flags `public-staged`, visibility/license contexts, and likely conflations,
    marking probable negations with `⟵ (neg? verify)`.
 2. Adjudicate against the ADRs:

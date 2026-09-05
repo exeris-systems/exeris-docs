@@ -30,13 +30,13 @@ separate visibility skill.)
 
 ## Review Procedure
 1. **Number-first** — `adr-index.md` row added BEFORE / WITH the content file.
-   Run `.claude/scripts/adr-filename-check.sh <adr-file>` (checks the filename
+   Run `.agents/scripts/adr-filename-check.sh <adr-file>` (checks the filename
    pattern AND that the number is already in the index). Content-without-index is a regression.
 2. **Location-by-scope** — platform → `exeris-docs/adr/`; per-repo →
    `<repo>/docs/adr/`; cross-repo → owning repo + `ADR-NNN.link.md` stubs in every
    affected repo; enterprise-private → `<enterprise-repo>/docs/adr/` (number still
    publicly registered). Confirm against `.agents/policies/adr-registry.md`.
-3. **Visibility + license** — run `.claude/scripts/taxonomy-check.sh` on the
+3. **Visibility + license** — run `.agents/scripts/taxonomy-check.sh` on the
    changed files; adjudicate candidates. Visibility two-valued (no live
    `public-staged`); license three-valued; the two axes not conflated. Read
    `adr/ADR-020` / `adr/ADR-023` if a value is in question.

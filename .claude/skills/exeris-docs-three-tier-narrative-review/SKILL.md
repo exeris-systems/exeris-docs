@@ -16,7 +16,7 @@ ecosystem / Tier 3 SKUs / Family products as a separate axis) lives once in
 `.agents/references/three-tier-architecture.md` and `.agents/references/capability-layer.md`, and in
 `high-level-architecture.md` §§2.2/3/4/5 + whitepaper §3. This skill does NOT
 restate it — read those sections for the authoritative wording, and use
-`.claude/scripts/drift-sweep.sh` to locate the greppable failure modes (the
+`.agents/scripts/drift-sweep.sh` to locate the greppable failure modes (the
 structural drift patterns #1,#3,#4,#5,#8 are exactly the tier-misassignment ones).
 
 ## When to Use

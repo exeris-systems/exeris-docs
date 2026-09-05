@@ -31,7 +31,7 @@ Owner of the single ADR numbering namespace and the discipline that keeps it usa
 - Read `adr/ADR-020-open-core-documentation-mirror-policy.md` for the visibility taxonomy authoritative source.
 - Read `adr/ADR-023-capability-licensing-taxonomy.md` for license taxonomy.
 - Read `templates/README.md` for template selection rules.
-- Run the mechanical gates rather than eyeballing: `.claude/scripts/adr-filename-check.sh <adr-file>` (filename pattern + number reserved in `adr-index.md`) and `.claude/scripts/taxonomy-check.sh <changed-files>` (visibility / license candidates). The rules they encode are single-sourced — don't restate the taxonomy values from memory; adjudicate candidates against the ADRs above.
+- Run the mechanical gates rather than eyeballing: `.agents/scripts/adr-filename-check.sh <adr-file>` (filename pattern + number reserved in `adr-index.md`) and `.agents/scripts/taxonomy-check.sh <changed-files>` (visibility / license candidates). The rules they encode are single-sourced — don't restate the taxonomy values from memory; adjudicate candidates against the ADRs above.
 
 ## Hard Constraints
 - Number reserved in index FIRST.

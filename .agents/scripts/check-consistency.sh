@@ -14,11 +14,11 @@
 # review skill must be allowed to say what it checks for. It targets only the
 # rotting specifics (numbers, named census, TRL values).
 #
-# Scope: .claude/{skills,commands,agents} + .claude/README.md.
-# Excluded: .claude/scripts/ (the allowed home of the greppable patterns) and
+# Scope: the generated provider adapters under .claude/{skills,commands,agents} + .claude/README.md.
+# Excluded: .agents/scripts/ (the allowed home of the greppable patterns) and
 #           ../../.agents/ and ../../AGENTS.md (the allowed home of the prose + census).
 #
-# Usage:  .claude/scripts/check-consistency.sh
+# Usage:  .agents/scripts/check-consistency.sh
 # Exit:   0 = clean, 1 = violation(s).
 
 set -uo pipefail

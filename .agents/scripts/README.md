@@ -1,13 +1,13 @@
-# `.claude/scripts/` — single source of the *greppable* doctrine rules
+# `.agents/scripts/` — single source of the *greppable* doctrine rules
 
 These scripts hold the **mechanical, regex-expressible** half of the exeris-docs
 guardrails. They are the one place the patterns are written down. Skills,
 commands, and agents **call** these scripts — they do not restate the patterns
-(see [`../README.md`](../README.md) § "Rules — single source").
+(see [`../README.md`](../../README.md) § "Rules — single source").
 
 The **prose** half of the doctrine (why each pattern is wrong, the cap census,
 the SKU split, the three-tier narrative) lives once in
-[`../../AGENTS.md`](../../AGENTS.md) and `../../.agents/` and the ADRs it points at. Scripts locate;
+[`../../AGENTS.md`](../../AGENTS.md) and the policies and references under `..` and the ADRs it points at. Scripts locate;
 prose explains; the skill/agent adjudicates.
 
 ## Scripts
@@ -17,7 +17,7 @@ prose explains; the skill/agent adjudicates.
 | `drift-sweep.sh <file>…` | Locate candidate lines for the 13 registered drift patterns (.agents/policies/drift-patterns.md). | clean / candidates-found / usage |
 | `taxonomy-check.sh <file>…` | Locate visibility (ADR-020) + license (ADR-023) candidate lines. | clean / candidates-found / usage |
 | `adr-filename-check.sh <adr-file>` | Verify `ADR-NNN-<lowercase-kebab>.md` + number reserved in `adr-index.md`. | pass / fail / usage |
-| `check-consistency.sh` | Anti-drift guard: fail if any `.claude/` file hard-codes doctrine that must live only in `.agents/`/scripts. | clean / violation / — |
+| `check-consistency.sh` | Anti-drift guard: fail if any generated provider file hard-codes doctrine that must live only in `.agents/`/scripts. | clean / violation / — |
 
 ## Locator, not auto-fail (drift-sweep + taxonomy-check)
 
@@ -39,14 +39,14 @@ violation) because their rules are unconditional.
 
 ```bash
 # after editing a large doc
-.claude/scripts/drift-sweep.sh high-level-architecture.md b2b-technical-whitepaper.md
-.claude/scripts/taxonomy-check.sh high-level-architecture.md
+.agents/scripts/drift-sweep.sh high-level-architecture.md b2b-technical-whitepaper.md
+.agents/scripts/taxonomy-check.sh high-level-architecture.md
 
 # before an ADR content file lands
-.claude/scripts/adr-filename-check.sh adr/ADR-046-some-decision.md
+.agents/scripts/adr-filename-check.sh adr/ADR-046-some-decision.md
 
 # keep the toolkit itself single-source
-.claude/scripts/check-consistency.sh
+.agents/scripts/check-consistency.sh
 ```
 
 These are dependency-free POSIX-ish bash + `grep`; they run in CI or a

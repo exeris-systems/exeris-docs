@@ -38,6 +38,15 @@ workflows:
   - workflows/three-tier-narrative-purity.md
   - workflows/visibility-taxonomy-check.md
 
+scripts:
+  # Plain shell, provider-agnostic: they read this repository's Markdown and locate candidates.
+  # They live here rather than under a provider directory because several skills, profiles and
+  # workflows call them, and a canonical file must not depend on an adapter (rules 2 and 7).
+  - scripts/drift-sweep.sh
+  - scripts/adr-filename-check.sh
+  - scripts/taxonomy-check.sh
+  - scripts/check-consistency.sh
+
 adapters:
   # No renderer exists yet; the Claude adapters are refreshed by hand and carry a do-not-edit marker.
   claude:
