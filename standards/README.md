@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-04
+last-verified: 2026-09-06
 ---
 
 # Exeris Standards
@@ -19,6 +19,7 @@ Each standard has the same shape: **hard rules** first, each tagged with the lay
 | [`pr-conventions.md`](pr-conventions.md) | PR title, required sections, labels | `exeris-systems/.github` → `PULL_REQUEST_TEMPLATE.md`, `scripts/pr_body_check.py` |
 | [`issue-conventions.md`](issue-conventions.md) | issue forms, title grammar, labels, findings → issues | `exeris-systems/.github` → `ISSUE_TEMPLATE/`, `labels.yml`, `scripts/labels_sync.py`, `workflows/issue-hygiene.yml` |
 | [`javadoc-conventions.md`](javadoc-conventions.md) | doc comments on Java API | per-repo `maven-javadoc-plugin`, `exeris-kernel-build-config/checkstyle.xml` |
+| [`tsdoc-conventions.md`](tsdoc-conventions.md) | doc comments on TypeScript API, release tags, API goldens (api-extractor / MCP tool surface), generated-file header | `exeris-systems/.github` → `ts/eslint.tsdoc.mjs`, `ts/tsdoc.json`, `ts/typedoc.base.json`, `ts/api-extractor.base.json`, `ts/scripts/mcp-tool-surface.mjs`, `workflows/tsdoc-gate.yml` |
 | [`docs-style-guide.md`](docs-style-guide.md) | Markdown docs: frontmatter, types, terminology, voice | `exeris-systems/.github` → `scripts/frontmatter_check.py`, `vale/`, `.markdownlint.yaml` |
 | [`readme-skeleton.md`](readme-skeleton.md) | repo README shape | `[L2]` only |
 | [`adr-conventions.md`](adr-conventions.md) | ADR / RFC / RESEARCH files and the registry | `exeris-systems/.github` → `scripts/registry_check.py` |
@@ -36,4 +37,4 @@ Each standard has the same shape: **hard rules** first, each tagged with the lay
 
 ## Provenance
 
-Written 2026-09-04 from the Phase 0 inventory (what the repos do today), the reference analysis of what OpenJDK, Spring, Quarkus, Micronaut and Netty do, the generator spike and the option comparison that chose between them. All of it is internal working material and is deliberately not part of the repository, so it is named descriptively rather than linked. Modelled on the arkstack voice checklist: few rules, testable, short.
+Written 2026-09-04 from the Phase 0 inventory (what the repos do today), the reference analysis of what OpenJDK, Spring, Quarkus, Micronaut and Netty do, the generator spike and the option comparison that chose between them. All of it is internal working material and is deliberately not part of the repository, so it is named descriptively rather than linked. `tsdoc-conventions.md` was added 2026-09-06 from the same kind of work on the TypeScript side — an inventory of the four packages, the practices of Angular, TSDoc/api-extractor, typedoc, VS Code and the MCP TypeScript SDK, and a spike of the gates on the real packages — likewise kept outside the repository. Modelled on the arkstack voice checklist: few rules, testable, short.

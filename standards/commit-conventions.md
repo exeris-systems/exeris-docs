@@ -15,7 +15,7 @@ Binding per ADR-085 §D. Applies to every commit that reaches a protected branch
 
 1. **Conventional Commits subject.** `type(scope): summary` — `[L1: commitlint]`
    - `type` ∈ `feat fix docs chore refactor test build ci perf release report research revert`. Nothing else. `wip` may exist on a feature branch and never on `main` or `development/*`.
-   - `scope` is a module, subsystem or benchmark scenario, lowercase: `kernel-spi`, `core`, `persistence`, `sdk-model`, `codegen-ts`, `entity-read-by-id`. Omit the module prefix when the repo has one module. Domain words that used to be prefixes are scopes now: `test(fuzz):`, `report(entity-read-by-id):`, not `fuzz:` / `report:`.
+   - `scope` is a module, subsystem or benchmark scenario, lowercase: `kernel-spi`, `core`, `persistence`, `sdk-model`, `codegen-ts`, `ai-bridge`, `ui-kit`, `studio-frontend`, `entity-read-by-id`. Omit the module prefix when the repo has one module. Domain words that used to be prefixes are scopes now: `test(fuzz):`, `report(entity-read-by-id):`, not `fuzz:` / `report:`.
    - `release` takes the version as scope: `release(0.12.0): integrate v0.12.0 milestone into main`.
 2. **Subject ≤ 100 characters**, imperative mood, no trailing period, no issue number in the subject (the `(#N)` suffix that squash-merge appends is exempt). `[L1: commitlint header-max-length=100]`
 3. **Body required, with three labelled sections, for `feat`, `fix`, `perf`, `refactor`, `release`:** `[L1: commitlint body-empty + custom rule mmr-sections]`
