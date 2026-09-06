@@ -4,7 +4,7 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-05
+last-verified: 2026-09-06
 slug: adr/ADR-085
 ---
 
@@ -154,6 +154,27 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 ## Amendments
 
+- **2026-09-06 — the Javadoc pilot in Engineering Protocol 4 measured one half of a two-half
+  gate.** "pilot `exeris-sdk` (Javadoc: already passes)" was written at 02:40:21 on 2026-09-05, in
+  the commit that aligned this repository with the standards. The Checkstyle ruleset the gate's
+  other half runs landed in `exeris-systems/.github` at 02:40:55 — 34 seconds later, in a different
+  repository. The claim was true of what could be measured when it was made, and §F.21 already
+  described the gate as two things: `maven-javadoc-plugin` with `failOnWarnings`, **and** the
+  Checkstyle Javadoc modules. Only the first was run.
+
+  Measured since, on `exeris-sdk` at `origin/main` with the shared ruleset over every module that
+  has a `src/main/java`: doclint is clean, and the Checkstyle half reports **1116 errors across 125
+  files**, of which **679 are in `exeris-sdk-annotations`** — the module §F.21 names by hand as a
+  fully gated surface. The SDK's own count of that module agrees to the finding. So the pilot was
+  well chosen for one half and told the rollout nothing about the other, which is why the same gate
+  on `exeris-kernel` read as a surprise rather than as the expected shape.
+
+  Nothing in the Decision changes: §F.21 already required both halves. What changes is the claim
+  that a repository "already passes" — a gate with two halves is passed by neither until both have
+  run, and a rollout plan that names a pilot says which halves the pilot measured. Alternative
+  considered and rejected: deleting the parenthetical, which would have left the plan reading as
+  though the pilot had been chosen on complete evidence. (PR #99)
+
 - **2026-09-05 — §F.21's Javadoc gate gains a history check, and its modules are recorded where they
   actually live.** Two changes, one of them a correction. `javadoc-conventions.md` rule 12 ("Javadoc
   carries no history") carried an `[L1 (planned)]` marker, which is the notation for an enforcement
@@ -264,7 +285,7 @@ Existing repos do **not** comply; this ADR is prescriptive. Migration owner: fou
 1. **Registry (before acceptance):** reserve 085 in `adr-index.md`; add the cross-repo-stubs row listing `.link.md` stubs in every public repo (`exeris-kernel`, `exeris-sdk`, `exeris-spring-runtime`, `exeris-tooling`, `exeris-platform`, `exeris-ai-bridge`, `exeris-benchmarks`, `exeris-caps-cors-policy`) and *(private repo)* markers for the enterprise repos; mark rows 071/073/074/077/080/083 `pending merge` or merge `development/0.12.0` docs to `main`; replace ADR-018's relative link into `exeris-telemetry-spec` with a *(content private)* marker.
 2. **Phase 3 — standards** (`exeris-docs/standards/`): `commit-conventions.md`, `pr-conventions.md`, `javadoc-conventions.md`, `docs-style-guide.md`, `readme-skeleton.md`, `adr-conventions.md`, `changelog-conventions.md`, `agents-md-schema.md`, `ai-provenance.md`, `claims-and-evidence.md` (thin), `checklists/*.md`; extend the kernel skills `exeris-pr-preflight`, `exeris-docs-adr-check`, `exeris-adr-register` rather than adding a new surface; update `ADR-TEMPLATE.md` and `RFC-TEMPLATE.md` per §G.26.
 3. **Phase 4 — enforcement** (`exeris-systems/.github`): reusable workflows and configs of §C.11; frontmatter validator modelled on Quarkus's `YamlMetadataGenerator` (errors to the step summary, exit 1); registry validator (§G.23–24); `docs-guardrails-review.md` routine and the `[DOC DEBT]` line in `pr-review.md`; DCO app installed at organisation level.
-4. **Phase 5 — rollout:** pilot `exeris-sdk` (Javadoc: already passes) and `exeris-kernel` (commit/PR gates) in warning mode for two weeks, then hard; fan out via workflow callers; frontmatter backfill script run per repo; site live at `docs.exeris.eu` from `sources.yml` with strict link mode enabled once item 1 is done.
+4. **Phase 5 — rollout:** pilot `exeris-sdk` ~~(Javadoc: already passes)~~ *(corrected 2026-09-06: true of doclint, not of the Checkstyle half, which did not exist when this was written — see `## Amendments`)* and `exeris-kernel` (commit/PR gates) in warning mode for two weeks, then hard; fan out via workflow callers; frontmatter backfill script run per repo; site live at `docs.exeris.eu` from `sources.yml` with strict link mode enabled once item 1 is done.
 5. **Phase 6 — upkeep:** `docs-guardrails-audit.md` monthly routine (re-run the Phase 0 inventory script, diff, report `[DOC DEBT]` count and age); `doc-drift-check.md` written to use `last-verified`.
 6. **Domain cleanup (tracked as `[DOC DEBT]`):** JSON-schema `$id` in `exeris-benchmarks` (`exeris.io` → `exeris.eu`, schema version bump + changelog); landing targets aligned to `exeris.eu` before the landing ships.
 7. **Acceptance criterion for closing this ADR's protocol:** every public repo has the PR template, a `CONTRIBUTING.md` linking the standards and the DCO paragraph, a schema-conformant `AGENTS.md` and `.agents/` where it exposes reusable agent behaviour, frontmatter on every file under `docs/`, the four reusable workflows green, and the site building with `onBrokenMarkdownLinks: 'throw'`.
