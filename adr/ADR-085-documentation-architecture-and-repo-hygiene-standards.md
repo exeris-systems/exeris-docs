@@ -4,7 +4,7 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-05
+last-verified: 2026-09-06
 slug: adr/ADR-085
 ---
 
