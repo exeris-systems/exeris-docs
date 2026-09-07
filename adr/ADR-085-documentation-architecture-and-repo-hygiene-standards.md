@@ -166,9 +166,8 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
   the two files GitHub's community profile and every external contributor look for first. The
   organisation `.github` repository now carries `CODE_OF_CONDUCT.md`, `SECURITY.md` and
   `SUPPORT.md` as defaults for every repository. The Code of Conduct is the Contributor Covenant
-  3.0 rather than the 2.x most references still carry, because 3.0 is the version its steward
-  publishes and its enforcement ladder is the one opensource.guide describes; Django adopted it in
-  April 2026 (`djangoproject.com/weblog/2026/apr/15/contributor-covenant-adoption/`). Three things
+  3.0, the version its steward publishes, adopted by Django in April 2026
+  (`djangoproject.com/weblog/2026/apr/15/contributor-covenant-adoption/`). Three things
   the template leaves open are filled in and are the substance of the amendment: reports go to a
   dedicated mailbox, the enforcing party is the maintainers list in `CONTRIBUTING.md` (today one
   person, stated as such), and the fallback for a report about a maintainer is GitHub's own
