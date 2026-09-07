@@ -4,7 +4,7 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-06
+last-verified: 2026-09-07
 slug: adr/ADR-085
 ---
 
@@ -126,6 +126,8 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 35. **DCO.** External contributions require a `Signed-off-by` trailer, enforced by the DCO GitHub App with organisation members exempt. `CONTRIBUTING.md` states the licence each module is offered under *(added 2026-09-05: and the contributor-terms instrument that repository asks for, if any — a decision owned by the private business decision registry, not by this ADR)*. ~~No CLA.~~ *(withdrawn 2026-09-05 — see `## Amendments`.)*
 
+35a. **Community-health defaults are organisation-level and enforceable.** `exeris-systems/.github` carries `CODE_OF_CONDUCT.md` (Contributor Covenant 3.0, with the reporting channel `conduct@exeris.eu`, the maintainers named in `CONTRIBUTING.md` as the enforcing party, GitHub's report-abuse form as the fallback when the report concerns a maintainer, and the Covenant's enforcement ladder), `SECURITY.md` (private vulnerability reporting on every repository, `security@exeris.eu` as the non-GitHub route, the kernel's 72 h / 7 d terms as the organisation's) and `SUPPORT.md` (the routing table behind the issue forms). A repository keeps its own file only where it says more — `exeris-kernel/SECURITY.md` — and every README links, never copies (§B). The two mailboxes exist before the files are published: a code of conduct that cannot be enforced is worse than none.
+
 ### L. Explicitly deferred
 
 36. Enterprise-private documentation site (trigger: first commercial customer needing docs outside the repo; path: Cloudflare Access on a second Pages project). Versioned docs per release line (trigger: Kernel 1.0 GA). Both require an amendment, not a new ADR.
@@ -158,6 +160,27 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 - Business ADRs (`BUS-NNN`) and portfolio-product internal namespaces.
 
 ## Amendments
+
+- **2026-09-07 — §K gains 35a: community-health files.** The ADR governed how contributors write
+  and what CI checks, and said nothing about how they are treated or where a vulnerability goes —
+  the two files GitHub's community profile and every external contributor look for first. The
+  organisation `.github` repository now carries `CODE_OF_CONDUCT.md`, `SECURITY.md` and
+  `SUPPORT.md` as defaults for every repository. The Code of Conduct is the Contributor Covenant
+  3.0 rather than the 2.x most references still carry, because 3.0 is the version its steward
+  publishes and its enforcement ladder is the one opensource.guide describes; Django adopted it in
+  April 2026 (`djangoproject.com/weblog/2026/apr/15/contributor-covenant-adoption/`). Three things
+  the template leaves open are filled in and are the substance of the amendment: reports go to a
+  dedicated mailbox, the enforcing party is the maintainers list in `CONTRIBUTING.md` (today one
+  person, stated as such), and the fallback for a report about a maintainer is GitHub's own
+  report-abuse channel until the project has a second, independent contact. One line is added to
+  the Covenant's restrictions: AI-assisted content is the author's conduct (§I.30). `SECURITY.md`
+  adopts the kernel's existing 72-hour / 7-day terms organisation-wide rather than inventing a
+  second set. Alternatives considered and rejected: Contributor Covenant 2.1 (superseded — no
+  reason to adopt a version its steward has replaced); a bespoke code — nothing about this
+  project's conduct needs is bespoke, and a standard text is the one contributors already know;
+  per-repository copies — they drift, and GitHub applies the organisation default anyway.
+  The two mailboxes and organisation-level private vulnerability reporting are a precondition of
+  publishing the files, not a follow-up: an unenforceable code of conduct is worse than none.
 
 - **2026-09-06 — §F covers TypeScript.** The ADR's doc-comment rules were written against Java
   and read as if the ecosystem had no other language; it has four TypeScript packages, one of them
