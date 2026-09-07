@@ -19,7 +19,7 @@ Binding per ADR-085 §B (shape) — enforced by review only. A README answers fi
    3. `## Build & test` — the golden command and the one that runs a single module; JDK requirement; native prerequisites if any.
    4. `## Documentation` — links to `docs/` entry points and to `docs.exeris.eu/<repo>`; the documentation-precedence list (which doc wins when they disagree).
    5. `## Governing ADRs` — numbers with one line each; link the registry.
-   6. `## Contributing` — one line linking `CONTRIBUTING.md`, which links the standards; licence sentence per module.
+   6. `## Contributing` — one line linking `CONTRIBUTING.md`, which links the standards, the Code of Conduct and `SECURITY.md` (all three are organisation defaults from `exeris-systems/.github`; a repo links, it does not copy); licence sentence per module.
 2. **No status badges that can go stale silently** (build badges are fine; "TRL-x" or "production-ready" are not). `[L2]`
 3. **No numbers** unless they carry a report path (`claims-and-evidence.md`). `[L2]`
 4. **Length:** under 120 lines. A README that needs more is a `docs/` page missing. `[L2]`
