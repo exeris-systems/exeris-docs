@@ -59,7 +59,7 @@ index and a safety boundary; it does not restate them.
 
 | Path | What it holds |
 |:--|:--|
-| [`.agents/policies/`](.agents/policies) | What is permitted or forbidden: [ADR registry discipline](.agents/policies/adr-registry.md) (hard constraints), [editing the whitepaper and the HLA](.agents/policies/editing-large-documents.md) (strong defaults), [drift patterns](.agents/policies/drift-patterns.md) (a sweep checklist). |
+| [`.agents/policies/`](.agents/policies) | What is permitted or forbidden here: [ADR registry discipline](.agents/policies/adr-registry.md), [editing the whitepaper and the HLA](.agents/policies/editing-large-documents.md), [drift patterns](.agents/policies/drift-patterns.md). |
 | [`.agents/references/`](.agents/references) | The short form of facts owned elsewhere — the three-tier architecture, the capability layer, the graph subsystem, the bootstrap DAG. Each names its authoritative source and yields to it. |
 | [`.agents/skills/`](.agents/skills) | Bounded capabilities: registry-discipline review, document-shape classification, drift sweep, routing, task classification, three-tier narrative review. |
 | [`.agents/agents/`](.agents/agents) | Role profiles, one per directory as `<name>/AGENT.md` — router, architect, registry keeper, shape classifier, implementer, evaluator. |
@@ -67,7 +67,8 @@ index and a safety boundary; it does not restate them.
 | [`.agents/schemas/`](.agents/schemas) | The three decision handoffs — triage result, verdict, handoff. A reviewing role emits its verdict as JSON against one of these, after the Markdown. |
 | [`.agents/hooks/`](.agents/hooks) | Runtime enforcement (L0): what may never run, and what may not be called finished. Authored once here, rendered per provider. |
 | [`.agents/evals/`](.agents/evals) | Behaviour tests for the roles above. A change to a profile, skill or policy a scenario covers reruns that scenario, and the pull request names the run. |
-| [`.agents/manifest.yaml`](.agents/manifest.yaml) | The composition, the render map, what each provider cannot do, and the version-pinned bundles this repository imports. It imports none. |
+| [`.agents/vendor/`](.agents/vendor) | The shared bundle, pinned and verified. Its policies bind here too and are composed as `bundle:<name>`; it is never edited in place — a hand-edit is a digest failure. |
+| [`.agents/manifest.yaml`](.agents/manifest.yaml) | The composition, the render map, what each provider cannot do, and the pinned bundle this repository vendors. |
 
 Instruction sources resolve broad to narrow — organisation bundle, repository, subtree, selected
 workflow. A narrower file may restrict behaviour; it may never relax a higher-order rule. Accepted
@@ -88,7 +89,7 @@ Before opening a pull request, run the guardrail checks the standards name and r
 rather than the impression: `frontmatter_check.py`, `registry_check.py`, `agents_file_check.py`,
 `agents_render.py --check`, Vale at error level, `commitlint`. Say what you did not verify as
 plainly as what you did — a check that did not run is reported as not run, never as silence
-([`error-handling-and-fallback.md`](.agents/policies/error-handling-and-fallback.md)).
+([`error-handling-and-fallback.md`](.agents/vendor/exeris-agents-1.0.0/policies/error-handling-and-fallback.md)).
 
 Where the checkout cannot settle a question, leave a `VERIFY` comment at the sentence and report it
 as doc debt rather than guessing. A record's decision text is amended, never edited in place, and

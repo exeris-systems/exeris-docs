@@ -21,7 +21,8 @@ hooks:
     tool: shell
     decision: deny
     reason: >-
-      .agents/policies/agent-safety-and-autonomy.md §1: irreversible or outward-facing action.
+      agent-safety-and-autonomy.md §1 (shared bundle policy, vendored under .agents/vendor/):
+      irreversible or outward-facing action.
       The founder asks for these in the session they happen in.
     # Ordinary `git push` of a feature branch is deliberately absent: it is reversible, it is how
     # a pull request is opened, and denying it would make the hook the thing people disable.
