@@ -5,3 +5,6 @@
 # Phase 0 inventory, the reference research and the org-github bundle, none of which
 # is repository content. Same rule as exeris-kernel's docs/release/ working notes.
 standards/_*/
+
+# Runtime state written by the L0 hooks (.agents/hooks/). Per-checkout, never content.
+.agents-state/

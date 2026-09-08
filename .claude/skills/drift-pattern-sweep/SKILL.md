@@ -1,14 +1,11 @@
 ---
 name: drift-pattern-sweep
 description: Sweep an edited file for the registered drift patterns in `.agents/policies/drift-patterns.md`. Use after any non-trivial HLA / whitepaper / large-doc edit.
-argument-hint: edited file path (e.g. `high-level-architecture.md`) or PR diff
-steps:
-  - {agent: exeris-docs-architect, skill: exeris-docs-drift-pattern-sweep-review, gate: verdict}
-  - {agent: exeris-docs-implementer, when: "a candidate is confirmed as real drift"}
-gates: [script:drift-sweep.sh, hook:guardrails-gate-on-stop]
-output: schemas/verdict.schema.json
+disable-model-invocation: true
 ---
 
+<!-- DO NOT EDIT. Generated from .agents/workflows/drift-pattern-sweep.md by agents_render.py
+     (exeris-systems/.github; agents-md-schema.md rule 7). Edit the source. -->
 Run the drift-pattern sweep on the target below.
 
 Target: $ARGUMENTS

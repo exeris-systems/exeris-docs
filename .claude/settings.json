@@ -1,0 +1,50 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .agents/hooks/bin/hook.py --hook deny-irreversible --vendor claude",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .agents/hooks/bin/hook.py --hook record-guardrail-run --vendor claude",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .agents/hooks/bin/hook.py --hook record-record-edit --vendor claude",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .agents/hooks/bin/hook.py --hook guardrails-gate-on-stop --vendor claude",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
+  "_generated": "hooks are generated from .agents/hooks/hooks.yaml by agents_render.py — edit the source, not this block"
+}

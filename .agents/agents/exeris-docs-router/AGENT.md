@@ -1,12 +1,21 @@
 ---
 name: exeris-docs-router
 description: Entry router for exeris-docs. Use proactively for triage to classify a docs task (ADR / RFC / Research / HLA / whitepaper / templates / drift sweep) and recommend a specialist agent. Invoke when the task shape is unclear (Research vs RFC vs ADR).
-tools: Read, Grep, Glob, WebFetch, WebSearch
+role: router
+mode: read-only
+capabilities: [read, search, web]
 model: inherit
+skills: [exeris-docs-task-classifier, exeris-docs-routing-planner]
+policies: [adr-registry, editing-large-documents, drift-patterns, agent-safety-and-autonomy]
+handoffs:
+  - {agent: exeris-docs-document-shape-classifier, when: "the request is 'draft an ADR / RFC / research note'", blocking: true}
+  - {agent: exeris-docs-adr-registry-keeper, when: "a number, filename, location or taxonomy value is in play", blocking: true}
+  - {agent: exeris-docs-architect, when: "three-tier framing, doc precedence or drift is in play", blocking: false}
+  - {agent: exeris-docs-implementer, when: "the shape and the placement are already settled", blocking: false}
+output: schemas/triage-result.schema.json
+evals: evals/
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/agents/exeris-docs-router/AGENT.md by agents_render.py
-     (exeris-systems/.github; agents-md-schema.md rule 7). Edit the source. -->
 # Exeris Docs Router
 
 ## Role
@@ -92,36 +101,3 @@ or `None`
 
 ## Non-goal
 Do not invent architectural direction; docs reflect decisions, they do not make them.
-
-<!-- BEGIN GENERATED: composition (agents-md-schema.md rule 5) -->
-
-## Skills
-
-Load these before working; each is the single owner of its procedure.
-
-- `.agents/skills/exeris-docs-task-classifier/SKILL.md`
-- `.agents/skills/exeris-docs-routing-planner/SKILL.md`
-
-## Applies
-
-Read the ones your change touches. Each is authoritative for its own list; do not work from a remembered subset.
-
-- `.agents/policies/adr-registry.md`
-- `.agents/policies/editing-large-documents.md`
-- `.agents/policies/drift-patterns.md`
-- `.agents/policies/agent-safety-and-autonomy.md`
-
-## Handoffs
-
-| To | When | Blocking |
-|:--|:--|:--|
-| `exeris-docs-document-shape-classifier` | the request is 'draft an ADR / RFC / research note' | yes |
-| `exeris-docs-adr-registry-keeper` | a number, filename, location or taxonomy value is in play | yes |
-| `exeris-docs-architect` | three-tier framing, doc precedence or drift is in play | no |
-| `exeris-docs-implementer` | the shape and the placement are already settled | no |
-
-## Response contract
-
-After the Markdown response above, emit the same content as a fenced `json` block conforming to `.agents/schemas/triage-result.schema.json`. The Markdown is for the human; the JSON is what the eval runner and the CI review consume. If the two cannot be made to agree, the Markdown is wrong.
-
-<!-- END GENERATED -->

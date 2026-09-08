@@ -1,0 +1,178 @@
+# Behaviour tests for this repository's roles — agents-md-schema.md rule 14.
+#
+# Runtime-independent on purpose: a case names a fixture, a prompt, the schema the answer must
+# conform to, and assertions over its fields. `run.py` drives whichever CLI is available; nothing
+# here mentions one.
+#
+# Graders are deterministic. `expect.fields` are JSON-path-ish assertions against the parsed
+# response; `expect.forbidden` are strings that must not appear anywhere in the raw output, which
+# is how a "does it quote the banned figure back at us" case is written.
+#
+# These run on demand and on a schedule, never on every pull request: model-in-the-loop CI on a
+# solo project is cost without a signal. A change to a profile, skill or policy a case covers
+# reruns that case before merge, and the pull request names the run.
+version: 1
+
+defaults:
+  schema_dir: ../schemas
+  fixture_dir: fixtures
+
+cases:
+  # ── document shape ────────────────────────────────────────────────────────────────────────
+  - id: shape-unmeasured-goes-to-research
+    agent: exeris-docs-document-shape-classifier
+    fixture: adr-unmeasured-question.md
+    prompt: "Classify the document shape for this request."
+    expect:
+      schema: triage-result.schema.json
+      fields:
+        document_shape: RESEARCH
+        template_path: templates/RESEARCH-TEMPLATE.md
+    tags: [shape, decision-tree]
+
+  - id: shape-multi-option-goes-to-rfc
+    agent: exeris-docs-document-shape-classifier
+    fixture: adr-multi-option.md
+    prompt: "Classify the document shape for this request."
+    expect:
+      schema: triage-result.schema.json
+      fields:
+        document_shape: RFC
+        template_path: templates/RFC-TEMPLATE.md
+    tags: [shape, decision-tree]
+
+  - id: shape-refactor-is-not-a-decision-doc
+    agent: exeris-docs-document-shape-classifier
+    fixture: refactor-only.md
+    prompt: "Classify the document shape for this request."
+    expect:
+      schema: triage-result.schema.json
+      fields:
+        document_shape: NOT_A_DECISION_DOC
+    tags: [shape, refactor]
+
+  # ── registry discipline ───────────────────────────────────────────────────────────────────
+  - id: registry-filename-pattern
+    agent: exeris-docs-adr-registry-keeper
+    fixture: adr-filename-wrong.md
+    prompt: "Review this change against registry discipline."
+    expect:
+      schema: verdict.schema.json
+      fields:
+        decision: BLOCKED
+      contains: ["ADR-086-documentation-search-and-indexing.md"]
+    tags: [registry, filename]
+
+  - id: registry-row-before-content
+    agent: exeris-docs-adr-registry-keeper
+    fixture: adr-content-before-row.md
+    prompt: "Review this change against registry discipline."
+    expect:
+      schema: verdict.schema.json
+      fields:
+        decision: BLOCKED
+      contains: ["adr-index.md"]
+    tags: [registry, reserve-first]
+
+  - id: registry-refuses-portfolio-number
+    agent: exeris-docs-adr-registry-keeper
+    fixture: portfolio-adr.md
+    prompt: "Review this request against registry discipline."
+    expect:
+      schema: verdict.schema.json
+      fields:
+        decision: BLOCKED
+    tags: [registry, scope]
+
+  - id: taxonomy-public-staged-is-dead
+    agent: exeris-docs-adr-registry-keeper
+    fixture: visibility-public-staged.md
+    prompt: "Review this claim against the visibility taxonomy."
+    expect:
+      schema: verdict.schema.json
+      fields:
+        decision: BLOCKED
+      contains: ["deprecated"]
+    tags: [taxonomy, visibility]
+
+  - id: taxonomy-axes-not-conflated
+    agent: exeris-docs-adr-registry-keeper
+    fixture: taxonomy-conflation.md
+    prompt: "Review this claim against the visibility and licence taxonomies."
+    expect:
+      schema: verdict.schema.json
+      fields:
+        decision: BLOCKED
+    tags: [taxonomy, licence]
+
+  # ── narrative and drift ───────────────────────────────────────────────────────────────────
+  - id: drift-sku-does-not-claim-spring-runtime
+    agent: exeris-docs-architect
+    fixture: hla-sku-spring.md
+    prompt: "Audit this paragraph for three-tier narrative purity."
+    expect:
+      schema: verdict.schema.json
+      fields:
+        decision: BLOCKED
+      min_findings: 2
+    tags: [three-tier, drift, structural]
+
+  # ── scoped bans ───────────────────────────────────────────────────────────────────────────
+  - id: ban-withdrawn-figure-is-never-restated
+    agent: exeris-docs-evaluator
+    fixture: withdrawn-figure.md
+    prompt: "Evaluate this sentence for merge."
+    expect:
+      schema: verdict.schema.json
+      fields:
+        decision: BLOCKED
+      # The ban is on citing the run, not on naming that a ban exists. A verdict that repeats the
+      # multiplier back into its own findings has failed the case it was asked to judge.
+      forbidden: ["4.1x", "4.1×"]
+    tags: [scoped-ban, claims]
+
+  - id: claims-number-needs-report-and-state
+    agent: exeris-docs-evaluator
+    fixture: number-without-evidence.md
+    prompt: "Evaluate this sentence for merge."
+    expect:
+      schema: verdict.schema.json
+      fields:
+        decision: BLOCKED
+      contains: ["claims-and-evidence"]
+    tags: [claims]
+
+  # ── routing ───────────────────────────────────────────────────────────────────────────────
+  - id: router-recognises-agent-layer-work
+    agent: exeris-docs-router
+    fixture: agent-layer-change.md
+    prompt: "Triage this change."
+    expect:
+      schema: triage-result.schema.json
+      fields:
+        task_class: AGENT_LAYER
+    tags: [routing]
+
+  - id: router-sends-draft-an-adr-to-the-classifier-first
+    agent: exeris-docs-router
+    fixture: adr-unmeasured-question.md
+    prompt: "Triage this request."
+    expect:
+      schema: triage-result.schema.json
+      fields:
+        primary_agent: exeris-docs-document-shape-classifier
+    tags: [routing, shape]
+
+  # ── reporting honesty ─────────────────────────────────────────────────────────────────────
+  - id: evaluator-reports-a-check-it-could-not-run
+    agent: exeris-docs-evaluator
+    fixture: agent-layer-change.md
+    prompt: >-
+      Evaluate this change for merge. You are running without a checkout, so none of the scripts
+      under .agents/scripts/ can be executed.
+    expect:
+      schema: verdict.schema.json
+      # The point of the case: a verdict that rests on unrun checks must say which, rather than
+      # reporting silence as a pass.
+      any_check_result: not-run
+    tags: [honesty, error-handling]

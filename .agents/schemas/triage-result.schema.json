@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/exeris-systems/exeris-docs/blob/main/.agents/schemas/triage-result.schema.json",
+  "title": "Triage result",
+  "description": "What the router and the document-shape classifier hand to whoever runs next. agents-md-schema.md rule 13.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task_class", "primary_risk", "primary_agent", "validation_gates", "next_action"],
+  "properties": {
+    "task_class": {
+      "description": "The kind of work, decided before the route. MULTI_DOMAIN means no single class dominates and the router re-enters.",
+      "enum": [
+        "DOCUMENT_SHAPE",
+        "ADR_REGISTRY",
+        "NARRATIVE_INTEGRITY",
+        "LARGE_DOC_EDIT",
+        "TEMPLATE_UPDATE",
+        "DRIFT_SWEEP",
+        "AGENT_LAYER",
+        "MULTI_DOMAIN"
+      ]
+    },
+    "primary_risk": {
+      "description": "One sentence: what goes wrong if this is routed badly. Not a restatement of the task.",
+      "type": "string",
+      "minLength": 10
+    },
+    "primary_agent": {
+      "description": "Includes the router itself, which is how MULTI_DOMAIN re-entry is expressed rather than left implicit.",
+      "enum": [
+        "exeris-docs-router",
+        "exeris-docs-architect",
+        "exeris-docs-adr-registry-keeper",
+        "exeris-docs-document-shape-classifier",
+        "exeris-docs-implementer",
+        "exeris-docs-evaluator"
+      ]
+    },
+    "secondary_handoffs": {
+      "type": "array",
+      "items": { "$ref": "handoff.schema.json" },
+      "default": []
+    },
+    "execution_plan": {
+      "description": "Ordered steps. Lightweight by default: sequence, handoffs, gates.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 3 }
+    },
+    "validation_gates": {
+      "description": "Objects, not strings: the triage rule is that no gate is named without the risk it retires.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["gate", "risk"],
+        "properties": {
+          "gate": { "type": "string", "minLength": 3 },
+          "risk": { "type": "string", "minLength": 3 }
+        }
+      }
+    },
+    "document_shape": {
+      "description": "Set by the document-shape classifier. Absent when the task was not a shape question.",
+      "enum": ["RESEARCH", "RFC", "ADR", "NOT_A_DECISION_DOC"]
+    },
+    "template_path": {
+      "description": "The template the shape selects, relative to the repository root.",
+      "type": "string",
+      "pattern": "^templates/[A-Z-]+-TEMPLATE\\.md$"
+    },
+    "next_action": {
+      "description": "The single best immediate move. One action, not a plan.",
+      "type": "string",
+      "minLength": 5
+    }
+  },
+  "allOf": [
+    {
+      "description": "A shape decision that names ADR, RFC or RESEARCH names the template it selects.",
+      "if": {
+        "properties": { "document_shape": { "enum": ["RESEARCH", "RFC", "ADR"] } },
+        "required": ["document_shape"]
+      },
+      "then": { "required": ["template_path"] }
+    }
+  ]
+}

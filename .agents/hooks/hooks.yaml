@@ -1,0 +1,95 @@
+# Canonical hook definitions — the L0 layer of ADR-085 §J, authored once here and rendered to each
+# vendor's hook file by the shared renderer. agents-md-schema.md rule 12.
+#
+# This file is read at runtime by bin/hook.py, so it is the implementation and not a description of
+# one. A pattern changed here changes behaviour on every vendor; a pattern changed in a rendered
+# file is overwritten on the next render.
+#
+# Two shapes only, and the difference is the whole design:
+#   deny            — the action is one no policy permits. Refuse it.
+#   record + gate   — the action is one policy permits *with a consequence*. Allow it, write down
+#                     that it happened, and block the stop until the consequence is discharged.
+# Denying what a policy allows produces a hook that is switched off within a week.
+version: 1
+
+state-dir: .agents-state          # git-ignored; per-session, recreated freely
+
+hooks:
+  # ── deny ────────────────────────────────────────────────────────────────────────────────────
+  - id: deny-irreversible
+    event: pre-tool
+    tool: shell
+    decision: deny
+    reason: >-
+      .agents/policies/agent-safety-and-autonomy.md §1: irreversible or outward-facing action.
+      The founder asks for these in the session they happen in.
+    # Ordinary `git push` of a feature branch is deliberately absent: it is reversible, it is how
+    # a pull request is opened, and denying it would make the hook the thing people disable.
+    match:
+      - 'git\s+push\b[^|;&]*--force(-with-lease)?\b'
+      - 'git\s+push\b[^|;&]*\s(main|master|development/\S+)\b'
+      - 'git\s+push\b[^|;&]*--delete\b'
+      - 'git\s+tag\s+(-[a-zA-Z]+\s+)*\S'
+      - 'git\s+branch\s+-[dD]\b'
+      - 'git\s+reset\s+--hard\b'
+      - 'git\s+clean\s+-[a-zA-Z]*[fd][a-zA-Z]*\b'
+      - 'gh\s+release\s+create\b'
+      - 'gh\s+pr\s+merge\b'
+      - 'gh\s+pr\s+close\b'
+      - 'git\s+worktree\s+remove\b'
+
+  # ── record ──────────────────────────────────────────────────────────────────────────────────
+  - id: record-guardrail-run
+    event: post-tool
+    tool: shell
+    decision: allow
+    # Records that a mechanical check actually ran, so the stop gate reads the session's own
+    # command log rather than the model's recollection of having run it.
+    match:
+      - 'adr-filename-check\.sh'
+      - 'drift-sweep\.sh'
+      - 'taxonomy-check\.sh'
+      - 'check-consistency\.sh'
+      - 'agents_file_check\.py'
+      - 'frontmatter_check\.py'
+      - 'registry_check\.py'
+    record: guardrails-run
+
+  - id: record-record-edit
+    event: post-tool
+    tool: edit
+    decision: allow
+    paths:
+      - 'adr/ADR-*.md'
+      - 'adr-index.md'
+      - 'high-level-architecture.md'
+      - 'b2b-technical-whitepaper.md'
+      - 'standards/*.md'
+      - '.agents/**'
+      - 'AGENTS.md'
+    record: docs-edited
+
+  # ── gate ────────────────────────────────────────────────────────────────────────────────────
+  - id: guardrails-gate-on-stop
+    event: stop
+    decision: block-or-allow
+    degrade: warn                 # only Claude Code and Codex document a blockable stop
+    # Each rule: if <edited> matched something and <requires> never ran, the session may not finish.
+    rules:
+      - when-edited: ['adr/ADR-*.md', 'adr-index.md']
+        requires: ['adr-filename-check.sh']
+        reason: >-
+          .agents/policies/adr-registry.md: an ADR touched without adr-filename-check.sh — the
+          number must be reserved in adr-index.md before the content file lands, and the filename
+          must match ADR-NNN-<lowercase-kebab-title>.md.
+      - when-edited: ['high-level-architecture.md', 'b2b-technical-whitepaper.md']
+        requires: ['drift-sweep.sh']
+        reason: >-
+          .agents/policies/editing-large-documents.md: a large document edited without a
+          drift-pattern sweep. Run .agents/scripts/drift-sweep.sh on each edited file and
+          adjudicate the candidates.
+      - when-edited: ['.agents/**', 'AGENTS.md']
+        requires: ['agents_file_check.py']
+        reason: >-
+          standards/agents-md-schema.md: the agent layer changed without the agent-file check.
+          Run it, and regenerate the adapters rather than editing them.

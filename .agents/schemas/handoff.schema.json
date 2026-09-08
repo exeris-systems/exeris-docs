@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/exeris-systems/exeris-docs/blob/main/.agents/schemas/handoff.schema.json",
+  "title": "Handoff",
+  "description": "One agent passing work to another. Referenced by triage-result and verdict rather than emitted alone. agents-md-schema.md rule 13.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["from", "to", "reason", "blocking"],
+  "properties": {
+    "from": { "$ref": "#/$defs/agent" },
+    "to": { "$ref": "#/$defs/agent" },
+    "reason": {
+      "description": "Why this role and not the current one. Names the constraint the receiving role owns.",
+      "type": "string",
+      "minLength": 10
+    },
+    "blocking": {
+      "description": "true when the sender may not proceed until the receiver has answered. The registry keeper and the shape classifier are blocking by design: a number reserved after the fact, or the wrong template, cannot be corrected cheaply later.",
+      "type": "boolean"
+    },
+    "context_refs": {
+      "description": "Paths or record ids the receiver needs. Paths are repository-relative; a path under a home directory is not portable and is rejected by the agent-file check.",
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "default": []
+    }
+  },
+  "$defs": {
+    "agent": {
+      "enum": [
+        "exeris-docs-router",
+        "exeris-docs-architect",
+        "exeris-docs-adr-registry-keeper",
+        "exeris-docs-document-shape-classifier",
+        "exeris-docs-implementer",
+        "exeris-docs-evaluator",
+        "human"
+      ]
+    }
+  }
+}

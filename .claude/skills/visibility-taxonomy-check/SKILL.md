@@ -1,13 +1,11 @@
 ---
 name: visibility-taxonomy-check
 description: Verify visibility taxonomy (ADR-020) is two-valued (`public` / `enterprise-private`) and not conflated with license taxonomy (ADR-023, three-valued).
-argument-hint: ADR / doc / cap description that mentions visibility or license
-steps:
-  - {agent: exeris-docs-adr-registry-keeper, skill: exeris-docs-adr-registry-discipline-review, gate: verdict}
-gates: [script:taxonomy-check.sh]
-output: schemas/verdict.schema.json
+disable-model-invocation: true
 ---
 
+<!-- DO NOT EDIT. Generated from .agents/workflows/visibility-taxonomy-check.md by agents_render.py
+     (exeris-systems/.github; agents-md-schema.md rule 7). Edit the source. -->
 Audit the visibility / license claim below.
 
 Change: $ARGUMENTS
