@@ -5,7 +5,7 @@ disable-model-invocation: true
 ---
 
 <!-- DO NOT EDIT. Generated from .agents/workflows/docs-pr-review.md by agents_render.py
-     (exeris-systems/.github; agents-md-schema.md rule 7). Edit the source. -->
+     (exeris-systems/exeris-agents; agents-md-schema.md rule 7). Edit the source. -->
 Review the change below and return one verdict.
 
 Change: $ARGUMENTS

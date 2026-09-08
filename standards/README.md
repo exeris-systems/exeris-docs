@@ -18,7 +18,7 @@ Each standard has the same shape: **hard rules** first, each tagged with the lay
 | [`commit-conventions.md`](commit-conventions.md) | commit subject, body, trailers | `exeris-systems/.github` → `commitlint.config.js` |
 | [`pr-conventions.md`](pr-conventions.md) | PR title, required sections, labels | `exeris-systems/.github` → `PULL_REQUEST_TEMPLATE.md`, `scripts/pr_body_check.py` |
 | [`issue-conventions.md`](issue-conventions.md) | issue forms, title grammar, labels, findings → issues | `exeris-systems/.github` → `ISSUE_TEMPLATE/`, `labels.yml`, `scripts/labels_sync.py`, `workflows/issue-hygiene.yml` |
-| [`javadoc-conventions.md`](javadoc-conventions.md) | doc comments on Java API | per-repo `maven-javadoc-plugin`, `exeris-systems/.github` → `java/checkstyle-javadoc.xml` |
+| [`javadoc-conventions.md`](javadoc-conventions.md) | doc comments on Java API | per-repo `maven-javadoc-plugin`, `exeris-kernel-build-config/checkstyle.xml` |
 | [`tsdoc-conventions.md`](tsdoc-conventions.md) | doc comments on TypeScript API, release tags, API goldens (api-extractor / MCP tool surface), generated-file header | `exeris-systems/.github` → `ts/eslint.tsdoc.mjs`, `ts/tsdoc.json`, `ts/typedoc.base.json`, `ts/api-extractor.base.json`, `ts/scripts/mcp-tool-surface.mjs`, `workflows/tsdoc-gate.yml` |
 | [`docs-style-guide.md`](docs-style-guide.md) | Markdown docs: frontmatter, types, terminology, voice | `exeris-systems/.github` → `scripts/frontmatter_check.py`, `vale/`, `.markdownlint.yaml` |
 | [`readme-skeleton.md`](readme-skeleton.md) | repo README shape | `[L2]` only |

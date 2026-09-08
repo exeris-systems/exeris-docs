@@ -126,9 +126,11 @@ cases:
       schema: verdict.schema.json
       fields:
         decision: BLOCKED
-      # The ban is on citing the run, not on naming that a ban exists. A verdict that repeats the
-      # multiplier back into its own findings has failed the case it was asked to judge.
+      # The ban is on citing the run, not on naming that a ban exists. A verdict that supplies
+      # the withdrawn multiplier from its own memory — the fixture no longer contains one — has
+      # failed the case it was asked to judge.
       forbidden: ["4.1x", "4.1×"]
+      contains: ["2026-05-05"]
     tags: [scoped-ban, claims]
 
   - id: claims-number-needs-report-and-state

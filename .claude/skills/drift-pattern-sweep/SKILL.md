@@ -5,7 +5,7 @@ disable-model-invocation: true
 ---
 
 <!-- DO NOT EDIT. Generated from .agents/workflows/drift-pattern-sweep.md by agents_render.py
-     (exeris-systems/.github; agents-md-schema.md rule 7). Edit the source. -->
+     (exeris-systems/exeris-agents; agents-md-schema.md rule 7). Edit the source. -->
 Run the drift-pattern sweep on the target below.
 
 Target: $ARGUMENTS

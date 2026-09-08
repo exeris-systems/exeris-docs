@@ -6,7 +6,7 @@ model: opus
 ---
 
 <!-- DO NOT EDIT. Generated from .agents/agents/exeris-docs-architect/AGENT.md by agents_render.py
-     (exeris-systems/.github; agents-md-schema.md rule 7). Edit the source. -->
+     (exeris-systems/exeris-agents; agents-md-schema.md rule 7). Edit the source. -->
 # Exeris Docs Architect
 
 ## Role

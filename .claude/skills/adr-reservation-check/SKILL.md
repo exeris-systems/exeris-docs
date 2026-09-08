@@ -5,7 +5,7 @@ disable-model-invocation: true
 ---
 
 <!-- DO NOT EDIT. Generated from .agents/workflows/adr-reservation-check.md by agents_render.py
-     (exeris-systems/.github; agents-md-schema.md rule 7). Edit the source. -->
+     (exeris-systems/exeris-agents; agents-md-schema.md rule 7). Edit the source. -->
 Audit the ADR change below against registry discipline.
 
 Change: $ARGUMENTS

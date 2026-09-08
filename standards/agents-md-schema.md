@@ -35,7 +35,7 @@ CLAUDE.md                         rendered pointer — a client that cannot read
   policies/*.md                   non-negotiable constraints
   references/*.md                 deferred, authoritative context
   schemas/*.schema.json           the decision handoffs (triage, verdict, handoff)
-  hooks/hooks.yaml, hooks/bin/*   runtime enforcement, authored once
+  hooks/hooks.yaml                runtime enforcement, declared once (dispatcher: see rule 12)
   evals/scenarios.yaml, evals/    runtime-independent behaviour tests
   scripts/*                       provider-agnostic checks the canonical files call
   vendor/<bundle>-<version>/      VENDORED, verified copy of an imported bundle — never edited
@@ -95,7 +95,10 @@ does not make them canonical merely because of where they sit.
    it is the drift this rule exists to prevent. `[L2; L1 for generated
    references]`
 7. **Provider directories are adapters, not a lowest-common-denominator
-   target.** The renderer generates native Claude subagents and skills, GitHub
+   target.** A provider file that the renderer writes *part* of — a settings file
+   whose hook block is generated and whose other keys are the human's — is
+   provider-owned with a **generated region**, declared as such in the manifest,
+   and the renderer merges around what it does not own rather than replacing it. The renderer generates native Claude subagents and skills, GitHub
    Copilot agents and instructions, Codex agents, Gemini agents and commands,
    Antigravity rules and hooks, and Cursor rules from `.agents/`. Generated
    files carry their source and a do-not-edit marker. Provider-local settings,
@@ -134,9 +137,12 @@ does not make them canonical merely because of where they sit.
     live under `adapters: {<vendor>: {…}}` and are merged last by the renderer.
     A runtime that reads a canonical profile directly must find nothing it can
     mistake for a grant of tools. `[L1: frontmatter schema check]`
-12. **Hooks are L0 and are authored once.** Runtime enforcement lives in
-    `.agents/hooks/hooks.yaml` with its scripts under `.agents/hooks/bin/`, and
-    is rendered to each vendor's hook file. A hook may deny an action a policy
+12. **Hooks are L0 and are declared once.** Runtime enforcement is declared in
+    `.agents/hooks/hooks.yaml` and rendered to each vendor's hook file. The
+    *dispatcher* that reads those declarations ships with the imported bundle
+    (`.agents/vendor/…/hooks/bin/`), or lives at `.agents/hooks/bin/` in a
+    repository that imports none; either way the rendered vendor configs invoke
+    it and carry no patterns of their own. A hook may deny an action a policy
     already forbids; it may never permit one a policy forbids, and it is never
     the place a rule is first stated. **L0 is a tripwire, not a proof** — a stop
     hook establishes that a command ran, never that it was the right command,
@@ -237,11 +243,25 @@ concrete pipeline pays for one. That directory is reserved and currently unused.
 
 `hooks/hooks.yaml` declares each hook with an `id`, a canonical `event`
 (`pre-tool`, `post-tool`, `stop`, `session-start`), a canonical tool class
-(`shell | edit | read`), a `match`, the script to `run`, and a `decision`
-(`allow | deny | block-or-allow`). Scripts live in `hooks/bin/`, read the vendor
-from `$EXERIS_HOOK_VENDOR`, and emit that vendor's decision shape through one
-`normalize` helper. Session state lives in `.agents-state/`, which is
-git-ignored.
+(`shell | edit | read`), a `match`, and a `decision`
+(`allow | deny | block-or-allow`). The dispatcher selects behaviour by `id`;
+there is no per-hook script path, because a rendered config that named one would
+be a second place the patterns live. It reads the vendor from its invocation and
+emits that vendor's decision shape.
+
+Session state lives under `.agents-state/<session>/`, git-ignored and **keyed by
+the session the runtime names**. A state directory shared across sessions makes a
+stop gate fire once per checkout and never again: the first check ever run
+discharges it for every session afterwards.
+
+Three properties are not optional, because without them the layer reports
+enforcement it is not performing. A gate is discharged only when **every** check
+it requires has run, not one of them. A recorder credits a check only when the
+command actually invoked it — a mention in an echoed string is not an
+invocation — and not when the runtime reported it as failed. And a hook that
+**cannot read its own rules fails closed if it denies**: an L0 layer that
+switches itself off on a missing dependency is worse than no layer, because the
+operator still believes it is there. `[L1: hook render and degradation check]`
 
 Two shapes are worth naming because getting them backwards is the common
 mistake. A hook that **denies** encodes an action no policy permits — an
@@ -347,8 +367,11 @@ rule means:
    `disable-model-invocation: true`; the user-invoked `/name` behaviour is the
    same and one adapter kind disappears.
 4. Skills stop being copied into provider directories. Five runtimes read
-   `.agents/skills/` natively; Claude gets a directory symlink, and a repository
-   that cannot use symlinks records the copy fallback as a degradation.
+   `.agents/skills/` natively; Claude gets **one symlink per skill** — per skill
+   and not per directory, because workflows render into that same directory and a
+   directory-level link makes the two kinds fight over one path — and a
+   repository that cannot use symlinks records the copy fallback as a
+   degradation.
 
 `hooks/`, `schemas/`, `evals/` and nested `AGENTS.md` are additive: a repository
 without them is v2-conformant as long as it does not need them, and rules 12–14

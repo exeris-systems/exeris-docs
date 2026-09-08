@@ -100,7 +100,7 @@ the amendment and its registry status cell move in the same pull request
 ## Provider adapters
 
 [`.claude/`](.claude) holds Claude Code adapters generated from `.agents/` by the shared renderer
-in `exeris-systems/.github`, each carrying a do-not-edit marker naming its source, plus
+in `exeris-systems/exeris-agents`, each carrying a do-not-edit marker naming its source, plus
 provider-owned operational configuration. Regenerate them; never edit them. The five other provider
 directories are deferred, and the manifest says so rather than leaving it to be inferred.
 `CLAUDE.md` is a pointer to this file.

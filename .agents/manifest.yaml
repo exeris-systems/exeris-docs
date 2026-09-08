@@ -16,8 +16,8 @@ repository: exeris-docs
 imports:
   - bundle: exeris-agents
     version: 1.0.0
-    ref: 2276efa38b32ce8317d579b3d157af6b89a53d3e
-    sha256: sha256:1f60b5f413d89a4aac9d1c9dd6f382acaa5b21492a48d99c5d9539e3074839de
+    ref: d6336f93936c2d305cb929ad2479e88951683003
+    sha256: sha256:8d66761924e189d30e9fb1619f83b0d3a5ace7126750cb1e5ff408aa68bcdb5b
 
 agents:
   - exeris-docs-router
@@ -94,7 +94,9 @@ adapters:
   claude:
     target: .claude
     agents: .claude/agents/{name}.md
-    skills: symlink                       # .claude/skills -> ../.agents/skills
+    # One symlink PER SKILL, not one for the directory: workflows render into the same
+    # directory, so a directory-level link makes the two kinds fight over one path.
+    skills: symlink
     workflows: .claude/skills/{name}/SKILL.md   # `commands/` is the legacy flat-file form
     hooks: .claude/settings.json#hooks
   copilot:
@@ -149,3 +151,8 @@ provider-owned:
   - .claude/settings.local.json
   - .claude/README.md
   - .github/workflows/
+  # Provider-owned files carrying a GENERATED REGION. The renderer writes only the named key and
+  # merges around everything else, so the file is the human's and the region is ours. JSON has no
+  # comments, so this list is where the region is declared instead of a marker in the file.
+  - path: .claude/settings.json
+    generated-region: hooks

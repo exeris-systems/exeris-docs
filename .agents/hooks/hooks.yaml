@@ -12,7 +12,9 @@
 # Denying what a policy allows produces a hook that is switched off within a week.
 version: 1
 
-state-dir: .agents-state          # git-ignored; per-session, recreated freely
+state-dir: .agents-state          # git-ignored; the dispatcher keys a subdirectory per
+                                  # session, so a check run in one session discharges
+                                  # nothing in the next
 
 hooks:
   # ── deny ────────────────────────────────────────────────────────────────────────────────────
@@ -27,36 +29,53 @@ hooks:
     # Ordinary `git push` of a feature branch is deliberately absent: it is reversible, it is how
     # a pull request is opened, and denying it would make the hook the thing people disable.
     match:
-      # `--force-with-lease` is deliberately absent: it refuses when anyone else has pushed, and
-      # denying it would forbid rewriting an unreviewed commit message on one's own branch, which
-      # is the rule people learn to route around. Bare `--force` and `-f` have no such guard.
-      - 'git\s+push\b[^|;&]*(--force(?!-with-lease)|\s-f)\b'
-      - 'git\s+push\b[^|;&]*\s(main|master|development/\S+)\b'
+      # Force. `--force-with-lease` is deliberately absent: it refuses when anyone else has
+      # pushed, and denying it would forbid rewriting an unreviewed commit message on one's own
+      # branch — the rule people learn to route around. Bare `--force`, `-f` and bundled short
+      # forms (`-fu`, `-uf`) have no such guard.
+      - 'git\s+push\b[^|;&]*(--force(?!-with-lease)|--mirror|\s-[a-zA-Z]*f[a-zA-Z]*(\s|$))'
+      # Protected refs, in every spelling git accepts: bare name, refspec, forced refspec, and
+      # --all/--tags which push them without naming them.
+      - 'git\s+push\b[^|;&]*\s\+?(main|master|development/\S+)(\s|$)'
+      - 'git\s+push\b[^|;&]*\s\+?[^\s:]*:(refs/heads/)?(main|master|development/)'
+      - 'git\s+push\b[^|;&]*\s--(all|tags)\b'
       - 'git\s+push\b[^|;&]*--delete\b'
-      - 'git\s+tag\s+(-[a-zA-Z]+\s+)*\S'
+      # Tag CREATION only. `-l`, `--list`, `-n`, `--contains`, `-v` are read-only and denying them
+      # is the over-block this file's own header warns about.
+      - 'git\s+tag\s+(?!-(l|-list|n\d*|-contains|-no-contains|v|-verify|-points-at|-merged|-no-merged)\b)(-[a-zA-Z]+\s+)*\S'
       - 'git\s+branch\s+-[dD]\b'
       - 'git\s+reset\s+--hard\b'
       - 'git\s+clean\s+-[a-zA-Z]*[fd][a-zA-Z]*\b'
-      - 'gh\s+release\s+create\b'
-      - 'gh\s+pr\s+merge\b'
-      - 'gh\s+pr\s+close\b'
       - 'git\s+worktree\s+remove\b'
+      # Publish and deploy, which agent-safety-and-autonomy.md §1 names and this list did not.
+      - '(^|[|;&]\s*)npm\s+(publish|unpublish|deprecate)\b'
+      - '(^|[|;&]\s*)(yarn|pnpm)\s+publish\b'
+      - 'mvn\b[^|;&]*\s(deploy|release:(prepare|perform))\b'
+      - '(^|[|;&]\s*)docker\s+push\b'
+      - '(^|[|;&]\s*)gh\s+release\s+(create|delete|upload)\b'
+      - '(^|[|;&]\s*)gh\s+pr\s+(merge|close)\b'
+      # Repository lifecycle and visibility — irreversible, and outward-facing.
+      - '(^|[|;&]\s*)gh\s+repo\s+(delete|archive|rename)\b'
+      - '(^|[|;&]\s*)gh\s+repo\s+edit\b[^|;&]*--visibility\b'
 
   # ── record ──────────────────────────────────────────────────────────────────────────────────
   - id: record-guardrail-run
     event: post-tool
     tool: shell
     decision: allow
-    # Records that a mechanical check actually ran, so the stop gate reads the session's own
-    # command log rather than the model's recollection of having run it.
+    # Records that a mechanical check actually ran. The patterns are anchored to a command
+    # POSITION — start of line, or after a pipe, `&&`, `;` or `$(` — because a bare substring
+    # match let `echo adr-filename-check.sh` discharge the stop gate. The dispatcher additionally
+    # refuses to record a call the runtime reported as failed: a check that ran and failed has
+    # discharged nothing.
     match:
-      - 'adr-filename-check\.sh'
-      - 'drift-sweep\.sh'
-      - 'taxonomy-check\.sh'
-      - 'check-consistency\.sh'
-      - 'agents_file_check\.py'
-      - 'frontmatter_check\.py'
-      - 'registry_check\.py'
+      - '(?:^|[|;&]\s*|\$\(\s*)(?:\S*/)?adr-filename-check\.sh\b'
+      - '(?:^|[|;&]\s*|\$\(\s*)(?:\S*/)?drift-sweep\.sh\b'
+      - '(?:^|[|;&]\s*|\$\(\s*)(?:\S*/)?taxonomy-check\.sh\b'
+      - '(?:^|[|;&]\s*|\$\(\s*)(?:\S*/)?check-consistency\.sh\b'
+      - '(?:^|[|;&]\s*|\$\(\s*)(?:python3?\s+)?(?:\S*/)?agents_file_check\.py\b'
+      - '(?:^|[|;&]\s*|\$\(\s*)(?:python3?\s+)?(?:\S*/)?frontmatter_check\.py\b'
+      - '(?:^|[|;&]\s*|\$\(\s*)(?:python3?\s+)?(?:\S*/)?registry_check\.py\b'
     record: guardrails-run
 
   - id: record-record-edit
