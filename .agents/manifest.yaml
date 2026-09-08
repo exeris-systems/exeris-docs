@@ -16,7 +16,7 @@ repository: exeris-docs
 imports:
   - bundle: exeris-agents
     version: 1.0.0
-    ref: d6336f93936c2d305cb929ad2479e88951683003
+    ref: 0b3dd21f57503f48ef115c534a8cf9a68622dc83
     sha256: sha256:8d66761924e189d30e9fb1619f83b0d3a5ace7126750cb1e5ff408aa68bcdb5b
 
 agents:
