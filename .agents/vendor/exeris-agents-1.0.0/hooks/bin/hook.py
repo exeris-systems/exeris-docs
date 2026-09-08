@@ -36,7 +36,6 @@ import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-HOOKS_YAML = os.path.join(HERE, "..", "hooks.yaml")
 
 # Vendors whose stop event can actually block. Everywhere else `degrade: warn` applies and the
 # gate prints its reason without stopping anything — recorded in manifest.yaml `degradations`.
@@ -52,6 +51,19 @@ def repo_root() -> str:
     return os.getcwd()
 
 
+def hooks_yaml() -> str:
+    """The hook DEFINITIONS are the repository's; only this dispatcher is the bundle's.
+
+    Vendored, this script sits at `.agents/vendor/<bundle>-<v>/hooks/bin/hook.py`, so a path
+    relative to itself would find the bundle's own directory rather than the repository's rules.
+    The repository's file wins; the sibling path is the fallback for an unvendored layout.
+    """
+    repo = os.path.join(repo_root(), ".agents", "hooks", "hooks.yaml")
+    if os.path.exists(repo):
+        return repo
+    return os.path.join(HERE, "..", "hooks.yaml")
+
+
 def load_config() -> dict:
     try:
         import yaml
@@ -61,7 +73,11 @@ def load_config() -> dict:
         # without pyyaml — the tripwire is not worth that.
         print("exeris-hook: pyyaml is not installed; hooks are inactive", file=sys.stderr)
         return {}
-    with open(HOOKS_YAML, encoding="utf-8") as fh:
+    path = hooks_yaml()
+    if not os.path.exists(path):
+        print(f"exeris-hook: no hooks.yaml at {path}; hooks are inactive", file=sys.stderr)
+        return {}
+    with open(path, encoding="utf-8") as fh:
         return yaml.safe_load(fh) or {}
 
 

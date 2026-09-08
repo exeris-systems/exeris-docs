@@ -90,8 +90,8 @@ Read the ones your change touches. Each is authoritative for its own list; do no
 - `.agents/policies/editing-large-documents.md`
 - `.agents/policies/adr-registry.md`
 - `.agents/policies/drift-patterns.md`
-- `.agents/policies/agent-safety-and-autonomy.md`
-- `.agents/policies/error-handling-and-fallback.md`
+- `.agents/vendor/exeris-agents-1.0.0/policies/agent-safety-and-autonomy.md`
+- `.agents/vendor/exeris-agents-1.0.0/policies/error-handling-and-fallback.md`
 
 ## Handoffs
 

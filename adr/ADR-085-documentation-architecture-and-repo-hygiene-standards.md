@@ -69,7 +69,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 ### C. Standards home and shared configuration
 
 10. **`exeris-docs/standards/` is the single home of the standards** listed in §D–§I, one file per artefact kind plus `checklists/`. Repos link to them from `CONTRIBUTING.md`; they never copy them (ADR-020 applies to standards as it does to ADRs).
-11. **`exeris-systems/.github` (organisation repository) holds the shared enforcement**: default `CONTRIBUTING.md` and `PULL_REQUEST_TEMPLATE.md`, reusable workflows (`docs-lint`, `commit-lint`, `pr-body-check`, `javadoc-gate`), the Vale style package, `markdownlint` and `commitlint` configuration, the frontmatter/registry validator scripts, and *(added 2026-09-08: the agent-layer renderer `agents_render.py` with one vendor mapping file per runtime under `agents/adapters/`, and the agent-file checker `agents_file_check.py`)*. Each repo calls the reusable workflows; it does not re-implement them. **A repository does not carry its own renderer**: two implementations of one schema is how the schema stops being one.
+11. **`exeris-systems/.github` (organisation repository) holds the shared enforcement**: default `CONTRIBUTING.md` and `PULL_REQUEST_TEMPLATE.md`, reusable workflows (`docs-lint`, `commit-lint`, `pr-body-check`, `javadoc-gate`), the Vale style package, `markdownlint` and `commitlint` configuration, the frontmatter/registry validator scripts, and the shared PR/issue templates. Each repo calls the reusable workflows; it does not re-implement them. *(added 2026-09-08: the **agent layer** is the one part of the shared enforcement that does **not** live here. It lives in `exeris-systems/exeris-agents`, because it is the only part with content a repository vendors and therefore the only part that needs a version a repository can pin — and a bundle's semantics and the renderer that renders them are one contract, versioned together. `.github` keeps the caller: `docs-lint.yml` checks the bundle out at a pinned ref and runs it.)* **A repository does not carry its own renderer**: two implementations of one schema is how the schema stops being one.
 
 ### D. Commit messages
 
@@ -114,7 +114,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 29. **`AGENTS.md` is the canonical agent-instruction entry point per repo; `.agents/` is the canonical semantic source.** `AGENTS.md` is concise and points to policies, Agent Skills (`.agents/skills/*/SKILL.md`), role profiles, workflows and authoritative references. Provider directories (`.claude/`, `.github/`, `.codex/`, `.cursor/`, `.gemini/`) are thin adapters or provider-owned operational configuration, never independently authored copies of project rules. Rules already enforced by CI are not repeated in agent files. The precise schema and migration policy live in `../standards/agents-md-schema.md` (historical filename retained for stable links).
 
-29a. **The canonical layout is vendor-neutral, and the neutrality is load-bearing** *(added 2026-09-08, see Amendments)*. A role profile lives at `.agents/agents/<name>/AGENT.md`, mirroring the skill layout, and declares `capabilities` and a `model` tier rather than any runtime's tool names or model ids; per-vendor keys live under `adapters:` and are merged by the renderer. Decision handoffs between roles conform to JSON Schema files in `.agents/schemas/`; runtime enforcement is declared once in `.agents/hooks/hooks.yaml` (§J.31a); behaviour is tested by `.agents/evals/`. Workflows remain Markdown prompts with a machine-readable header — no runtime in scope executes a workflow file, so a declarative graph would be interpreted by the same model it was meant to constrain.
+29a. **The canonical layout is vendor-neutral, and the neutrality is load-bearing** *(added 2026-09-08, see Amendments)*. A role profile lives at `.agents/agents/<name>/AGENT.md`, mirroring the skill layout, and declares `capabilities` and a `model` tier rather than any runtime's tool names or model ids; per-vendor keys live under `adapters:` and are merged by the renderer. Decision handoffs between roles conform to JSON Schema files in `.agents/schemas/`; runtime enforcement is declared once in `.agents/hooks/hooks.yaml` (§J.31a); behaviour is tested by `.agents/evals/`. Shared policies, base schemas and the tooling are imported from one version-pinned bundle and vendored under `.agents/vendor/`, never copied per repository. Workflows remain Markdown prompts with a machine-readable header — no runtime in scope executes a workflow file, so a declarative graph would be interpreted by the same model it was meant to constrain.
 30. **AI provenance policy:** AI-assisted commits keep the `Co-authored-by:` trailer; the human author is accountable for every line and must be able to defend it in review; agents do not open PRs or file issues without a named human author. Recorded in `standards/ai-provenance.md`, linked from every `CONTRIBUTING.md`.
 
 ### J. Enforcement layering
@@ -201,11 +201,18 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
   directory-level link makes the two kinds fight over one path. Nothing stores a second copy of a
   skill; a checkout without symlink support renders copies and records the fallback.
 
-  **The renderer lives in `exeris-systems/.github`, not in either repository** (§C.11). This
-  repository had none at all, so its adapters were refreshed by hand, and the kernel had two shell
-  scripts of its own — which meant a schema change had to be implemented twice or one repository
-  drifted. One implementation, one vendor mapping file per runtime, and `--check` as the CI form:
-  an adapter edited by hand is a diff.
+  **The shared half lives in `exeris-systems/exeris-agents`, not in either repository and not in
+  `.github`** (§C.11). This repository had no renderer at all, so its adapters were refreshed by
+  hand, and the kernel had two shell scripts of its own — a schema change had to be implemented
+  twice or one repository drifted. `.github` was the first destination and was wrong for one
+  reason that only became visible while writing rule 8's check: a bundle is something a repository
+  *pins*, and `.github` has no version — it is consumed at `@main` by every caller, which is
+  exactly the moving target rule 8 forbids. So the bundle is its own repository with its own
+  SemVer, and it reaches a repository two ways that are not interchangeable: **semantics are
+  vendored** under `.agents/vendor/`, committed and digest-verified so a `$ref` resolves offline,
+  and **tooling is checked out** at a pinned ref in CI. Rule 8's
+  `[L1: pinned-import and checksum check]` had named a check nobody could write, because there was
+  nothing to import; it now names one that runs.
 
   Measured while deciding, on this workstation on 2026-09-08 (`agy` 1.1.27, ext4, case-sensitive).
   The layout question that gated everything was whether Antigravity, which natively discovers
@@ -410,8 +417,9 @@ Existing repos do **not** comply; this ADR is prescriptive. Migration owner: fou
 2. **Phase 3 — standards** (`exeris-docs/standards/`): `commit-conventions.md`, `pr-conventions.md`, `javadoc-conventions.md`, `docs-style-guide.md`, `readme-skeleton.md`, `adr-conventions.md`, `changelog-conventions.md`, `agents-md-schema.md`, `ai-provenance.md`, `claims-and-evidence.md` (thin), `tsdoc-conventions.md`, `checklists/*.md`; extend the kernel skills `exeris-pr-preflight`, `exeris-docs-adr-check`, `exeris-adr-register` rather than adding a new surface; update `ADR-TEMPLATE.md` and `RFC-TEMPLATE.md` per §G.26.
 3. **Phase 4 — enforcement** (`exeris-systems/.github`): reusable workflows and configs of §C.11; frontmatter validator modelled on Quarkus's `YamlMetadataGenerator` (errors to the step summary, exit 1); `tsdoc-gate.yml` with the shared ESLint fragment, `tsdoc.json`, typedoc/api-extractor port targets and `mcp-tool-surface.mjs`; registry validator (§G.23–24); `docs-guardrails-review.md` routine and the `[DOC DEBT]` line in `pr-review.md`; DCO app installed at organisation level.
 4. **Phase 5 — rollout:** pilot `exeris-sdk` ~~(Javadoc: already passes)~~ *(corrected 2026-09-06: true of doclint, not of the Checkstyle half, which did not exist when this was written — see `## Amendments`)* and `exeris-kernel` (commit/PR gates) in warning mode for two weeks, then hard; fan out via workflow callers; frontmatter backfill script run per repo; site live at `docs.exeris.eu` from `sources.yml` with strict link mode enabled once item 1 is done.
-4a. **Agent layer v2** *(added 2026-09-08)*: the schema at v2, the renderer and checker in
-   `exeris-systems/.github`, and `exeris-docs` migrated to the v2 layout as the pilot. `exeris-kernel`
+4a. **Agent layer v2** *(added 2026-09-08)*: the schema at v2, the bundle and its tooling in
+   `exeris-systems/exeris-agents`, and `exeris-docs` migrated to the v2 layout as the pilot and
+   first consumer — pinned, vendored and digest-verified. `exeris-kernel`
    follows — six profiles, sixteen skills, twelve workflows, plus the three nested `AGENTS.md` its
    module boundaries warrant — and the five remaining vendor adapters land as one mapping file each.
    A mapping written from memory would silently grant or withhold tools, so a vendor ships when its

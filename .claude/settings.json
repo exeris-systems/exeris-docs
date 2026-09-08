@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .agents/hooks/bin/hook.py --hook deny-irreversible --vendor claude",
+            "command": "python3 .agents/vendor/exeris-agents-1.0.0/hooks/bin/hook.py --hook deny-irreversible --vendor claude",
             "timeout": 15
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .agents/hooks/bin/hook.py --hook record-guardrail-run --vendor claude",
+            "command": "python3 .agents/vendor/exeris-agents-1.0.0/hooks/bin/hook.py --hook record-guardrail-run --vendor claude",
             "timeout": 15
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .agents/hooks/bin/hook.py --hook record-record-edit --vendor claude",
+            "command": "python3 .agents/vendor/exeris-agents-1.0.0/hooks/bin/hook.py --hook record-record-edit --vendor claude",
             "timeout": 15
           }
         ]
@@ -39,7 +39,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 .agents/hooks/bin/hook.py --hook guardrails-gate-on-stop --vendor claude",
+            "command": "python3 .agents/vendor/exeris-agents-1.0.0/hooks/bin/hook.py --hook guardrails-gate-on-stop --vendor claude",
             "timeout": 15
           }
         ]

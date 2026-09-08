@@ -6,7 +6,7 @@ mode: read-only
 capabilities: [read, search, web]
 model: inherit
 skills: [exeris-docs-task-classifier, exeris-docs-routing-planner]
-policies: [adr-registry, editing-large-documents, drift-patterns, agent-safety-and-autonomy]
+policies: [adr-registry, editing-large-documents, drift-patterns, bundle:agent-safety-and-autonomy]
 handoffs:
   - {agent: exeris-docs-document-shape-classifier, when: "the request is 'draft an ADR / RFC / research note'", blocking: true}
   - {agent: exeris-docs-adr-registry-keeper, when: "a number, filename, location or taxonomy value is in play", blocking: true}

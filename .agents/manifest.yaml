@@ -9,9 +9,15 @@
 version: 2
 repository: exeris-docs
 
-# The organisation bundle does not exist as a published artefact yet, so there is nothing to pin.
-# A floating import would be a rule-8 violation, not a shortcut.
-imports: []
+# The organisation bundle, pinned and vendored under .agents/vendor/. `ref` is the commit the
+# vendored tree was taken from and `sha256` is a digest over every byte of it, so a hand-edit of
+# the vendored copy is a CI failure rather than a silent local fork (rule 8). Bumping the version
+# means re-vendoring, not editing in place.
+imports:
+  - bundle: exeris-agents
+    version: 1.0.0
+    ref: 9e1d71104a0b8119df26b5661d1ecc37f00c7160
+    sha256: sha256:011ebfb9c7822947446cf4c2d92f55e46a443f27ba738f31fc0a85aebcd0e1ab
 
 agents:
   - exeris-docs-router
@@ -40,12 +46,13 @@ workflows:
   - three-tier-narrative-purity
   - visibility-taxonomy-check
 
+# Repository-owned policies only. `agent-safety-and-autonomy` and `error-handling-and-fallback`
+# moved into the shared bundle, where a change to them reaches every repository at once; profiles
+# reference them as `bundle:<name>` so a reader can tell whose rule it is.
 policies:
   - adr-registry
   - editing-large-documents
   - drift-patterns
-  - agent-safety-and-autonomy
-  - error-handling-and-fallback
 
 references:
   - three-tier-architecture
@@ -75,12 +82,13 @@ scripts:
   - scripts/check-consistency.sh
 
 renderer:
-  # One implementation, shared across repositories (ADR-085 §C.11). A repository that renders with
-  # its own script is a fork of the standard and drifts from it — which is exactly what this
-  # repository did while it had none.
-  source: exeris-systems/.github
-  entrypoint: scripts/agents_render.py
-  check: scripts/agents_file_check.py
+  # One implementation, shared across repositories. It lives with the bundle rather than in the
+  # organisation .github repository, because the renderer and the semantics it renders are one
+  # contract and a pinned version has to cover both.
+  source: exeris-systems/exeris-agents
+  entrypoint: tools/agents_render.py
+  check: tools/agents_file_check.py
+  bundle: tools/agents_bundle.py
 
 adapters:
   claude:

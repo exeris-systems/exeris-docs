@@ -6,7 +6,7 @@ mode: edit
 capabilities: [read, search, edit, shell, web]
 model: inherit
 skills: [exeris-docs-adr-registry-discipline-review]
-policies: [adr-registry, agent-safety-and-autonomy]
+policies: [adr-registry, bundle:agent-safety-and-autonomy]
 handoffs:
   - {agent: exeris-docs-document-shape-classifier, when: "the change may not be an ADR at all", blocking: true}
 output: schemas/verdict.schema.json

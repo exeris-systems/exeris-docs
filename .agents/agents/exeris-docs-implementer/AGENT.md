@@ -6,7 +6,7 @@ mode: edit
 capabilities: [read, search, edit, shell, web]
 model: inherit
 skills: [exeris-docs-drift-pattern-sweep-review, exeris-docs-adr-registry-discipline-review]
-policies: [editing-large-documents, adr-registry, drift-patterns, agent-safety-and-autonomy, error-handling-and-fallback]
+policies: [editing-large-documents, adr-registry, drift-patterns, bundle:agent-safety-and-autonomy, bundle:error-handling-and-fallback]
 handoffs:
   - {agent: exeris-docs-document-shape-classifier, when: "the document shape is not settled", blocking: true}
   - {agent: exeris-docs-adr-registry-keeper, when: "a number, filename or location is in play", blocking: true}

@@ -38,6 +38,7 @@ CLAUDE.md                         rendered pointer — a client that cannot read
   hooks/hooks.yaml, hooks/bin/*   runtime enforcement, authored once
   evals/scenarios.yaml, evals/    runtime-independent behaviour tests
   scripts/*                       provider-agnostic checks the canonical files call
+  vendor/<bundle>-<version>/      VENDORED, verified copy of an imported bundle — never edited
   hooks.json, rules/, plugins/    RENDERED adapters that a vendor claims inside .agents/
 .claude/ .github/ .codex/ .cursor/ .gemini/    rendered adapters + provider-owned configuration
 ```
@@ -103,11 +104,17 @@ does not make them canonical merely because of where they sit.
    are listed under `provider-owned` in the manifest rather than matched by a
    regex. `[L1: generated outputs]`
 8. **No hidden or remote authority.** A manifest may import only an approved,
-   version-pinned Exeris bundle, with a checksum when it is fetched over the
-   network. It must never fetch executable scripts, policies or instructions at
-   agent runtime. Bundled scripts are reviewed code with explicit permissions;
-   an agent must not execute them merely because a skill mentions them.
-   `[L1: pinned-import and checksum check]`
+   Exeris bundle pinned to a version and a commit, and recorded with a digest.
+   An import is **vendored**: its content is committed under
+   `.agents/vendor/<bundle>-<version>/` and verified byte-for-byte, so a
+   `$ref` into it resolves on github.com, in CI without a network and in a
+   fresh clone alike. Nothing is fetched at agent runtime — the network is used
+   once, by a human, at the moment the version is chosen. A profile composes an
+   imported policy or reference by the `bundle:<name>` prefix, so a reader can
+   tell whose rule it is without knowing the layout. Bundled scripts are
+   reviewed code with explicit permissions; an agent must not execute them
+   merely because a skill mentions them, and must never edit the vendored copy
+   in place. `[L1: pinned-import and checksum check]`
 9. **No agent file may weaken an ADR, a standard, a repository policy, or the
    user's explicit safety constraints.** When they disagree, the higher-order
    authority wins and the lower document is a `[DOC DEBT]` item. `[L2]`
@@ -252,6 +259,14 @@ are JSON Schema, are the eval grader's input, and are what a CI review posts.
 Adding a fourth schema means a new kind of decision exists, which is a change to
 rule 3's list and to this file.
 
+Where a bundle is imported, a repository's schema **narrows the bundle's base
+rather than copying it**: an `allOf` of a relative `$ref` into
+`.agents/vendor/…/schemas/<name>.base.schema.json` and the repository's own
+enums. The shape belongs to the bundle; the vocabulary does not, because role
+names carry a repository prefix (rule 10) and a task class means what its
+repository decided. A `$ref` that is a URL is a rule-8 violation, not a style
+choice: resolving one needs a fetch. `[L1: $ref targets exist and are local]`
+
 ## Naming and size caps
 
 | Subject | Cap | Set by |
@@ -290,7 +305,13 @@ The canonical source is portable; delivery may differ by audience.
 - Repository contributors consume the repository's `.agents/` source and its
   generated adapters. One renderer, shared across repositories, produces every
   adapter; a repository that renders with its own script is a fork of the
-  standard and will drift from it.
+  standard and will drift from it. The shared half lives in one bundle and
+  reaches a repository two ways, which are not interchangeable: **semantics are
+  vendored** (policies, base schemas, the hook dispatcher, the eval runner —
+  committed, digest-verified, resolvable offline), and **tooling is checked out**
+  at a pinned ref in CI (renderer, checker, vendor mappings), because copying
+  executable tooling into every repository is the duplication a bundle exists to
+  remove.
 - Application developers may receive a versioned, read-only bundle through an
   npm package or MCP resources/prompts. It must declare its Exeris and manifest
   versions and may not claim to be current for a different dependency line.

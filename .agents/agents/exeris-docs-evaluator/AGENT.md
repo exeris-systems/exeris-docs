@@ -6,7 +6,7 @@ mode: read-only
 capabilities: [read, search, shell, web]
 model: strong
 skills: [exeris-docs-drift-pattern-sweep-review, exeris-docs-adr-registry-discipline-review, exeris-docs-three-tier-narrative-review]
-policies: [adr-registry, editing-large-documents, drift-patterns, error-handling-and-fallback]
+policies: [adr-registry, editing-large-documents, drift-patterns, bundle:error-handling-and-fallback]
 handoffs:
   - {agent: exeris-docs-implementer, when: "the verdict is BLOCKED and the fix is mechanical", blocking: false}
   - {agent: exeris-docs-architect, when: "a finding is about framing rather than compliance", blocking: false}
