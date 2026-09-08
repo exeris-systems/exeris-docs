@@ -4,7 +4,7 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-07
+last-verified: 2026-09-08
 slug: adr/ADR-085
 ---
 
@@ -163,7 +163,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 ## Amendments
 
-- **2026-09-07 — §F.21 gains 21e: rule 1's exemption is a policy, not a ruleset change.** The
+- **2026-09-08 — §F.21 gains 21e: rule 1's exemption is a policy, not a ruleset change.** The
   pilot repository's 204 undocumented public methods are all fluent builder setters, and
   documenting them would put 204 comments repeating `this.x = v` into a `-javadoc.jar` on Maven
   Central permanently — which §I.30's own reasoning, and the reason this repository was chosen as
