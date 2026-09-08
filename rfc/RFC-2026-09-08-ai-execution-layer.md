@@ -41,13 +41,9 @@ Three programmes converged in the last week and they now constrain each other.
 
 **The AI execution plan exists in draft** with a V0→V10 staging. Its central discipline — V0 observes, V0 does not route — is correct and is not in question here.
 
-**Placement is settled and is recorded here as context, not as an option.** The layer belongs in a new sibling repository, not in `exeris-agents` and not in `exeris-ai-bridge`:
+**Placement is settled and is recorded here as context, not as an option.** The layer belongs in a new sibling repository. ADR-025 gives most of the argument: the bridge's mission runs from Exeris surfaces **to** agents and this layer runs the other way; its "adjacent AI-integration artefacts" clause is qualified by that same responsibility; and §3 chose TypeScript on the reasoning that no Java was needed, where the layer's own skeleton is Java. `exeris-agents` is excluded by construction — it is defined by being vendored and digest-verified, and a mutable dataset with a capture process breaks the property that makes a pinned import verifiable. The plan's own "the planner and the router do not know MCP" then requires the bridge to be downstream, not host.
 
-- ADR-025 states the bridge's mission as exposing Exeris surfaces **to** agents, and its clause admitting "adjacent AI-integration artefacts" is qualified by "when they share the same fundamental responsibility: bridging Exeris semantic surfaces to AI agents". A layer that consumes signals **about** agent runs is the opposite direction. ADR-025 §3 also chose TypeScript on the reasoning that no Java was needed; the execution layer's own draft skeleton is Java.
-- `exeris-agents` is defined by being vendored and digest-verified — immutable content plus small deterministic tools, with no runtime. A mutable dataset and a long-running capture process would break exactly the property that makes a pinned import verifiable.
-- The plan's own constraint, "the planner and the router do not know MCP", requires the bridge to be a downstream context adapter. Hosting the layer inside the bridge inverts that dependency on day one.
-
-The cost of leaving the *oracle* question unanswered is concrete: V0 either stalls waiting for SCB Phase 0, or quietly invents a second quality system — which the plan explicitly says it does not want, and which would then be a competing, uncalibrated judge of the same runs.
+The cost of leaving the *oracle* question unanswered is concrete: V0 either stalls waiting for SCB Phase 0, or quietly invents a second, uncalibrated judge of the same runs — which the plan explicitly does not want.
 
 ## Investigation
 
@@ -70,18 +66,16 @@ External prior art is thinner than it looks. Published model-routing work optimi
 1. **ADR-025** bounds `exeris-ai-bridge` to bridging Exeris surfaces to agents; it may feed the layer, not host it.
 2. **`agents-md-schema.md` rule 8** forbids fetching policies, instructions or executable scripts at agent runtime, and requires a pinned, digest-verified import. A telemetry sink shipped through the bundle must therefore be reviewed code inside the vendored tree, not a callback fetched at session time.
 3. **ADR-085 §J** already defines the enforcement layering L0–L3. The execution layer adds no layer; it *observes* L0–L2 and consumes their verdicts.
-4. **SCB §7.1** — token-to-token comparison is valid only within one model; across models the units are USD and wall time. This constrains the cost model before it is written.
-5. **SCB §8** — a model reference is `id + snapshot/date + harness + system-prompt hash`. The plan's V0.2 already mirrors this; it is restated here because it is the field most often dropped and the one that makes a dataset uninterpretable a quarter later.
-6. **Privacy** — the plan's own "separate metadata from potentially sensitive content" is a hard constraint, not a preference: prompt and file content may carry customer or private-repository material.
+4. **SCB §7.1 and §8** — token-to-token comparison is valid only within one model (across models the units are USD and wall time), and a model reference is `id + snapshot + harness + system-prompt hash`. Both are discharged by the run record in §Recommendation.
+5. **Privacy** — "separate metadata from potentially sensitive content" is a hard constraint, not a preference: prompts and file content may carry customer or private-repository material.
 
 ### Data gathered
 
 What exists today, measured in this workspace on 2026-09-08 rather than assumed:
 
-- **A validated docs-domain oracle now runs.** `agents_file_check.py`, `agents_render.py --check`, `agents_bundle.py verify`, `frontmatter_check.py`, `registry_check.py`, plus 14 eval scenarios. On the migrated `exeris-docs` tree it reports 24 files / 0 errors, and its negative behaviour has been exercised rather than assumed: 5 malformed agent-layer states are caught (a vendor `tools:` list in canonical frontmatter, a lowercase `agent.md`, a skill on disk the manifest does not name, a read-only role holding `edit`, a hook state directory not git-ignored), a hand-edited vendored policy is caught with both digests printed, a hand-edited adapter is caught as a unified diff, and 7 malformed verdict instances are rejected offline by the composing schema.
-- **That set is, in SCB's terms, a proto mutation suite** — small, and never yet run as one, but the shape is right.
-- **A six-vendor telemetry tap exists.** `.agents/vendor/…/hooks/bin/hook.py` intercepts pre-tool, post-tool and stop events, normalises the stdin shapes of Claude Code, Copilot, Codex, Gemini CLI, Antigravity and Cursor, and already writes session state. It is the only provider-neutral tool-call interception point in the ecosystem today.
-- **An outcome record shape exists.** `verdict.base.schema.json` carries `decision` (PASS/CONDITIONAL/BLOCKED), findings each bound to a clause, and `checks_run[]` with `pass | fail | not-run`.
+- **A docs-domain oracle runs.** `agents_file_check.py`, `agents_render.py --check`, `agents_bundle.py verify`, `frontmatter_check.py`, `registry_check.py` and 14 eval scenarios. 24 files / 0 errors on the migrated tree, with negative behaviour exercised rather than assumed: 5 malformed agent-layer states caught, a hand-edited vendored policy caught with both digests printed, a hand-edited adapter caught as a diff, 7 malformed verdict instances rejected offline. In SCB's terms that is a proto mutation suite — small, never yet run as a suite, but the right shape.
+- **A six-vendor telemetry tap exists.** The vendored hook dispatcher intercepts pre-tool, post-tool and stop events and normalises the stdin shapes of Claude Code, Copilot, Codex, Gemini CLI, Antigravity and Cursor. It is the only provider-neutral tool-call interception point in the ecosystem today.
+- **An outcome record shape exists.** `verdict.base.schema.json`: `decision`, findings each bound to a clause, and `checks_run[]` with `pass | fail | not-run`.
 - **The SCB metric vocabulary is in none of the repositories.** A workspace-wide search for `true_done`, `false_DONE_rate`, `first_pass_gap`, `turns_to_true_done` and `runs_reaching_100` returns zero hits across every checked-out repository. `exeris-benchmarks` is the JMH/wrk performance harness; the System Construction Benchmark is a different programme and is not in that repository. This is a statement about the checkout, not about the plan — the plan exists and is detailed — and it fixes the sequencing: **nothing can consume SCB output until SCB Phase 0 has run.**
 - **Antigravity's CLI selects agents silently.** `agy` 1.1.27 runs a turn with the default agent and exits 0 when `--agent` names something that does not resolve. Any per-run capture that records "which agent ran" from that runtime must assert it, not trust the invocation.
 
@@ -91,74 +85,42 @@ No spike was built for this RFC. The agent-layer v2 work is treated as an incide
 
 ## Options Considered
 
-The options are over **V0's oracle**, which decides V0's first domain and therefore what the first dataset is worth.
+The options are over **V0's oracle**, which decides V0's first domain and therefore what the first
+dataset is worth. Recorded here as the trail behind a settled recommendation.
 
 ### Option A: Wait for SCB Phase 0
 
-Build V0's capture, and gate the first `TRUE_DONE` on the System Construction Benchmark reaching Phase 4.
+Build capture; gate the first `TRUE_DONE` on the System Construction Benchmark reaching Phase 4.
 
-**Pros:**
-- One quality system, exactly as the plan wants; no competing judge.
-- SCB's oracle is designed to be validated (mutation suite, neutrality audit), so labels inherit that rigour.
-- The construction domains are the ones where model choice plausibly matters most.
-
-**Cons:**
-- V0 blocks on all six of SCB's own unresolved questions (Appendix D), including who performs the neutrality audit.
-- SCB's frozen contract measures *system construction* — 14-entity domains, sagas, migrations. It would not oracle a repository-wide documentation sweep, the workload that motivated this layer.
-- Nothing is captured meanwhile: the first row is months away and the capture code goes unexercised.
-
-**Cost:** low to build, high latency, and a real risk that the capture design is wrong in ways only rows would reveal.
+**Pros:** one quality system, no competing judge; SCB's labels inherit a mutation suite and a neutrality audit; construction domains are where model choice plausibly matters most.
+**Cons:** V0 blocks on all six of SCB's own unresolved items (its Appendix D), including who performs the neutrality audit; SCB's frozen contract measures *system construction* and would not oracle a documentation sweep, the workload that motivated this layer; nothing is captured meanwhile, so the first row is months away and the capture code goes unexercised.
+**Cost:** low to build, high latency, and a real risk the capture design is wrong in ways only rows reveal.
 
 ### Option B: V0 observes the documentation and agent-layer domain, against the guardrail suite
 
-Ship V0 capture now, against the oracle that already runs. First workload family: repository-wide documentation and agent-layer changes, judged by the guardrail suite plus the eval scenarios. SCB becomes the *second* oracle when Phase 4 lands, under one shared oracle interface.
+Ship capture now against the oracle that already runs. SCB becomes the *second* oracle at Phase 4, under one shared interface.
 
-**Pros:**
-- The oracle exists, is machine-runnable, and has a partially exercised negative suite (§Data gathered).
-- It is exactly the workload the layer was conceived to explain.
-- The outcome record already has a schema; capture and oracle meet at a shape that exists.
-- SCB stays unhurried and joins later as a second oracle implementation — a stronger design than one hard-wired judge.
-- Capture-design failures surface within days, on cheap workloads.
-
-**Cons:**
-- The docs oracle is narrow: it answers "is the corpus structurally consistent", never "is this document any good" — a large unmeasured surface that SCB §1.3 warns will be optimised down.
-- Documentation work may be unrepresentative of where routing matters most.
-- Two oracles of different rigour risk being reported as one; each row must carry its oracle's calibration state.
-
-**Cost:** moderate. The oracle is done. What is new is the workload model, the event sink, the store, and a mutation suite for the docs oracle.
+**Pros:** the oracle exists, is machine-runnable and has a partially exercised negative suite (§Data gathered); it is exactly the workload the layer was conceived to explain; the outcome record already has a schema, so capture and oracle meet at a shape that exists; SCB stays unhurried and joins later as a second implementation, which is a stronger design than one hard-wired judge; capture-design failures surface within days, on cheap workloads.
+**Cons:** the oracle is narrow — it answers "is the corpus structurally consistent", never "is this document any good", a large unmeasured surface SCB §1.3 warns will be optimised down; documentation work may be unrepresentative of where routing matters most; two oracles of different rigour risk being reported as one unless every row carries its oracle's calibration state.
+**Cost:** moderate. The oracle is done; the workload model, event sink, store and a docs mutation suite are not.
 
 ### Option C: Build an execution-layer-owned oracle
 
-Give the layer its own quality system, independent of both the guardrail suite and SCB.
-
-**Pros:**
-- Uniform across domains from the start.
-- Free of either existing instrument's blind spots.
-
-**Cons:**
-- A third judge must itself be calibrated, audited and mutation-tested; until it is, its verdicts are not results.
-- Largest build of the three, and delivers no row sooner than Option B.
-- Two uncalibrated judges disagreeing about one run is worse than one narrow judge with a stated scope.
-
+**Pros:** uniform across domains from the start; free of either existing instrument's blind spots.
+**Cons:** a third judge needs its own calibration, audit and mutation suite before its verdicts are results; largest build of the three and delivers no row sooner than B; two uncalibrated judges disagreeing about one run is worse than one narrow judge with a stated scope.
 **Cost:** high, and it duplicates the hardest part of SCB.
 
 ### Option D (do nothing): keep choosing models by hand
 
-**Pros:**
-- Zero cost. The founder's judgement is currently the router and is not obviously bad.
-
-**Cons:**
-- Unfalsifiable: with no record of what a cheaper model would have done, the cost of every choice is invisible.
-- It leaves the platform's most differentiating claim unevidenced — and no competitor can make it without the same dataset.
-- Once the tap exists the marginal cost of capture is near zero, so not capturing is a decision to discard data already flowing past.
-
+**Pros:** zero cost; the founder's judgement is the current router and is not obviously bad.
+**Cons:** unfalsifiable — with no record of what a cheaper model would have done, the cost of every choice is invisible; it leaves the platform's most differentiating claim unevidenced, and no competitor can make that claim without the same dataset; once the tap exists the marginal cost of capture is near zero, so not capturing is a decision to discard data already flowing past.
 **Cost:** nil now, compounding later.
 
 ## Testing
 
-The layer's testable surface in V0 is the **oracle**, and it inherits SCB §4.4's entry condition by analogy: an oracle whose `PASS` has never been contradicted by a known-broken input is not validated.
+V0's testable surface is the **oracle**, and it inherits SCB §4.4's entry condition: an oracle whose `PASS` has never been contradicted by a known-broken input is not validated.
 
-**Mutation suite for the docs oracle.** Each mutant is a deliberately broken repository state that at least one gate must catch, run as a suite with a published result, as SCB publishes `oracle-selftest.json`:
+**Mutation suite for the docs oracle** — each mutant a deliberately broken repository state at least one gate must catch, run as a suite with a published result, as SCB publishes `oracle-selftest.json`:
 
 - an ADR file whose number has no registry row (registry gate);
 - a registry row whose link does not resolve on the branch it names (link gate);
@@ -181,18 +143,65 @@ The decisive argument is not that the guardrail suite is a good oracle; it is na
 
 Option B also preserves what makes SCB valuable. Under one oracle interface SCB arrives as a second implementation carrying its own calibration state, coverage declaration and fences — rather than as a dependency V0 was blocked on and therefore tempted to approximate. Two oracles of different rigour are a problem only if calibration state is not carried per row, and carrying it is one field.
 
-The disciplines below are **not optional additions to the plan; they are the condition under which its later stages mean anything.** Each is lifted from SCB rather than invented:
+### What this oracle is, and what it is not
 
-1. **Four-valued outcome, fail-closed.** `TRUE_DONE | FALSE_DONE | UNKNOWN | UNREACHABLE`, `UNKNOWN` counted as failure. The existing `checks_run.result: not-run` is the mechanism, and a run whose gates did not run is `UNKNOWN`, never a pass.
-2. **Fences.** A change to the oracle, the harness, the hook dispatcher or a model snapshot writes a dated fence. Rows before it are marked, never deleted, and rows from either side of a fence are not summarised in one figure.
-3. **Exact identity.** Model id, snapshot, client, client version, system-prompt hash, bundle version, repository commit. A row missing any of these is `UNKNOWN`.
-4. **Accounting mode as a first-class field.** `api | subscription | local`. Under a subscription there is no per-run price; mixing the modes in one cost column silently corrupts every cost conclusion drawn from the dataset afterwards, and the corruption is undetectable after the fact.
-5. **Cost-to-true-done, not raw cost, as the primary quantity** — the plan already has this and it is its second-best decision after "V0 does not route".
-6. **Paired runs are the primary collection mode.** Observational rows across heterogeneous tasks will not support `P(TRUE_DONE | task, phase, model)` at the volumes a solo founder generates; the same task across N models will, at far smaller n. This is SCB's own design (3 runs × 3 arms), applied to a cheaper domain.
-7. **Preregistration before any routing claim.** Hypotheses of the form "class X suffices for phase Y" are written, with falsification conditions, before the dataset is queried for them. Without this, V0's dataset becomes a device for confirming whatever the founder already believes — and it is the founder's own dataset, oracle and annotation, which is precisely SCB §0.3's warning.
-8. **Instrument cost as a published line item**, as SCB §12.3 does. The capture layer's own token and hour cost belongs in the first report, not in a footnote.
+It answers exactly one question: **does this workload satisfy a stated set of machine-verifiable properties?** It does not answer whether the documentation is any good. That distinction is the scope declaration this recommendation stands on, and it must survive into the ADR verbatim — because the moment `TRUE_DONE` is read as "the work was good", every risk in §Risks becomes active at once.
 
-**Placement**, restated as the recommendation's structural half: a new `exeris-ai-execution` repository owns the workload model, the event store, the dataset, the oracle interface and everything downstream. `exeris-agents` gains one small, versioned **telemetry sink contract** in the hook dispatcher — an optional, no-op-by-default emitter, reviewed code inside the vendored tree per rule 8 — and gains no runtime. `exeris-ai-bridge` becomes a context adapter at V8 under ADR-025, not before.
+For the same reason V0's domain is an **instrumentation and calibration workload, not a representative one.** V0 answers whether we can capture, normalise, classify, oracle, measure and reproduce a run. Whether documentation work is decent material for a *router* is a question the data answers later, and this RFC deliberately declines to assume it.
+
+### The ladder, and the rule that keeps V0 honest
+
+| Stage | Produces | Exit criteria |
+|:--|:--|:--|
+| **V0** | capture only | mutation suite calibrated and published; event capture validated against replayed runs; exact model identity on every row; accounting modes separated; run records reproducible; paired-task capture works; **no routing and no recommendation** |
+| **V1** | descriptive analysis | complexity features correlate measurably with execution difficulty; annotation noise quantified; ≥1 held-out workload set; no evidence the features are artefacts of one domain |
+| **V2** | complexity estimation | planner decomposes a workload reproducibly; phase-level outcomes available |
+| **V3** | recommendation | capability registry entries carry evidence provenance; recommendations evaluated against held-out runs |
+| **V4+** | routing | `P(TRUE_DONE \| router) ≥ P(TRUE_DONE \| frontier baseline)` **and** `Cost(router) < Cost(frontier baseline)` |
+
+The V4 exit is stated as a conjunction on purpose. "The router is cheaper" is not a routing result; it is the thing a router trivially achieves by being worse.
+
+**V0 must not emit model-selection recommendations either — not only routing decisions.** A sentence like "Haiku appears appropriate for this workload" is formally not routing and is materially premature routing inference, arrived at without preregistration, without held-out data and without the correlation V1 exists to establish. The rule is `capture only`, and it is a rule about output, not about automation.
+
+### What a run record must carry
+
+The shape matters more than the field names, because it is what makes the one query the router will eventually need — *the same workload, on the same repository state, under the same oracle, across different models* — answerable at all.
+
+| Component | Carries | Why it cannot be added later |
+|:--|:--|:--|
+| `Workload` | fingerprint, domain, scope, phase, complexity | the join key for paired runs |
+| `Agent` / `Model` / `Harness` | provider, model id, snapshot, client + version, system-prompt hash | a row without these is uninterpretable once a snapshot moves |
+| `RepositoryState` | commit, bundle version, dirty flag | "same repository state" is otherwise unverifiable |
+| `Execution` | event stream, tool calls, turns, wall time | metadata separated from potentially sensitive content |
+| `Accounting` | mode `api \| subscription \| local`, usage, provider-reported cost | under a subscription there is no per-run price; mixing modes in one column corrupts every later cost conclusion, undetectably |
+| `Oracle` | id, version, **and calibration state** — suite name, status, result (e.g. `docs-mutation-v1: 8/8`) | otherwise an average across six months of drifting oracles looks scientific and means nothing |
+| `Outcome` | `TRUE_DONE \| FALSE_DONE \| UNKNOWN \| UNREACHABLE`, fail-closed | a run whose gates did not run is `UNKNOWN`, never a pass |
+| `InstrumentVersion` / `Fence` | capture version; the dated fence in force | rows either side of a fence are never summarised in one figure |
+| `HumanBaseline` | on paired tasks: human time, outcome, changes | see below |
+
+**Human baseline is a V0 requirement, not a follow-up.** It need not be a golden oracle and need not be large — the first paired tasks are enough. Without it, `Haiku: $0.10, 95% TRUE_DONE` reads as a triumph until one learns a human does the same work in seven minutes and Haiku takes forty-two, at which point the economic interpretation inverts. A cost figure with no human reference point is not interpretable, only quotable.
+
+### The remaining disciplines
+
+Each is lifted from SCB rather than invented, and each is a condition under which the later stages mean anything:
+
+1. **Fences.** A change to the oracle, harness, dispatcher or model snapshot writes a dated fence. Rows before it are marked, never deleted.
+2. **Cost-to-true-done, not raw cost**, as the primary quantity — the plan's second-best decision after "V0 does not route".
+3. **Paired runs are the primary collection mode.** Observational rows across heterogeneous tasks will not support `P(TRUE_DONE | task, phase, model)` at the volumes a solo founder generates; the same task across N models will, at far smaller n. SCB's own design (3 runs × 3 arms), on a cheaper domain.
+4. **Preregistration before any routing claim.** Hypotheses of the form "class X suffices for phase Y" are written with falsification conditions before the dataset is queried for them. The dataset, the oracle and the annotation share one author, which is exactly SCB §0.3's warning.
+5. **Instrument cost as a published line item** (SCB §12.3) — the capture layer's own tokens and hours belong in the first report, not a footnote.
+
+### Placement and the direction of the seam
+
+A new `exeris-ai-execution` repository owns the workload model, the event store, the dataset, the oracle interface and everything downstream. `exeris-ai-bridge` becomes a context adapter later, under ADR-025, not before.
+
+`exeris-agents` gains one small, versioned **telemetry sink contract** in the hook dispatcher — optional, no-op by default, reviewed code inside the vendored tree per rule 8 — and gains no runtime. The direction is deliberate and is the part the ADR must freeze:
+
+```text
+exeris-agents  ──normalized events──▶  Telemetry Sink Contract  ──▶  exeris-ai-execution
+```
+
+not `exeris-agents ──▶ AI Execution`. **The agent layer owns event semantics; the execution layer owns their interpretation.** An emitter that knew what a run *meant* would put analysis inside a bundle that twenty repositories vendor and verify by digest, which is the boundary the whole v2 design exists to hold.
 
 ### Why not the alternatives?
 
@@ -203,11 +212,11 @@ The disciplines below are **not optional additions to the plan; they are the con
 ### Risks of the recommendation
 
 - **A router trained on oracle outcomes selects for the oracle's blind spots.** SCB §1.3 observes that an agent optimises down everything the oracle does not check. A router is worse: it *learns* which model class passes the oracle most cheaply, so it will systematically prefer models that are good at satisfying the gates over models that are good at the work. On a docs oracle that checks structure and not quality, that is a machine for finding the cheapest way to produce structurally perfect, substantively empty documentation. Partial mitigations: the change-cost idea from SCB §7.5 (a hollow implementation is expensive to modify later) and holding a human-judged sample out of the training signal entirely. **This risk does not go away and must be stated in any report the layer produces.**
-- **Three roles in one person.** The founder authors the oracle, will author the router, and is the sole annotator. SCB answers this with an external neutrality audit; this layer has no equivalent and should say so rather than imply independence it does not have.
-- **The calibration set is not the deployment distribution.** SCB produces high-quality labels on a narrow frozen contract; V0 telemetry produces weaker labels on a broad drifting one. Transferring a routing policy from the first to the second is an extrapolation, and the gap between them is itself a measurable quantity that should be measured rather than assumed away.
-- **Annotation decays.** A 1–10 complexity scale, single-rater and unanchored, is mostly noise and is the step that gets skipped in week three. The three-valued *too weak / appropriate / overkill* judgement is cheap, carries most of the signal, and is what the recommendation keeps.
-- **V6+ may never have the data.** V0–V4 should be justified as products in their own right — a dataset and an analyzer are useful without a learned router — so that the programme is not a bet on reaching V6.
-- **Capability-registry seed values are claims.** Numbers like `reasoning: 7` need a source under `claims-and-evidence.md`, and at least one model name in the draft plan (`Astra`) could not be verified against any vendor list available here.
+- **Three roles in one person.** The founder authors the oracle, will author the router, and is the sole annotator. SCB answers this with an external neutrality audit; this layer has no equivalent and should say so rather than imply independence it lacks.
+- **The calibration set is not the deployment distribution.** SCB gives high-quality labels on a narrow frozen contract; V0 telemetry gives weaker labels on a broad drifting one. Transferring a policy between them is an extrapolation, and the gap is itself measurable rather than assumable.
+- **Annotation decays.** A single-rater, unanchored 1–10 complexity scale is mostly noise and is the step skipped in week three. The three-valued *too weak / appropriate / overkill* judgement is cheap and carries most of the signal.
+- **The later stages may never have the data.** Every stage through V3 must be worth building on its own — a dataset and an analyzer are useful without a learned router — so the programme is not a bet on reaching V4.
+- **Capability-registry seed values are claims.** `reasoning: 7` needs a source under `claims-and-evidence.md`, and at least one model name in the draft plan (`Astra`) could not be verified against any vendor list available here.
 
 ## Decision Record
 
@@ -220,9 +229,12 @@ The disciplines below are **not optional additions to the plan; they are the con
 
 ## Open questions / follow-ups
 
-- **Does the layer's first ADR need to amend ADR-025?** The bridge's "adjacent artefacts" clause is arguably narrowed by making the execution layer a separate repository. — founder, before the ADR is drafted
-- **Which SCB unresolved question blocks the shared oracle interface?** Appendix D lists six; at least "who performs the neutrality audit" bears on whether SCB verdicts can be admitted as labels at all. — founder / SCB Phase 1
-- **Does the sink contract belong in bundle 1.1.0 or 2.0.0?** It is additive to consumers, but it changes what a vendored script may do at runtime, which touches rule 8's reasoning. — agent-layer, next bundle release
-- **What is the retention and privacy policy for event payloads?** Metadata is separable from content in principle; the boundary needs writing down before the first row, not after. — founder, before V0 capture ships
-- **Is the docs domain representative enough to seed a router at all**, or is V0's honest deliverable only a dataset and an analyzer for that one domain? — answerable only with rows
-- **Human baseline.** SCB Phase 0 collects one for construction. The execution layer has no equivalent for documentation work, and without it "the model was appropriate" has no reference point. — founder, consider folding into the first paired experiment
+Deliberately open, and none of them resolvable by argument — each needs either rows or another
+programme's timetable. Decisions that were the author's to make have been made and are in
+§Recommendation rather than parked here.
+
+- **Is the documentation domain representative enough to seed a router at all?** Held open on purpose: V0 is scoped as a calibration workload precisely so that this is answered by data rather than assumed by the choice of first domain. A negative answer is a result, and its consequence is a second domain, not a failed V0.
+- **The exact sink contract.** Direction is settled (§Recommendation); the payload, the versioning and whether it ships in bundle 1.1.0 or 2.0.0 are not. It is additive to consumers but changes what a vendored script may do at runtime, which touches rule 8's reasoning rather than its letter.
+- **Retention and privacy for event payloads.** Metadata is separable from content in principle; the boundary needs writing down before the first row rather than after, and it is a policy question, not a schema question.
+- **When SCB enters as the second oracle.** Its Appendix D lists six unresolved items of its own; at least "who performs the neutrality audit" bears on whether its verdicts are admissible as labels at all. Tracked against SCB Phase 1, not against this layer.
+- **When the dataset becomes sufficient for a first routing hypothesis.** The V1 exit criteria are the current best answer and are themselves a guess until annotation noise has been quantified.
