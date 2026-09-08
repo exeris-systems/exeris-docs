@@ -18,8 +18,12 @@ An agent never performs an irreversible or outward-facing action on its own init
 these needs the founder to ask for it in the session it happens in; approval given once for one
 action does not carry to the next.
 
-- `git push --force` and `--force-with-lease`, to any ref.
-- Any push to `main` or to a `development/*` branch.
+- Any push to `main` or to a `development/*` branch, forced or not.
+- `git push --force` to any ref. `--force-with-lease` on a topic branch the agent itself created
+  is *not* on this list: rewriting an unreviewed commit message is routine, and a rule that forbids
+  it is one that gets worked around the first day it is enforced. The lease is what makes it safe —
+  it refuses if anyone else has pushed. Onto a reviewed branch, ask: a reviewer's line comments
+  point at commits a rewrite discards.
 - `git tag`, `gh release create`, and any publish or deploy.
 - `gh pr merge`, and closing or merging anyone else's pull request.
 - Deleting a branch, a worktree, or a remote ref.

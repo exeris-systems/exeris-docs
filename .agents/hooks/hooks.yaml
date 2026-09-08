@@ -26,7 +26,10 @@ hooks:
     # Ordinary `git push` of a feature branch is deliberately absent: it is reversible, it is how
     # a pull request is opened, and denying it would make the hook the thing people disable.
     match:
-      - 'git\s+push\b[^|;&]*--force(-with-lease)?\b'
+      # `--force-with-lease` is deliberately absent: it refuses when anyone else has pushed, and
+      # denying it would forbid rewriting an unreviewed commit message on one's own branch, which
+      # is the rule people learn to route around. Bare `--force` and `-f` have no such guard.
+      - 'git\s+push\b[^|;&]*(--force(?!-with-lease)|\s-f)\b'
       - 'git\s+push\b[^|;&]*\s(main|master|development/\S+)\b'
       - 'git\s+push\b[^|;&]*--delete\b'
       - 'git\s+tag\s+(-[a-zA-Z]+\s+)*\S'
