@@ -23,10 +23,6 @@ jobs:
       contents: read
       pull-requests: write
       id-token: write
-      # The routine reads the `ci:` gates rather than re-running them, and a check run is not
-      # readable under `contents` or `pull-requests`. Without this the read is a 403 and the
-      # reviewer falls back to reporting gates it cannot see as `not-run`.
-      checks: read
 
     steps:
       - name: Checkout repository
