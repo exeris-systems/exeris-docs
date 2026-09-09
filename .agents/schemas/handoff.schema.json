@@ -3,7 +3,7 @@
   "title": "Handoff (exeris-docs)",
   "description": "The bundle's shape, narrowed to this repository's roles. The shape is not restated here: if a field's meaning is in question, the base is the answer. agents-md-schema.md rule 13.",
   "allOf": [
-    { "$ref": "../vendor/exeris-agents-1.3.0/schemas/handoff.base.schema.json" },
+    { "$ref": "../vendor/exeris-agents-1.4.0/schemas/handoff.base.schema.json" },
     {
       "properties": {
         "from": { "$ref": "#/$defs/agent" },

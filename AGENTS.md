@@ -89,7 +89,7 @@ Before opening a pull request, run the guardrail checks the standards name and r
 rather than the impression: `frontmatter_check.py`, `registry_check.py`, `agents_file_check.py`,
 `agents_render.py --check`, Vale at error level, `commitlint`. Say what you did not verify as
 plainly as what you did — a check that did not run is reported as not run, never as silence
-([`error-handling-and-fallback.md`](.agents/vendor/exeris-agents-1.3.0/policies/error-handling-and-fallback.md)).
+([`error-handling-and-fallback.md`](.agents/vendor/exeris-agents-1.4.0/policies/error-handling-and-fallback.md)).
 
 Where the checkout cannot settle a question, leave a `VERIFY` comment at the sentence and report it
 as doc debt rather than guessing. A record's decision text is amended, never edited in place, and
