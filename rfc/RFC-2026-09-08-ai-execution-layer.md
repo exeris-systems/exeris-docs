@@ -3,21 +3,21 @@ title: "RFC-2026-09-08: The AI execution layer — against which oracle does V0 
 type: rfc
 visibility: public
 owning-repo: exeris-docs
-status: draft
-last-verified: 2026-09-08
+status: accepted
+last-verified: 2026-09-09
 ---
 
 # RFC-2026-09-08: The AI execution layer — against which oracle does V0 observe, and what must be preregistered before the dataset may justify a routing decision?
 
 | Field             | Value |
 |:------------------|:------|
-| **Status**        | **DRAFT** |
+| **Status**        | **ACCEPTED** |
 | **Author(s)**     | arkstack-dev |
 | **Date Opened**   | 2026-09-08 |
-| **Date Closed**   | — |
+| **Date Closed**   | 2026-09-09 |
 | **Scope**         | platform / cross-repo (a new sibling repository, a seam into `exeris-agents`, and a consumer relationship with `exeris-ai-bridge` under ADR-025) |
 | **Owning Repo**   | `exeris-docs` (an ecosystem-shape question; the layer has no repository yet) |
-| **Target ADR(s)** | TBD — one platform-scope ADR fixing the layer's boundary against ADR-025 and the agent bundle. Number reserved in [`adr-index.md`](../adr-index.md) only once this RFC is accepted. |
+| **Target ADR(s)** | **ADR-086** — one platform-scope ADR fixing the layer's boundary against ADR-025 and the agent bundle. Reserved in [`adr-index.md`](../adr-index.md) on acceptance; content pending. |
 | **Affected Repos**| `exeris-docs` (this RFC, the eventual ADR), a new `exeris-ai-execution` repository, `exeris-agents` (a telemetry sink contract in the hook dispatcher), `exeris-ai-bridge` (a context adapter, later), `exeris-benchmarks` (unaffected — the System Construction Benchmark is a separate programme and is not that repository) |
 | **Reviewers**     | — |
 
