@@ -14,3 +14,8 @@ standards/_*/
 # Session state written by the L0 hooks. The dispatcher keys a subdirectory per session, so this
 # is per-session scratch and never repository content.
 .agents-state/
+
+# The eval runner's default report sink. The documented verification command writes it on every
+# run, dry or not, and the runner's path guards keep the sink inside the repository — so it cannot
+# be aimed at /dev/null. Per-run artefact, never repository content.
+working-notes/eval-report.json
