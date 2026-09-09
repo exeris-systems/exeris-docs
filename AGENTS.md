@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-04
+last-verified: 2026-09-09
 ---
 
 # exeris-docs: the central documentation hub for the Exeris Systems ecosystem
@@ -59,12 +59,16 @@ index and a safety boundary; it does not restate them.
 
 | Path | What it holds |
 |:--|:--|
-| [`.agents/policies/`](.agents/policies) | What is permitted or forbidden: [ADR registry discipline](.agents/policies/adr-registry.md) (hard constraints), [editing the whitepaper and the HLA](.agents/policies/editing-large-documents.md) (strong defaults), [drift patterns](.agents/policies/drift-patterns.md) (a sweep checklist). |
+| [`.agents/policies/`](.agents/policies) | What is permitted or forbidden here: [ADR registry discipline](.agents/policies/adr-registry.md), [editing the whitepaper and the HLA](.agents/policies/editing-large-documents.md), [drift patterns](.agents/policies/drift-patterns.md). |
 | [`.agents/references/`](.agents/references) | The short form of facts owned elsewhere — the three-tier architecture, the capability layer, the graph subsystem, the bootstrap DAG. Each names its authoritative source and yields to it. |
 | [`.agents/skills/`](.agents/skills) | Bounded capabilities: registry-discipline review, document-shape classification, drift sweep, routing, task classification, three-tier narrative review. |
-| [`.agents/agents/`](.agents/agents) | Role profiles composed from those skills — router, architect, registry keeper, shape classifier, implementer. |
-| [`.agents/workflows/`](.agents/workflows) | Ordered task sequences: ADR reservation check, drift-pattern sweep, three-tier narrative purity, visibility-taxonomy check. |
-| [`.agents/manifest.yaml`](.agents/manifest.yaml) | The composition, and the version-pinned bundles this repository imports. It imports none. |
+| [`.agents/agents/`](.agents/agents) | Role profiles, one per directory as `<name>/AGENT.md` — router, architect, registry keeper, shape classifier, implementer, evaluator. |
+| [`.agents/workflows/`](.agents/workflows) | Ordered task sequences: ADR reservation check, pull-request review, drift-pattern sweep, three-tier narrative purity, visibility-taxonomy check. |
+| [`.agents/schemas/`](.agents/schemas) | The three decision handoffs — triage result, verdict, handoff. A reviewing role emits its verdict as JSON against one of these, after the Markdown. |
+| [`.agents/hooks/`](.agents/hooks) | Runtime enforcement (L0): what may never run, and what may not be called finished. Authored once here, rendered per provider. |
+| [`.agents/evals/`](.agents/evals) | Behaviour tests for the roles above. A change to a profile, skill or policy a scenario covers reruns that scenario, and the pull request names the run. |
+| [`.agents/vendor/`](.agents/vendor) | The shared bundle, pinned and verified. Its policies bind here too and are composed as `bundle:<name>`; it is never edited in place — a hand-edit is a digest failure. |
+| [`.agents/manifest.yaml`](.agents/manifest.yaml) | The composition, the render map, what each provider cannot do, and the pinned bundle this repository vendors. |
 
 Instruction sources resolve broad to narrow — organisation bundle, repository, subtree, selected
 workflow. A narrower file may restrict behaviour; it may never relax a higher-order rule. Accepted
@@ -73,20 +77,19 @@ defect.
 
 ## Conventions
 
-The binding standards live in [`standards/`](standards/) and are not restated here. When this file and a standard disagree, the standard wins and this file is the defect.
-
-- [`standards/commit-conventions.md`](standards/commit-conventions.md)
-- [`standards/pr-conventions.md`](standards/pr-conventions.md)
-- [`standards/javadoc-conventions.md`](standards/javadoc-conventions.md)
-- [`standards/docs-style-guide.md`](standards/docs-style-guide.md)
-- [`standards/adr-conventions.md`](standards/adr-conventions.md)
-- [`standards/ai-provenance.md`](standards/ai-provenance.md)
+The binding standards live in [`standards/`](standards/) and are not restated here. When this file
+and a standard disagree, the standard wins and this file is the defect.
+[`standards/README.md`](standards/README.md) indexes all of them and names the gate that enforces
+each — it is the list to read, because a copy of it here goes stale the next standard that lands,
+as the copy it replaces had.
 
 ## Verification and reporting
 
 Before opening a pull request, run the guardrail checks the standards name and report the numbers
 rather than the impression: `frontmatter_check.py`, `registry_check.py`, `agents_file_check.py`,
-Vale at error level, `commitlint`. Say what you did not verify as plainly as what you did.
+`agents_render.py --check`, Vale at error level, `commitlint`. Say what you did not verify as
+plainly as what you did — a check that did not run is reported as not run, never as silence
+([`error-handling-and-fallback.md`](.agents/vendor/exeris-agents-1.2.0/policies/error-handling-and-fallback.md)).
 
 Where the checkout cannot settle a question, leave a `VERIFY` comment at the sentence and report it
 as doc debt rather than guessing. A record's decision text is amended, never edited in place, and
@@ -96,10 +99,8 @@ the amendment and its registry status cell move in the same pull request
 
 ## Provider adapters
 
-[`.claude/`](.claude) holds Claude Code adapters generated from `.agents/`, each carrying a
-do-not-edit marker and its source path, plus provider-owned operational configuration. There is no
-renderer yet, so they are refreshed by hand. `CLAUDE.md` is a pointer to this file.
-
-## Auto-memory
-
-Persistent memory for this workspace lives at `~/.claude/projects/-home-arkstack-exeris-systems-exeris-docs/memory/`. Use it for **process feedback** and **user preferences** — not for project facts. Project facts belong in this file, in `.agents/`, or in the canonical documents and records — all versioned and visible to humans and to other tools.
+[`.claude/`](.claude) holds Claude Code adapters generated from `.agents/` by the shared renderer
+in `exeris-systems/exeris-agents`, each carrying a do-not-edit marker naming its source, plus
+provider-owned operational configuration. Regenerate them; never edit them. The five other provider
+directories are deferred, and the manifest says so rather than leaving it to be inferred.
+`CLAUDE.md` is a pointer to this file.

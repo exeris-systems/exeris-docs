@@ -26,9 +26,13 @@ set -uo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 claude_dir="$(cd -- "$script_dir/.." && pwd)"
 
-# Build the file list (skills, commands, agents, top-level README) — never scripts/.
+# Build the file list (skills, agents, top-level README) — never scripts/.
+# -L follows symlinks. Without it this gate silently stopped seeing six of the skills the day
+# .claude/skills/ became per-skill links into .agents/skills/: find reported 5 files where 11
+# exist, and a script that calls itself a gate went green over files it never opened.
+# `commands/` is gone — workflows render as skills — and a missing path is not an error to find.
 mapfile -t FILES < <(
-  find "$claude_dir/skills" "$claude_dir/commands" "$claude_dir/agents" \
+  find -L "$claude_dir/skills" "$claude_dir/agents" \
        -type f -name '*.md' 2>/dev/null
   [ -f "$claude_dir/README.md" ] && echo "$claude_dir/README.md"
 )

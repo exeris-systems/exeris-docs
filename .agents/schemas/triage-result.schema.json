@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Triage result (exeris-docs)",
+  "description": "The bundle's shape, narrowed to this repository's task classes and roles. `document_shape` stays the base's, because the Research / RFC / ADR distinction is ecosystem-wide (ADR-085 §G) rather than this repository's.",
+  "allOf": [
+    { "$ref": "../vendor/exeris-agents-1.2.0/schemas/triage-result.base.schema.json" },
+    {
+      "properties": {
+        "task_class": {
+          "enum": [
+            "DOCUMENT_SHAPE",
+            "ADR_REGISTRY",
+            "NARRATIVE_INTEGRITY",
+            "LARGE_DOC_EDIT",
+            "TEMPLATE_UPDATE",
+            "DRIFT_SWEEP",
+            "AGENT_LAYER",
+            "MULTI_DOMAIN"
+          ]
+        },
+        "primary_agent": {
+          "enum": [
+            "exeris-docs-router",
+            "exeris-docs-architect",
+            "exeris-docs-adr-registry-keeper",
+            "exeris-docs-document-shape-classifier",
+            "exeris-docs-implementer",
+            "exeris-docs-evaluator"
+          ]
+        },
+        "template_path": { "pattern": "^templates/[A-Z-]+-TEMPLATE\\.md$" }
+      }
+    }
+  ]
+}

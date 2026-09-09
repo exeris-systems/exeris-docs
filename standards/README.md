@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-06
+last-verified: 2026-09-09
 ---
 
 # Exeris Standards
@@ -18,13 +18,13 @@ Each standard has the same shape: **hard rules** first, each tagged with the lay
 | [`commit-conventions.md`](commit-conventions.md) | commit subject, body, trailers | `exeris-systems/.github` → `commitlint.config.js` |
 | [`pr-conventions.md`](pr-conventions.md) | PR title, required sections, labels | `exeris-systems/.github` → `PULL_REQUEST_TEMPLATE.md`, `scripts/pr_body_check.py` |
 | [`issue-conventions.md`](issue-conventions.md) | issue forms, title grammar, labels, findings → issues | `exeris-systems/.github` → `ISSUE_TEMPLATE/`, `labels.yml`, `scripts/labels_sync.py`, `workflows/issue-hygiene.yml` |
-| [`javadoc-conventions.md`](javadoc-conventions.md) | doc comments on Java API | per-repo `maven-javadoc-plugin`, `exeris-kernel-build-config/checkstyle.xml` |
+| [`javadoc-conventions.md`](javadoc-conventions.md) | doc comments on Java API | per-repo `maven-javadoc-plugin`; `exeris-systems/.github` → `java/checkstyle-javadoc.xml`, `java/checkstyle-engine-pom.xml`, `workflows/javadoc-gate.yml` |
 | [`tsdoc-conventions.md`](tsdoc-conventions.md) | doc comments on TypeScript API, release tags, API goldens (api-extractor / MCP tool surface), generated-file header | `exeris-systems/.github` → `ts/eslint.tsdoc.mjs`, `ts/tsdoc.json`, `ts/typedoc.base.json`, `ts/api-extractor.base.json`, `ts/scripts/mcp-tool-surface.mjs`, `workflows/tsdoc-gate.yml` |
 | [`docs-style-guide.md`](docs-style-guide.md) | Markdown docs: frontmatter, types, terminology, voice | `exeris-systems/.github` → `scripts/frontmatter_check.py`, `vale/`, `.markdownlint.yaml` |
 | [`readme-skeleton.md`](readme-skeleton.md) | repo README shape | `[L2]` only |
 | [`adr-conventions.md`](adr-conventions.md) | ADR / RFC / RESEARCH files and the registry | `exeris-systems/.github` → `scripts/registry_check.py` |
 | [`changelog-conventions.md`](changelog-conventions.md) | CHANGELOG, release notes, accepted API changes | per-repo japicmp / revapi |
-| [`agents-md-schema.md`](agents-md-schema.md) | `AGENTS.md`, `.agents/`, provider adapters | `exeris-systems/.github` → `scripts/agents_file_check.py` |
+| [`agents-md-schema.md`](agents-md-schema.md) | `AGENTS.md`, `.agents/`, role profiles, hooks (L0), decision schemas, evals, provider adapters | `exeris-systems/.github` → `scripts/agents_file_check.py`, `scripts/agents_render.py`, `agents/adapters/<vendor>.yaml` |
 | [`ai-provenance.md`](ai-provenance.md) | AI-assisted contributions | `[L2]` + DCO app |
 | [`claims-and-evidence.md`](claims-and-evidence.md) | numbers in docs | `[L2]`; authority is `exeris-benchmarks/docs/CLAIMS.md` |
 | [`checklists/`](checklists/) | `pre-pr`, `doc-page`, `adr`, `release-notes` | `[L3]` only |

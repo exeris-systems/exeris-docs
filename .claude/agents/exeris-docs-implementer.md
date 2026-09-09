@@ -1,12 +1,12 @@
 ---
 name: exeris-docs-implementer
 description: Large-doc editing agent for exeris-docs. Use for concrete edits to the HLA, the whitepaper, records and templates, applying the editing discipline (targeted grep before edit, drift-sweep after edit, and a dated `## Amendments` entry where a record's meaning moves).
-tools: Read, Edit, Write, Bash, Grep, Glob, WebFetch, TodoWrite
+tools: Read, Grep, Glob, Edit, Write, Bash, WebFetch, WebSearch
 model: inherit
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/agents/exeris-docs-implementer.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
+<!-- DO NOT EDIT. Generated from .agents/agents/exeris-docs-implementer/AGENT.md by agents_render.py
+     (exeris-systems/exeris-agents; agents-md-schema.md rule 7). Edit the source. -->
 # Exeris Docs Implementer
 
 ## Role
@@ -73,3 +73,37 @@ or `None`
 
 ### Escalation Needed
 `<None | exeris-docs-architect | exeris-docs-adr-registry-keeper | exeris-docs-document-shape-classifier>`
+
+<!-- BEGIN GENERATED: composition (agents-md-schema.md rule 5) -->
+
+## Skills
+
+Load these before working; each is the single owner of its procedure.
+
+- `.agents/skills/exeris-docs-drift-pattern-sweep-review/SKILL.md`
+- `.agents/skills/exeris-docs-adr-registry-discipline-review/SKILL.md`
+
+## Applies
+
+Read the ones your change touches. Each is authoritative for its own list; do not work from a remembered subset.
+
+- `.agents/policies/editing-large-documents.md`
+- `.agents/policies/adr-registry.md`
+- `.agents/policies/drift-patterns.md`
+- `.agents/vendor/exeris-agents-1.2.0/policies/agent-safety-and-autonomy.md`
+- `.agents/vendor/exeris-agents-1.2.0/policies/error-handling-and-fallback.md`
+
+## Handoffs
+
+| To | When | Blocking |
+|:--|:--|:--|
+| `exeris-docs-document-shape-classifier` | the document shape is not settled | yes |
+| `exeris-docs-adr-registry-keeper` | a number, filename or location is in play | yes |
+| `exeris-docs-architect` | a drift finding needs adjudicating before it is called resolved | yes |
+| `exeris-docs-evaluator` | the edit is finished and a pull request is next | no |
+
+## Response contract
+
+After the Markdown response above, emit the same content as a fenced `json` block conforming to `.agents/schemas/handoff.schema.json`. The Markdown is for the human; the JSON is what the eval runner and the CI review consume. If the two cannot be made to agree, the Markdown is wrong.
+
+<!-- END GENERATED -->
