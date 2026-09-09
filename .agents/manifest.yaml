@@ -15,9 +15,9 @@ repository: exeris-docs
 # means re-vendoring, not editing in place.
 imports:
   - bundle: exeris-agents
-    version: 1.1.0
-    ref: 90ace29edb90b1b1569c6f1f0214091b7a3fcd9c
-    sha256: sha256:b9591e34b3a2409e408891d4ea437a10e869cc614aa9e85dcd4023a8cf8d6ab1
+    version: 1.1.1
+    ref: b229007cfd40e640e8c5cefe128451ddb2a397c4
+    sha256: sha256:ffabe7d2ae8f67755d5dbab94b2ac6c9d421935d4b7cfc9a05138abd1fc17462
 
 agents:
   - exeris-docs-router
