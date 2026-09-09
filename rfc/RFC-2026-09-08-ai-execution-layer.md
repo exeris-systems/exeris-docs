@@ -17,7 +17,7 @@ last-verified: 2026-09-09
 | **Date Closed**   | 2026-09-09 |
 | **Scope**         | platform / cross-repo (a new sibling repository, a seam into `exeris-agents`, and a consumer relationship with `exeris-ai-bridge` under ADR-025) |
 | **Owning Repo**   | `exeris-docs` (an ecosystem-shape question; the layer has no repository yet) |
-| **Target ADR(s)** | **ADR-086** — one platform-scope ADR fixing the layer's boundary against ADR-025 and the agent bundle. Reserved in [`adr-index.md`](../adr-index.md) on acceptance; content pending. |
+| **Target ADR(s)** | **ADR-086** — one platform-scope ADR fixing the layer's boundary against ADR-025 and the agent bundle. Reserved in [`adr-index.md`](../adr-index.md) by this pull request; content pending. |
 | **Affected Repos**| `exeris-docs` (this RFC, the eventual ADR), a new `exeris-ai-execution` repository, `exeris-agents` (a telemetry sink contract in the hook dispatcher), `exeris-ai-bridge` (a context adapter, later), `exeris-benchmarks` (unaffected — the System Construction Benchmark is a separate programme and is not that repository) |
 | **Reviewers**     | — |
 
@@ -222,10 +222,10 @@ not `exeris-agents ──▶ AI Execution`. **The agent layer owns event semanti
 
 | Field | Value |
 |:--|:--|
-| **Outcome** | — |
-| **Date** | — |
-| **Resulting ADR(s)** | — |
-| **Notes** | — |
+| **Outcome** | **ACCEPTED** |
+| **Date** | 2026-09-09 |
+| **Resulting ADR(s)** | **ADR-086** — reserved in [`adr-index.md`](../adr-index.md) by this pull request; content pending. |
+| **Notes** | Accepted on the founder's decision, and on a reason narrower than the routing question the RFC opens: the observability layer is needed for the System Construction Benchmark programme whatever the routing answer turns out to be. Nothing in §Recommendation was amended to reach acceptance. The open questions in the section below stay open — they need rows or another programme's timetable, and acceptance does not pretend otherwise. |
 
 ## Open questions / follow-ups
 
