@@ -3,7 +3,7 @@
   "title": "Review verdict (exeris-docs)",
   "description": "The bundle's shape, narrowed to this repository's reviewing roles and scope vocabulary. The three-state `decision` and the `checks_run` contract are the base's; only the vocabulary is local.",
   "allOf": [
-    { "$ref": "../vendor/exeris-agents-1.1.1/schemas/verdict.base.schema.json" },
+    { "$ref": "../vendor/exeris-agents-1.2.0/schemas/verdict.base.schema.json" },
     {
       "properties": {
         "agent": {
