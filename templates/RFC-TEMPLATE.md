@@ -17,13 +17,14 @@ TEMPLATE USAGE NOTES — DELETE THIS BLOCK BEFORE COMMITTING.
 3. RFCs MAY live outside this repo (an external system, an issue tracker, a discussion thread). When external, an ADR's "Driven By" field links to the RFC URL. Use this template either way — it's the structure that matters, not the host.
 4. The Investigation section carries the evidence behind the option comparison. A falsifiable hypothesis that needs its own measurement campaign is a RESEARCH document instead (`RESEARCH-TEMPLATE.md`; filename `RESEARCH-YYYY-MM-DD-<kebab>.md`, branch-scoped on `research/<slug>` — see `templates/README.md`).
 5. RFC status flow: DRAFT → IN-REVIEW → ACCEPTED → (one or more ADRs) | REJECTED | WITHDRAWN.
+5a. That flow is the state of the **decision** and lives in the header table only. The frontmatter `status:` is the state of the **document** and takes a different vocabulary (`adr-conventions.md` rule 6), so an accepted RFC reads `status: active` in the frontmatter and `**ACCEPTED**` in the table — exactly as an accepted ADR does; see `adr/ADR-006`. `status: accepted` is not a value the frontmatter check accepts and fails `docs-lint`. The enforced enum is `active | draft | retracted | stale | superseded`; rule 6's own list omits `stale`, and `frontmatter_check.py` is the one that decides.
 6. An RFC is too long if you can't read it in 15 minutes. If options analysis is sprawling, split into multiple RFCs.
 7. Don't write an RFC for a decision the team has already informally made — go straight to ADR.
 -->
 
 | Field            | Value                                                                                            |
 |:-----------------|:-------------------------------------------------------------------------------------------------|
-| **Status**       | **DRAFT** \| **IN-REVIEW** \| **ACCEPTED** \| **REJECTED** \| **WITHDRAWN**                      |
+| **Status**       | **DRAFT** \| **IN-REVIEW** \| **ACCEPTED** \| **REJECTED** \| **WITHDRAWN** <the decision's state; the frontmatter `status:` is the document's and uses its own vocabulary — note 5a> |
 | **Author(s)**    | <Name(s)>                                                                                        |
 | **Date Opened**  | YYYY-MM-DD                                                                                       |
 | **Date Closed**  | YYYY-MM-DD <set when status reaches ACCEPTED/REJECTED/WITHDRAWN>                                 |
