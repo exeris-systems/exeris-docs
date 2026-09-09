@@ -27,6 +27,16 @@ Steps:
    Report each as pass, fail or not-run with its exit code. A check you did not run is `not-run`;
    it is never silence.
 
+   `ci:docs`, `ci:commits` and `ci:pr-body` are gates too, and a `ci:` gate is **observed, not
+   re-run** — `agents-md-schema.md`'s *Workflow header* owns that rule, because it owns what the
+   prefix means. Here it is one command:
+   `gh api repos/<repo>/commits/<sha>/check-runs --jq '.check_runs[] | "\(.name) \(.status) \(.conclusion)"'`.
+
+   What `ci:docs` owns in this repository is the shared enforcement in `exeris-systems/.github` —
+   `frontmatter_check.py`, `registry_check.py`, `lint_globs.py`, markdownlint and Vale. Where the
+   pull-request body cites a number from one of them, say whose environment produced it rather
+   than filing the script as a check you failed to perform.
+
 3. **Specialist passes**, as the triage class requires. The registry keeper owns numbering,
    filename, location, visibility and licence; the architect owns three-tier framing, doc
    precedence and drift adjudication. Neither restates the other's rules.

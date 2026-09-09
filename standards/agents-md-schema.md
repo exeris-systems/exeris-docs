@@ -241,6 +241,16 @@ names in both keys are checked against the manifest and the filesystem; the
 model reads them as guidance, and the gates they name are what actually
 enforces.
 
+How a gate is *satisfied* differs by prefix, and an agent following a workflow
+has to know which. A `script:` gate it runs, reporting the exit code. A
+`ci:<job>` gate has already run against the same commit and is **observed, not
+re-run** — read the job's conclusion, and `pending at review time` is an answer.
+Re-running one inverts §J's layering: an L3 reading re-deriving an L1 gate that
+blocks the merge on its own, from a sandbox with a different checkout, produces
+an opinion worth less than the gate's own exit code. Everything that job owns is
+the job's, including checkers that live outside this checkout — listing those
+individually as `not-run` describes a gap that does not exist.
+
 No runtime in scope executes a workflow file: every one of them hands it to the
 model as a prompt. A declarative graph here would be interpreted by the same
 model it was meant to constrain, so determinism comes from the hooks and the CI
