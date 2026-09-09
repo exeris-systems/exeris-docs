@@ -1,0 +1,49 @@
+---
+name: docs-pr-review
+description: Full pull-request review for exeris-docs — scope, registry discipline, amendment discipline, drift, single-edit consistency, scoped bans and claims, ending in a verdict. This is the routine the CI review action runs; run it locally before opening a pull request to get the same answer earlier.
+argument-hint: PR number, diff, or the list of changed files
+steps:
+  - {agent: exeris-docs-router, skill: exeris-docs-task-classifier}
+  - {agent: exeris-docs-architect, when: "the diff touches the HLA, the whitepaper or three-tier framing", gate: verdict}
+  - {agent: exeris-docs-adr-registry-keeper, when: "the diff touches adr/, adr-index.md or a taxonomy value", gate: verdict}
+  - {agent: exeris-docs-evaluator, gate: verdict, loop: {to: exeris-docs-implementer, on: BLOCKED, max: 2}}
+gates: [script:adr-filename-check.sh, script:drift-sweep.sh, script:taxonomy-check.sh, script:check-consistency.sh, ci:docs, ci:commits, ci:pr-body]
+output: schemas/verdict.schema.json
+---
+
+Review the change below and return one verdict.
+
+Change: $ARGUMENTS
+
+Read `AGENTS.md` first — it is the entry point, and the rules live under `.agents/`. Read the
+policies your diff actually touches rather than working from memory; each is the single owner of
+its list, and a summary repeated here would go stale the next time an entry is added.
+
+Steps:
+
+1. **Triage.** Classify the change with the `exeris-docs-task-classifier` skill. The class decides
+   which of the specialist steps below run at all; a docs-only typo fix does not need the architect.
+
+2. **Run the mechanical checks and record what they said**, before reading the diff for meaning.
+   `.agents/scripts/adr-filename-check.sh` on every changed `adr/ADR-*.md`,
+   `.agents/scripts/drift-sweep.sh` on every changed large document,
+   `.agents/scripts/taxonomy-check.sh` on the changed set,
+   `.agents/scripts/check-consistency.sh` for the repository-wide invariants.
+   Report each as pass, fail or not-run with its exit code. A check you did not run is `not-run`;
+   it is never silence.
+
+3. **Specialist passes**, as the triage class requires. The registry keeper owns numbering,
+   filename, location, visibility and licence; the architect owns three-tier framing, doc
+   precedence and drift adjudication. Neither restates the other's rules.
+
+4. **Evaluate.** Run `exeris-docs-evaluator` over the whole change: scope against the pull-request
+   description, amendment discipline, single-edit consistency, scoped bans, claims. Its verdict is
+   the one that is posted.
+
+5. **Report.** Lead with blockers, then in-scope improvements, then non-blocking suggestions. Cite
+   `file:line`. End with the verdict and, after it, the same content as a fenced `json` block
+   conforming to `.agents/schemas/verdict.schema.json`.
+
+The scoped bans in `AGENTS.md` and `.agents/policies/adr-registry.md` are absolute: a withdrawn
+figure asserted rather than fenced, or a number without its report path and figure state, is
+`BLOCKED` however small the diff is.

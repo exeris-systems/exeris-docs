@@ -1,6 +1,11 @@
 ---
+name: three-tier-narrative-purity
 description: Audit a doc edit for three-tier narrative purity — Tier 1 substrate / Tier 2 capability ecosystem / Tier 3 SKUs / Family products as separate axis.
 argument-hint: doc edit / new section / framing claim to audit
+steps:
+  - {agent: exeris-docs-architect, skill: exeris-docs-three-tier-narrative-review, gate: verdict}
+gates: [script:drift-sweep.sh, script:taxonomy-check.sh]
+output: schemas/verdict.schema.json
 ---
 
 Audit the change below for three-tier narrative purity.

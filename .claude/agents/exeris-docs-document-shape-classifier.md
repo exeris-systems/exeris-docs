@@ -1,12 +1,12 @@
 ---
 name: exeris-docs-document-shape-classifier
 description: Document shape classifier for exeris-docs. Use whenever a user says "draft an ADR" / "write an RFC" / "make a research note" — confirms Research / RFC / ADR is the right shape for the question, and selects the right template.
-tools: Read, Grep, Glob, WebFetch
+tools: Read, Grep, Glob, WebFetch, WebSearch
 model: inherit
 ---
 
-<!-- DO NOT EDIT. Generated from .agents/agents/exeris-docs-document-shape-classifier.md by the AGENTS.md adapter step
-     (agents-md-schema.md rule 7). Edit the source, not this file. -->
+<!-- DO NOT EDIT. Generated from .agents/agents/exeris-docs-document-shape-classifier/AGENT.md by agents_render.py
+     (exeris-systems/exeris-agents; agents-md-schema.md rule 7). Edit the source. -->
 # Exeris Docs Document Shape Classifier
 
 ## Role
@@ -61,3 +61,29 @@ Return exactly:
 ## Non-goals
 - Do not write the document itself — hand off to the originating author / `exeris-docs-implementer`.
 - Do not arbitrate the substance of the decision.
+
+<!-- BEGIN GENERATED: composition (agents-md-schema.md rule 5) -->
+
+## Skills
+
+Load these before working; each is the single owner of its procedure.
+
+- `.agents/skills/exeris-docs-document-shape-classifier/SKILL.md`
+
+## Applies
+
+Read the ones your change touches. Each is authoritative for its own list; do not work from a remembered subset.
+
+- `.agents/policies/adr-registry.md`
+
+## Handoffs
+
+| To | When | Blocking |
+|:--|:--|:--|
+| `exeris-docs-adr-registry-keeper` | the shape is ADR and a number must be reserved | yes |
+
+## Response contract
+
+After the Markdown response above, emit the same content as a fenced `json` block conforming to `.agents/schemas/triage-result.schema.json`. The Markdown is for the human; the JSON is what the eval runner and the CI review consume. If the two cannot be made to agree, the Markdown is wrong.
+
+<!-- END GENERATED -->

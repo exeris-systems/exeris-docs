@@ -10,3 +10,7 @@ standards/_*/
 # ignore is this subdirectory and not the provider tree. `git add -A` committed one as a gitlink
 # on 2026-09-07, which would have broken every clone.
 .claude/worktrees/
+
+# Session state written by the L0 hooks. The dispatcher keys a subdirectory per session, so this
+# is per-session scratch and never repository content.
+.agents-state/

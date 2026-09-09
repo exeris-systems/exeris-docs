@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-06
+last-verified: 2026-09-08
 ---
 
 # Exeris Standards
@@ -24,7 +24,7 @@ Each standard has the same shape: **hard rules** first, each tagged with the lay
 | [`readme-skeleton.md`](readme-skeleton.md) | repo README shape | `[L2]` only |
 | [`adr-conventions.md`](adr-conventions.md) | ADR / RFC / RESEARCH files and the registry | `exeris-systems/.github` → `scripts/registry_check.py` |
 | [`changelog-conventions.md`](changelog-conventions.md) | CHANGELOG, release notes, accepted API changes | per-repo japicmp / revapi |
-| [`agents-md-schema.md`](agents-md-schema.md) | `AGENTS.md`, `.agents/`, provider adapters | `exeris-systems/.github` → `scripts/agents_file_check.py` |
+| [`agents-md-schema.md`](agents-md-schema.md) | `AGENTS.md`, `.agents/`, role profiles, hooks (L0), decision schemas, evals, provider adapters | `exeris-systems/.github` → `scripts/agents_file_check.py`, `scripts/agents_render.py`, `agents/adapters/<vendor>.yaml` |
 | [`ai-provenance.md`](ai-provenance.md) | AI-assisted contributions | `[L2]` + DCO app |
 | [`claims-and-evidence.md`](claims-and-evidence.md) | numbers in docs | `[L2]`; authority is `exeris-benchmarks/docs/CLAIMS.md` |
 | [`checklists/`](checklists/) | `pre-pr`, `doc-page`, `adr`, `release-notes` | `[L3]` only |

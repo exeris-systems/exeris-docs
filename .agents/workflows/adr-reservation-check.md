@@ -1,13 +1,19 @@
 ---
+name: adr-reservation-check
 description: Verify a new / amended ADR follows the registry discipline — number reserved first, filename pattern correct, location matches scope, visibility taxonomy correct, link stubs in affected repos.
 argument-hint: ADR PR / new ADR file / index update to audit
+steps:
+  - {agent: exeris-docs-adr-registry-keeper, skill: exeris-docs-adr-registry-discipline-review, gate: verdict}
+  - {agent: exeris-docs-document-shape-classifier, when: "the change may not be an ADR at all"}
+gates: [script:adr-filename-check.sh, script:taxonomy-check.sh, hook:guardrails-gate-on-stop, ci:docs]
+output: schemas/verdict.schema.json
 ---
 
 Audit the ADR change below against registry discipline.
 
 Change: $ARGUMENTS
 
-The rules live once in `.agents/policies/adr-registry.md` (see" and
+The rules live once in `.agents/policies/adr-registry.md` and
 `adr/ADR-020-open-core-documentation-mirror-policy.md`; the mechanical checks live
 in `.agents/scripts/`. Read those — this command does not restate the rule text.
 
