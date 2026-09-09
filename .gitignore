@@ -5,3 +5,8 @@
 # Phase 0 inventory, the reference research and the org-github bundle, none of which
 # is repository content. Same rule as exeris-kernel's docs/release/ working notes.
 standards/_*/
+
+# Local git worktrees parked inside the repo. Tracked .claude/ holds generated adapters, so the
+# ignore is this subdirectory and not the provider tree. `git add -A` committed one as a gitlink
+# on 2026-09-07, which would have broken every clone.
+.claude/worktrees/
