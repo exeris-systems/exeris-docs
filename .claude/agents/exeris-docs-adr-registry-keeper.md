@@ -97,7 +97,7 @@ Load these before working; each is the single owner of its procedure.
 Read the ones your change touches. Each is authoritative for its own list; do not work from a remembered subset.
 
 - `.agents/policies/adr-registry.md`
-- `.agents/vendor/exeris-agents-1.3.0/policies/agent-safety-and-autonomy.md`
+- `.agents/vendor/exeris-agents-1.4.0/policies/agent-safety-and-autonomy.md`
 
 ## Handoffs
 
