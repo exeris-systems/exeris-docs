@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-06
+last-verified: 2026-09-08
 ---
 
 # Javadoc Conventions
@@ -14,6 +14,8 @@ Binding per ADR-085 §F. Applies to all Java sources (TypeScript: `tsdoc-convent
 ## Hard rules
 
 1. **Every public type, constructor, method, enum constant and record component on a gated module has a doc comment.** `[L1: maven-javadoc-plugin failOnWarnings=true on gated modules — port the exeris-sdk block; Checkstyle JavadocType/JavadocMethod scope=public]`
+   - **One exemption, taken per repository and never by default** *(added 2026-09-08)*. A repository whose published surface is fluent — a builder whose setters are `this.x = v; return this;` — may set the Javadoc gate's `trivial-accessors: exempt`, which drops the Checkstyle half of this rule for single-line method bodies. Doclint keeps running. The exemption is only available where something else carries the coverage and the repository says what: `exeris-sdk` has a completeness test requiring a comment on every public member except exactly that body shape. The point is to move the coverage, not to lose it, and a repository that cannot name its replacement does not qualify. `[L1: javadoc-gate input trivial-accessors, default documented; the gate writes the policy in force into its step summary, so a green run says which standard it ran]`
+   - Line count is a poor proxy for triviality and is used for want of one Checkstyle can express: it exempts `public Instant deadline() { return start.plus(ttl); }` along with the setters. That is why the gate's input names the policy and not the property — a better predicate replaces it without any repository changing a line. `[L2: whether an exempted method is genuinely trivial]`
 2. **First sentence is a summary that stands alone**: third-person declarative, states the contract, does not repeat the name. `[L1: Checkstyle JavadocStyle checkFirstSentence]` `[L2]`
    - ✗ `Returns the segment.` on `segment()`
    - ✓ `Returns the backing memory as a read-only view whose lifetime is bound to this buffer's reference count.`
