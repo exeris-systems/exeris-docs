@@ -32,6 +32,21 @@ Steps:
    Report each as pass, fail or not-run with its exit code. A check you did not run is `not-run`;
    it is never silence.
 
+   **A `ci:` gate is observed, not re-run.** `ci:docs`, `ci:commits` and `ci:pr-body` are jobs that
+   have already run against this head commit, so read the conclusion —
+   `gh api repos/<repo>/commits/<sha>/check-runs --jq '.check_runs[] | "\(.name) \(.status) \(.conclusion)"'`
+   — and report that, including `pending at review time` when the job has not finished. Re-running
+   one from here would duplicate an L1 gate from L3, which is the layering in ADR-085 §J inverted:
+   the gate blocks the merge on its own, and a second opinion about it from a sandbox with a
+   different checkout is worth less than its own exit code.
+
+   The shared checkers in `exeris-systems/.github` — `frontmatter_check.py`, `registry_check.py`,
+   `lint_globs.py`, markdownlint and Vale — are **not yours to run and not yours to list**. They
+   live in a repository this job does not check out, they are `ci:docs`, and reporting them
+   individually as `not-run` describes a gap that does not exist. Where the pull-request body cites
+   a number from them, say whose environment produced it rather than filing the script as a check
+   you failed to perform.
+
 3. **Specialist passes**, as the triage class requires. The registry keeper owns numbering,
    filename, location, visibility and licence; the architect owns three-tier framing, doc
    precedence and drift adjudication. Neither restates the other's rules.
