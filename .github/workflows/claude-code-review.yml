@@ -23,6 +23,11 @@ jobs:
       contents: read
       pull-requests: write
       id-token: write
+      # The review routine reads the `ci:` gates rather than re-running them, and a check run is
+      # readable under neither `contents` nor `pull-requests`. Without this the read is a 403 and
+      # the reviewer falls back to reporting gates it cannot see as `not-run` — which is what it
+      # did on every review until exeris-systems/exeris-docs#110.
+      checks: read
 
     steps:
       - name: Checkout repository
