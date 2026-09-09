@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-08
+last-verified: 2026-09-09
 ---
 
 # Agent-File Schema and Policy
@@ -36,6 +36,7 @@ CLAUDE.md                         rendered pointer — a client that cannot read
   references/*.md                 deferred, authoritative context
   schemas/*.schema.json           the decision handoffs (triage, verdict, handoff)
   hooks/hooks.yaml                runtime enforcement, declared once (dispatcher: see rule 12)
+  hooks/bin/dispatch.py           RENDERED, version-free entry point every adapter names
   evals/scenarios.yaml, evals/    runtime-independent behaviour tests
   scripts/*                       provider-agnostic checks the canonical files call
   vendor/<bundle>-<version>/      VENDORED, verified copy of an imported bundle — never edited
@@ -142,9 +143,16 @@ does not make them canonical merely because of where they sit.
     *dispatcher* that reads those declarations ships with the imported bundle
     (`.agents/vendor/…/hooks/bin/`), or lives at `.agents/hooks/bin/` in a
     repository that imports none; either way the rendered vendor configs invoke
-    it and carry no patterns of their own. A hook may deny an action a policy
-    already forbids; it may never permit one a policy forbids, and it is never
-    the place a rule is first stated. **L0 is a tripwire, not a proof** — a stop
+    it and carry no patterns of their own. **A rendered config never names the
+    versioned path.** It names `.agents/hooks/bin/dispatch.py`, a generated
+    version-free copy that resolves the pin when the hook fires. An adapter and
+    a vendored tree have different lifetimes — one is written when the renderer
+    last ran, the other is replaced at every bump — and a config carrying the
+    version denies *every* tool call wherever the two are a version apart,
+    whatever each hook's own `--on-error` says, because an interpreter that
+    cannot open a file answers before the layer can. A hook may deny an action
+    a policy already forbids; it may never permit one a policy forbids, and it
+    is never the place a rule is first stated. **L0 is a tripwire, not a proof** — a stop
     hook establishes that a command ran, never that it was the right command,
     and where a runtime cannot block a stop the hook degrades to a warning and
     the manifest records the degradation. `[L0; L1: hook render and
@@ -248,6 +256,19 @@ concrete pipeline pays for one. That directory is reserved and currently unused.
 there is no per-hook script path, because a rendered config that named one would
 be a second place the patterns live. It reads the vendor from its invocation and
 emits that vendor's decision shape.
+
+The entry point every adapter names is `hooks/bin/dispatch.py`: generated, free
+of the version, and the one file in `.agents/` that the renderer writes. It
+resolves the pin from `manifest.yaml` at run time and hands off to the
+dispatcher in the vendored tree, so a stale adapter and a fresh tree still meet.
+Two consequences are load-bearing rather than incidental. It puts the vendored
+directory ahead of its own on the import path, because its own directory is a
+generated file's home and not part of what the pin's digest covers — otherwise
+a file dropped beside it is imported by the gate, and L0 is switched off by an
+*addition* that no diff of an existing file would show. And it answers an
+unreachable dispatcher in the vendor's own decision shape, not with an exit code
+alone: exit 2 is the block channel on three of the six runtimes and is ignored
+on the rest, so a code-only refusal fails **open** exactly where it must not.
 
 Session state lives under `.agents-state/<session>/`, git-ignored and **keyed by
 the session the runtime names**. A state directory shared across sessions makes a

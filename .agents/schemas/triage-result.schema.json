@@ -3,7 +3,7 @@
   "title": "Triage result (exeris-docs)",
   "description": "The bundle's shape, narrowed to this repository's task classes and roles. `document_shape` stays the base's, because the Research / RFC / ADR distinction is ecosystem-wide (ADR-085 §G) rather than this repository's.",
   "allOf": [
-    { "$ref": "../vendor/exeris-agents-1.2.0/schemas/triage-result.base.schema.json" },
+    { "$ref": "../vendor/exeris-agents-1.3.0/schemas/triage-result.base.schema.json" },
     {
       "properties": {
         "task_class": {
