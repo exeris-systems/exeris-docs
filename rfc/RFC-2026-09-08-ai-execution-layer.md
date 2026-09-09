@@ -3,7 +3,7 @@ title: "RFC-2026-09-08: The AI execution layer — against which oracle does V0 
 type: rfc
 visibility: public
 owning-repo: exeris-docs
-status: accepted
+status: active
 last-verified: 2026-09-09
 ---
 
