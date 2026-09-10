@@ -15,7 +15,7 @@ slug: adr/ADR-087
 | **Deciders**    | Arkadiusz Przychocki |
 | **Date**        | 2026-09-10 |
 | **Scope**       | platform / cross-repo (`exeris-systems/.github` owns the workflows; every repository that calls them adopts the contract; `exeris-agents` supplies the verdict shape; `exeris-ai-execution` consumes the rows) |
-| **Owning Repo** | `exeris-docs` (the bot is an organisation-wide identity and contract; its code lives in `.github`, which carries the stub) |
+| **Owning Repo** | `exeris-docs` (the contract is organisation-wide, and so is `exeris-bot`; `exeris-inbox` is installed on the two inbox repositories only. The code lives in `.github`, which carries the stub) |
 | **Driven By**   | The provider coupling of `docs-review.yml` (ADR-085 §J.33's L2 review, one step, one provider's identity); the label taxonomy's severity vocabulary that nothing applies; ADR-086, which needs a producer for CI rows. The option comparison behind this ADR is internal working material and is not part of this repository. |
 | **Compliance**  | [ADR-085](ADR-085-documentation-architecture-and-repo-hygiene-standards.md) §C.11 (shared enforcement lives in `.github`), §I.29–30 (no duplicated rules; no PR or issue without a named human), §J (enforcement layering); [ADR-086](ADR-086-bound-the-ai-execution-layer-to-observation-before-routing.md) §C (run record), §D.15 (review-domain rows), §F.31 (`ci:` fingerprints); [ADR-065](https://github.com/exeris-systems/exeris-kernel/blob/main/docs/adr/ADR-065-spi-compatibility-gate.md) (the compatibility report §D trusts) |
 
@@ -31,7 +31,7 @@ This ADR answers: **what does `exeris-bot` own in CI, under whose identity and c
 
 ## 🏁 The Decision
 
-**`exeris-bot` is a GitHub App identity plus reusable workflow steps in `exeris-systems/.github` — a *publish* step that turns any runner's schema-valid `verdict` into a review comment, labels and a fail-closed required check under the organisation's own byline, and a *capture* step that emits one ADR-086 run record per L2 run; it files one merge-time, human-named, idempotent issue per downstream repository when a compatibility report says an upstream surface changed; it judges nothing, selects nothing, and routes nobody.**
+**`exeris-bot` and `exeris-inbox` are two GitHub App identities plus reusable workflow steps in `exeris-systems/.github` — `exeris-bot` speaks and `exeris-inbox` writes, because an App's permissions are one set for every repository it is installed on (§A.1) — a *publish* step that turns any runner's schema-valid `verdict` into a review comment, labels and a fail-closed required check under the organisation's own byline, and a *capture* step that emits one ADR-086 run record per L2 run; it files one merge-time, human-named, idempotent issue per downstream repository when a compatibility report says an upstream surface changed; it judges nothing, selects nothing, and routes nobody.**
 
 It is not a service. It has no repository of its own, no hosted process and no state beyond what a workflow run holds. Everything below is a step in `.github/workflows/*.yml`, checked out by callers at a pinned ref.
 
