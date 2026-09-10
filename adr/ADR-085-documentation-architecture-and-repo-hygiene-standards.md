@@ -57,11 +57,11 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
    visibility: public | enterprise-private   # required
    owning-repo: <repo-name>              # required
    status: draft | active | stale | superseded | retracted   # required for records; default active
-   last-verified: YYYY-MM-DD             # required on narrative pages; records carry none
+   last-verified: YYYY-MM-DD             # required (narrative pages only from 2026-09-10 — see ## Amendments)
    slug: <path>                          # optional; fixes the site URL
    ---
    ```
-   Missing or invalid `title`, `type`, `visibility` or `owning-repo` is a **build error**, not a warning; so is `last-verified` on a narrative page. A record — `adr`, `adr-link`, `rfc`, `research` — carries no `last-verified` at all (amended 2026-09-10).
+   Missing or invalid `title`, `type`, `visibility`, `owning-repo` ~~or `last-verified`~~ is a **build error**, not a warning. *(narrowed 2026-09-10: `last-verified` is a build error on a narrative page only; a record — `adr`, `adr-link`, `rfc`, `research` — carries none — see `## Amendments`)*
 8. **`type` enumeration** (extend by amending this ADR): `adr`, `adr-link`, `rfc`, `research`, `design-note`, `subsystem`, `module`, `tutorial`, `howto`, `reference`, `explanation`, `operations`, `release-notes`, `changelog`, `roadmap`, `benchmark-report`, `claims`, `methodology`, `refactor-note`, `working-note`, `migration-guide`. Narrative docs use the four Diátaxis values (`tutorial`, `howto`, `reference`, `explanation`); everything else is an Exeris record kind.
 9. **Working artefacts do not live at repo root.** Reports, refactor notes, session notes and crash dumps go under `docs/working-notes/` (type `working-note`, git-ignored or committed per repo policy) or are deleted; repo root holds only community files (`README`, `CONTRIBUTING`, `SECURITY`, `LICENSE*`, `CHANGELOG`, `ROADMAP`, `MIGRATION*`, `AGENTS.md`) and build files. Thin provider adapters such as `CLAUDE.md` are allowed only when required by a supported client.
 
