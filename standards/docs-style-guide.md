@@ -23,7 +23,7 @@ Binding per ADR-085 §B and §J. Applies to every Markdown file under `docs/` in
    visibility: public                      # required — public | enterprise-private
    owning-repo: exeris-kernel              # required
    status: active                          # draft | active | stale | superseded | retracted (records: required; narrative: default active)
-   last-verified: 2026-09-04               # required — the date a human last confirmed this page matches the code
+   last-verified: 2026-09-04               # the date a human last confirmed this page matches the code (narrative: required; records: absent — a record states a decision as of its date and makes no claim about current code, so `frontmatter_check.py` does not ask them for one)
    slug: subsystems/persistence            # optional — fixes the site URL; required for ADRs (see adr-conventions.md)
    ---
    ```
@@ -42,6 +42,7 @@ Binding per ADR-085 §B and §J. Applies to every Markdown file under `docs/` in
     - Forbidden pairs from each repo's registered drift patterns (`.agents/policies/drift-patterns.md` in `exeris-docs`) are Vale `existence` rules: "Postgres-only graph", "replacing Neo4j", `exeris-kernel-community` as a sibling repo, "Axon" adjacent to a digit, "~60% CPU waste", ">160 GB", TRL-5 or higher for the platform aggregate.
     - Style rules seeded from the Quarkus package: sentence-case headings, no heading punctuation, sentence length ≤ 32 words (suggestion), no "in order to", no "utilize", American spelling.
 11. **English.** A document that is deliberately not — an internal working note, the landing's business report — says so in its filename: `<name>.pl.md`, `<NAME>_PL.md`, or a language directory. The prose linter turns every style off for those, because an English speller reading Polish reports one warning per word. Nothing published to the site is in this category. `[L2]` `[L1: vale/.vale.ini turns styles off for the marked names]`
+12. **One home per fact; everywhere else links.** A rule, definition or constraint is written once, in the document that owns it. Every other place that needs it names that place rather than restating it. A second copy agrees on the day it is written and stops agreeing the day either one is edited, and nothing reports the divergence. ADR-085 §C.10 says this across repositories, for standards; this says it inside one document and between the documents of one repository. Changing a rule's wording means searching the repository in the same commit for quotations of it, and for sentences that assume its old phrasing. A link moves the maintenance cost from the copier to the editor, which is the right direction only when the editor knows they carry it. `[L2]`
 
 ## Voice
 

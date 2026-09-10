@@ -4,7 +4,6 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-08
 slug: adr/ADR-085
 ---
 
@@ -58,11 +57,11 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
    visibility: public | enterprise-private   # required
    owning-repo: <repo-name>              # required
    status: draft | active | stale | superseded | retracted   # required for records; default active
-   last-verified: YYYY-MM-DD             # required
+   last-verified: YYYY-MM-DD             # required (narrative pages only from 2026-09-10 — see ## Amendments)
    slug: <path>                          # optional; fixes the site URL
    ---
    ```
-   Missing or invalid `title`, `type`, `visibility`, `owning-repo` or `last-verified` is a **build error**, not a warning.
+   Missing or invalid `title`, `type`, `visibility`, `owning-repo` ~~or `last-verified`~~ is a **build error**, not a warning. *(narrowed 2026-09-10: `last-verified` is a build error on a narrative page only; a record — `adr`, `adr-link`, `rfc`, `research` — carries none — see `## Amendments`)*
 8. **`type` enumeration** (extend by amending this ADR): `adr`, `adr-link`, `rfc`, `research`, `design-note`, `subsystem`, `module`, `tutorial`, `howto`, `reference`, `explanation`, `operations`, `release-notes`, `changelog`, `roadmap`, `benchmark-report`, `claims`, `methodology`, `refactor-note`, `working-note`, `migration-guide`. Narrative docs use the four Diátaxis values (`tutorial`, `howto`, `reference`, `explanation`); everything else is an Exeris record kind.
 9. **Working artefacts do not live at repo root.** Reports, refactor notes, session notes and crash dumps go under `docs/working-notes/` (type `working-note`, git-ignored or committed per repo policy) or are deleted; repo root holds only community files (`README`, `CONTRIBUTING`, `SECURITY`, `LICENSE*`, `CHANGELOG`, `ROADMAP`, `MIGRATION*`, `AGENTS.md`) and build files. Thin provider adapters such as `CLAUDE.md` are allowed only when required by a supported client.
 
@@ -165,6 +164,22 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 - Business ADRs (`BUS-NNN`) and portfolio-product internal namespaces.
 
 ## Amendments
+
+- **2026-09-10 — §B.7 narrows `last-verified` to narrative pages; records carry none.** The key is
+  defined as *the date a human last confirmed this page matches the code*, and a record makes no
+  such claim: an ADR from February states a decision taken in February, and no later commit can
+  falsify it. Requiring it of records left two ways to fill it and both were wrong — a date
+  asserting a verification nobody performed, or the decision's own date wearing a name that means
+  something else. The corpus showed which way it went: seven of eleven ADRs here carried
+  `last-verified: 2026-09-05`, each equal to that file's last commit date, written by
+  `frontmatter_backfill.py` — whose own docstring says the value is not what the field means and
+  books every file it touches as owing a verification pass. Reported from exeris-kernel while
+  migrating 43 records; enforced by exeris-systems/.github#28, which moved the key out of
+  `REQUIRED` for `RECORD_TYPES` and stopped the backfill emitting it there. `adr-conventions.md`
+  rule 6 has always enumerated a record's frontmatter as `type`, `status` and `slug` — this
+  amendment makes §B.7 agree with the rule beside it rather than adding one. This record drops its
+  own `last-verified` in the same commit, because leaving it would contradict the clause being
+  amended.
 
 - **2026-09-08 — §F.21 gains 21e: rule 1's exemption is a policy, not a ruleset change.** The
   pilot repository's 204 undocumented public methods are all fluent builder setters, and
