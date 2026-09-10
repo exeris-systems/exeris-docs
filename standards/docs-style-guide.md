@@ -23,7 +23,7 @@ Binding per ADR-085 §B and §J. Applies to every Markdown file under `docs/` in
    visibility: public                      # required — public | enterprise-private
    owning-repo: exeris-kernel              # required
    status: active                          # draft | active | stale | superseded | retracted (records: required; narrative: default active)
-   last-verified: 2026-09-04               # required — the date a human last confirmed this page matches the code
+   last-verified: 2026-09-04               # the date a human last confirmed this page matches the code (narrative: required; records: absent — a record states a decision as of its date and makes no claim about current code, so `frontmatter_check.py` does not ask them for one)
    slug: subsystems/persistence            # optional — fixes the site URL; required for ADRs (see adr-conventions.md)
    ---
    ```
