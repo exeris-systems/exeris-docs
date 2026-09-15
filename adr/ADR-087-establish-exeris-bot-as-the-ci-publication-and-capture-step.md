@@ -11,7 +11,7 @@ slug: adr/ADR-087
 
 | Attribute       | Value |
 |:----------------|:------|
-| **Status**      | **PROPOSED** |
+| **Status**      | **ACCEPTED** (2026-09-15) |
 | **Deciders**    | Arkadiusz Przychocki |
 | **Date**        | 2026-09-10 |
 | **Scope**       | platform / cross-repo (`exeris-systems/.github` owns the workflows; every repository that calls them adopts the contract; `exeris-agents` supplies the verdict shape; `exeris-ai-execution` consumes the rows) |
