@@ -171,6 +171,39 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 
 ## Amendments
 
+- **2026-09-15 — the runner's execution log is measured, and it answers more than it was asked.**
+  The first L2 review to actually run in CI (`exeris-systems/.github` pull request 33, run
+  35014655583) produced one: `claude-execution-output.json`, 563 373 bytes, 507 events, uploaded as
+  its own workflow artefact. §C.14's three references — artefact URL, SHA-256, event count — are all
+  available, so `execution.event_stream` is answerable for this runner and the open question above it
+  closes.
+
+  It carries more than the field it was written for. `execution`: 68 turns, 408 318 ms, 67 tool calls
+  by name, 26 permission denials. `accounting`, split exactly as the System Construction Benchmark
+  §7.1 asks and never assumed available here: 112 input, 37 878 output, 3 887 025 cache-read and
+  101 766 cache-creation tokens. `agent`: the harness version, and the model.
+
+  Three consequences, each a change to this record rather than a note about a tool.
+
+  **A run is not one model.** `modelUsage` names two — `claude-sonnet-5` and
+  `claude-haiku-4-5-20251001` — in a single review, because the harness delegates. `agent.model_id`
+  is singular and cannot express that, and a row naming only the first would misattribute every
+  delegated turn. The field becomes a list, or gains a companion; either is a schema change and is
+  owed before the first captured row.
+
+  **The subscription cost figure is present, and the rule that drops it is now testable.** The log
+  carries `total_cost_usd: 1.564738` under an OAuth credential. §C.14 already says a price-list
+  computation under a subscription is dropped; until now nothing could check that a producer had
+  dropped it. A mutation for the capture step's suite follows from this directly.
+
+  **The privacy boundary has a measurement.** Of those 563 KB, 4 810 bytes are the model's own text
+  and 60 741 are tool results — excerpts of repository files. Ninety per cent is harness metadata.
+  So the artefact is neither "metadata" nor "content": it is metadata with content in it, which is
+  why §C.12's "never copied into the row" is load-bearing rather than tidy. What this repository runs
+  under meanwhile is no longer unstated either: the produce job sets `retention-days: 7`, which is a
+  retention policy nobody declared, and open question 37 now has a number to argue with.
+
+
 - **2026-09-15 — accepted, and Engineering Protocol 1 restated in the present tense.** The record is
   accepted under its own Engineering Protocol 7, alongside ADR-087, which is this layer's first
   producer. Item 1 described the repository as existing "locally… not yet on GitHub", and that

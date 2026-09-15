@@ -142,6 +142,50 @@ Resolving the base from the caller's checkout instead was considered: it validat
 
 ## Amendments
 
+- **2026-09-15 — the first real run answers Engineering Protocol 4's first half, and breaks three
+  things this record assumed.** Pull request 33 in `exeris-systems/.github`, run 35014655583: the
+  model ran for 408 seconds over 68 turns and produced a schema-valid verdict. Everything below was
+  measured on it.
+
+  **The execution log exists and is usable.** §C.14's three references are all available, and the
+  shape is recorded in ADR-086's amendment of the same date. The other half of Engineering Protocol
+  4 — whether the checkout's hooks fire — is still open.
+
+  **Neither source §B.10 names was reachable, and the log is the better third.** The runner tried to
+  write `verdict.json` and its harness refused: one `Write` call and twenty-five `gh` calls denied
+  under the action's permission mode. It posted no comment either, because the produce job holds
+  `pull-requests: read`. So the verdict existed and had no transport. It is now read from the
+  execution log, which is also the source whose authorship is not a question — an artefact of the
+  run is not a surface anyone with an account can write to, which is why §B.10's comment fallback
+  needs a trusted-author list and this needs none. §B.10 keeps the fallback and gains the log ahead
+  of it.
+
+  **The App token removes GitHub's protection against workflow recursion, and §B.5 does not say so.**
+  Events caused by `GITHUB_TOKEN` do not start new workflow runs; events caused by a GitHub App
+  token do. §B.5 moved every write onto an App token precisely to keep write scopes off the jobs —
+  and that turned the publication into a trigger for itself. Measured: the publish step applied
+  `doc-debt` at 20:12:17 and a new run began at 20:12:20 with `exeris-bot` as its actor. The runner
+  refuses a non-human actor, so the produce job failed and the publish job replaced a comment
+  carrying real findings with "no verdict". The failure was the only thing that stopped a loop. Any
+  step this ADR gives the App — labels here, issues in §D — must be read as a potential trigger for
+  the workflow that performed it.
+
+  **A pull request that touches a workflow file is never reviewed.** The runner refuses to start
+  when the workflow differs from the default branch's copy, by its own supply-chain guard, and the
+  job reports success anyway — so a missing review is indistinguishable from a clean one. The
+  repository this bites hardest is `exeris-systems/.github`, most of whose pull requests are workflow
+  changes: the record that makes the review mandatory is the one that will receive it least. The
+  routine now states it; closing it needs a different runner (§B.12's `runner:` input is the seam) or
+  `pull_request_target`, which pulls in §C.14a and is not implemented.
+
+  **And the contract was being read from the pull request under review.** `actions/checkout` reads a
+  default branch only for a *different* repository; pointed at the one it runs in, it takes the
+  triggering SHA. So when `.github` reviewed itself, the routine, the schema and the scripts came
+  from `refs/remotes/pull/33/merge`. Every claim in §B about a pull request being judged by the rule
+  in force was false in the one repository where a pull request can rewrite the rule. The checkout
+  now names its ref.
+
+
 - **2026-09-10 — the two Apps of §A.1 are registered; this is the rotation baseline.** `exeris-bot`
   and `exeris-inbox` were both created and installed on 2026-09-10, and their private keys stored as
   organisation secrets on the same day. §A.2 requires rotation to be a dated line per App, and this
