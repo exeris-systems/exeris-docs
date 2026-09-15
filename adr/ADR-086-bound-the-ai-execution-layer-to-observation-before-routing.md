@@ -3,7 +3,7 @@ title: "ADR-086: Bound the AI Execution Layer to Observation Before Routing"
 type: adr
 visibility: public
 owning-repo: exeris-docs
-status: draft
+status: active
 slug: adr/ADR-086
 ---
 
@@ -11,7 +11,7 @@ slug: adr/ADR-086
 
 | Attribute       | Value |
 |:----------------|:------|
-| **Status**      | **PROPOSED** |
+| **Status**      | **ACCEPTED** (2026-09-15) |
 | **Deciders**    | Arkadiusz Przychocki |
 | **Date**        | 2026-09-10 |
 | **Scope**       | platform / cross-repo (a new sibling repository; a seam into `exeris-agents`; a consumer relationship with `exeris-ai-bridge` under ADR-025; a producer relationship with the CI publication step of ADR-087) |
@@ -169,6 +169,23 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 - **Reversed by:** rows that show the envelope cannot reconstruct a run well enough to characterise it — that is a V0 failure and the answer is a MAJOR schema change, not a footnote; a documentation domain that V1 shows is unrepresentative — the answer is a second domain; a planted-defect self-test that cannot be made to pass without leaking the corpus — the answer is a different review oracle, recorded by amendment, with §D.16's two rejections still standing.
 - **Risk:** a producer fills a required field with a convenient value (a hash of the wrong thing, a `public` from a directory name, a cost from a price list). The validator catches the cross-file half; the producer-side half is caught only by the review of the producer's own derivations, which is why ADR-087 owns them and why this ADR names the field definitions precisely. The founder notices first, which is the problem.
 
+## Amendments
+
+- **2026-09-15 — accepted, and Engineering Protocol 1 restated in the present tense.** The record is
+  accepted under its own Engineering Protocol 7, alongside ADR-087, which is this layer's first
+  producer. Item 1 described the repository as existing "locally… not yet on GitHub", and that
+  stopped being true on 2026-09-10: `exeris-ai-execution` is public, and carries the judgement record
+  beside the run record — item 2 anticipated that file and it landed early. The two things item 1
+  said were missing and still are: the inbox validator is a specification rather than a program, and
+  the repository does not yet call `caller-example/guardrails.yml`. Acceptance freezes a decision,
+  not a stale observation, so the observation is corrected rather than carried.
+
+- **2026-09-15 — the stubs of Engineering Protocol 6 are owed and named.** `exeris-agents`,
+  `exeris-ai-bridge` and `exeris-ai-execution` each still need `docs/adr/ADR-086.link.md`, and the
+  registry's stubs table now names all three plus the private-repo marker. Item 6 accepts ahead of
+  them under `adr-conventions.md` rule 5's `[L2]` judgement, as rows 030, 072 and 085 do; the gap is
+  `[DOC DEBT]` and is written down rather than left to be noticed.
+
 ## Cross-references
 
 - [RFC-2026-09-08](../rfc/RFC-2026-09-08-ai-execution-layer.md) — the accepted exploration behind §A–§E; its option trail and its open questions are not repeated here.
@@ -184,7 +201,7 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 
 ## Engineering Protocol
 
-1. **Exists (2026-09-10):** `exeris-ai-execution` locally, with `schemas/run-record.schema.json`, `inbox/README.md`, `inbox/inbox.json` and the four validator rules as a specification. Not yet on GitHub; not yet under `caller-example/guardrails.yml`.
+1. **Exists (2026-09-15):** `exeris-ai-execution` is on GitHub, public, holding `schemas/run-record.schema.json`, `schemas/judgement-record.schema.json`, `inbox/README.md`, `inbox/inbox.json` and `README.md`. The validator rules are still a specification and not a program, and the repository is not yet under `caller-example/guardrails.yml` — item 2 is what closes both.
 2. **Before the first row:** the repository on GitHub, public, with the guardrails caller; the inbox validator (stdlib only, the five rules of §G.34, `inbox.json` as the inbox's identity); `schemas/judgement-record.schema.json` beside the run record, sharing its `oracle` and `outcome` definitions by `$ref` rather than by copy; the load-bearing wording in `inbox/README.md` fixed to *appended, marked, never rewritten or deleted* so that the reason `group_id` was chosen over a pointer is true of the text it cites.
 3. **Before any `calibration.status: pass`:** the docs mutation suite run as a suite with `oracle-selftest.json` published; the planted-defect self-test of §D.17 passing as a suite.
 4. **Before the first planned group:** `exeris-ai-execution-enterprise`, private, holding the task registry and the `enterprise-private` inbox with its own `inbox.json`. Ordered *after* the first CI-produced rows have shown that the envelope reconstructs a run — planning pairs on an instrument nobody has checked is the thing V0 exists to prevent.
