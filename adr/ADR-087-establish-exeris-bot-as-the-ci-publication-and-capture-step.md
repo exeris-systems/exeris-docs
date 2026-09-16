@@ -146,12 +146,14 @@ Resolving the base from the caller's checkout instead was considered: it validat
   No numbered clause owned this: §B.12 is the RUNNER seam — which harness produces the
   verdict — and says nothing about which events start one. This amendment establishes the
   trigger, and a later revision should give it a clause of its own rather than leaving it
-  here. The first runs cost
-  about five minutes and $1.56 each — read from the runner's own execution log for run
-  35014655583 (`total_cost_usd`, `duration_ms`), citable and not a benchmark figure, and the review fired on every push. The cost argument for
-  changing that turned out weaker than it first looked — `cancel-in-progress` collapses a burst of
-  pushes into one completed run, so the bill is one review per settled push rather than per push —
-  but examining it surfaced a correctness hole that matters more.
+  here.
+
+  The review fired on every push, and its cost is what prompted the look: about five minutes and
+  $1.56 a run, read from the runner's own execution log for run 35014655583 — `total_cost_usd` and
+  `duration_ms`, an operational measurement rather than a benchmark figure. That argument turned out
+  weaker than it seemed. `cancel-in-progress` collapses a burst of pushes into a single completed
+  run, so the bill is one review per settled push, not one per push. Examining it surfaced something
+  that matters more.
 
   **A verdict covers the commit it reviewed, and nothing noticed when the head moved.** A pull
   request reviewed green at one commit kept that green check while its tree changed underneath,
@@ -222,12 +224,6 @@ Resolving the base from the caller's checkout instead was considered: it validat
   now names its ref.
 
 
-- **2026-09-10 — the two Apps of §A.1 are registered; this is the rotation baseline.** `exeris-bot`
-  and `exeris-inbox` were both created and installed on 2026-09-10, and their private keys stored as
-  organisation secrets on the same day. §A.2 requires rotation to be a dated line per App, and this
-  is the line both rotations are measured from. `EXERIS_FINGERPRINT_KEY` belongs to §C.14's `ci:`
-  fingerprint and is not part of the publication path; Engineering Protocol 5 gates capture on it.
-
 - **2026-09-15 — §B.6a says whose composition validates, and what a caller's SHA pin does not
   reach.** The clause fixed where the base comes from and was silent on whose composition the
   publish step validates against, because it was written expecting one producer. Implementation made
@@ -260,6 +256,11 @@ Resolving the base from the caller's checkout instead was considered: it validat
   workflow file of a caller that passes secrets by name. The second is what §B.11 requires and the
   protocol did not say: three repositories already run their own routine beside the organisation's,
   so a publication reachable from one producer leaves the other unpublished and uncaptured.
+- **2026-09-10 — the two Apps of §A.1 are registered; this is the rotation baseline.** `exeris-bot`
+  and `exeris-inbox` were both created and installed on 2026-09-10, and their private keys stored as
+  organisation secrets on the same day. §A.2 requires rotation to be a dated line per App, and this
+  is the line both rotations are measured from. `EXERIS_FINGERPRINT_KEY` belongs to §C.14's `ci:`
+  fingerprint and is not part of the publication path; Engineering Protocol 5 gates capture on it.
 
 ## Cross-references
 
