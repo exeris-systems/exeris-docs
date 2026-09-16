@@ -93,7 +93,7 @@ Offline contract lifecycles are governed by five mechanisms:
 Exeris Tier 2 commercial capabilities and Tier 3 Platform SKUs are published under the **Exeris Commercial Source-Available License (ECSL)**. 
 
 * ECSL is **not** an OSI-approved open-source license. It is a **Source-Available Commercial License**.
-* Code is publicly visible across public repositories to uphold the *Glass Box Thesis* (whitepaper §1): customers audit source code, verify benchmark assertions, and inspect security routines prior to purchase.
+* Code is publicly visible across public repositories to uphold the *Glass Box Thesis* this section states: customers audit source code, verify benchmark assertions, and inspect security routines prior to purchase.
 * **Non-Production Use** (evaluation, academic study, local debugging, pre-production testing) is royalty-free and unrestricted.
 * **Production Use** requires an active commercial entitlement and a matching signed manifest.
 * Machine metadata standard: `SPDX-License-Identifier: LicenseRef-Exeris-ECSL-1.0`.
@@ -125,7 +125,7 @@ The core ECSL text establishes baseline terms. Commercial rights attach via four
 > **Normative Principle 2 (Capacity Monetization):**  
 > Exeris does not license infrastructure consumption. It licenses authorized capability execution within a defined workload envelope.
 
-Because the Exeris zero-copy architecture is designed to do the same work on less CPU and less resident memory than a traditional framework, licensing per vCPU or per server node creates an **Efficiency Penalty** — penalizing Exeris for its own optimization. Conversely, billing for non-existent virtual hardware destroys customer ROI perception.
+Licensing per vCPU or per server node prices the resources a workload consumes rather than the work it does, which creates an **Efficiency Penalty**: an architecture that needs fewer resources for the same work is paid less for it, so the optimization is charged against its author. No comparison is asserted here — what the architecture costs against any other is a benchmark question and this page answers none of it. Conversely, billing for non-existent virtual hardware destroys customer ROI perception.
 
 Exeris resolves this by monetizing the **economic result of workload transformation**.
 
