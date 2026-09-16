@@ -174,7 +174,7 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 - **2026-09-15 — the runner's execution log is measured, and it answers more than it was asked.**
   The first L2 review to actually run in CI (`exeris-systems/.github` pull request 33, run
   35014655583) produced one: `claude-execution-output.json`, 563 373 bytes, 507 events, uploaded as
-  its own workflow artefact. §C.14's three references — artefact URL, SHA-256, event count — are all
+  its own workflow artefact. §C.12's three references — artefact URL, SHA-256, event count — are all
   available, so `execution.event_stream` is answerable for this runner and the open question above it
   closes.
 
@@ -199,7 +199,7 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
   **The privacy boundary has a measurement.** Of those 563 KB, 4 810 bytes are the model's own text
   and 60 741 are tool results — excerpts of repository files. Ninety per cent is harness metadata.
   So the artefact is neither "metadata" nor "content": it is metadata with content in it, which is
-  why §C.12's "never copied into the row" is load-bearing rather than tidy. What this repository runs
+  why §C.12 — "prompts, file content and tool arguments never appear in a run record" — is load-bearing rather than tidy. What this repository runs
   under meanwhile is no longer unstated either: the produce job sets `retention-days: 7`, which is a
   retention policy nobody declared, and open question 37 now has a number to argue with.
 

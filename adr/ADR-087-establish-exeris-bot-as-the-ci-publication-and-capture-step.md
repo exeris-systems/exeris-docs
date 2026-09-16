@@ -142,8 +142,13 @@ Resolving the base from the caller's checkout instead was considered: it validat
 
 ## Amendments
 
-- **2026-09-16 — §B.12's trigger seam is readiness, and §B.8 gains staleness.** The first runs cost
-  about five minutes and $1.56 each, and the review fired on every push. The cost argument for
+- **2026-09-16 — when the review runs becomes readiness, and §B.8 gains staleness.**
+  No numbered clause owned this: §B.12 is the RUNNER seam — which harness produces the
+  verdict — and says nothing about which events start one. This amendment establishes the
+  trigger, and a later revision should give it a clause of its own rather than leaving it
+  here. The first runs cost
+  about five minutes and $1.56 each — read from the runner's own execution log for run
+  35014655583 (`total_cost_usd`, `duration_ms`), citable and not a benchmark figure, and the review fired on every push. The cost argument for
   changing that turned out weaker than it first looked — `cancel-in-progress` collapses a burst of
   pushes into one completed run, so the bill is one review per settled push rather than per push —
   but examining it surfaced a correctness hole that matters more.
@@ -153,7 +158,7 @@ Resolving the base from the caller's checkout instead was considered: it validat
   so a required check could rest on a review of code that is no longer there. Reviewing every push
   hid this rather than solving it: the verdict was usually fresh by accident.
 
-  The review therefore runs on **readiness**: `opened`, `reopened`, `ready_for_review`, and a
+  The review runs on **readiness**: `opened`, `reopened`, `ready_for_review`, and a
   dedicated label a human applies when the work is ready to look at. It does not run on
   `synchronize` or `edited`.
 
