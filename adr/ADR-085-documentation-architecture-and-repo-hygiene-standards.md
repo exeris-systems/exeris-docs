@@ -105,7 +105,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 25. **Amendments are logged, not silent.** An ADR amended in place gains a dated entry in an `## Amendments` section; the registry status shows `upd. YYYY-MM-DD`. Immutability à la Quarkus is explicitly not adopted.
 26. **Template additions:** ADR gains `Non-Goals` and `Risks and Assumptions` subsections; RFCs that propose an SPI surface gain `Testing`. A PR that adds or amends an ADR carries the `adr` label.
 
-26a. **A record carries no figures.** An ADR and a standards page state what is decided and what it costs in kind, not in numbers; where a decision rests on a measurement it cites the report and does not repeat the figure. `claims-and-evidence.md` rule 6 is this obligation's rule, and it is deliberately narrower than that file's rule 1: rule 1 permits a cited figure anywhere, which is how ADR-088 carried five of them through four review rounds, each removed on its own. They were measured — what was wrong was the page they were on. A repeated number is a maintenance obligation nobody tracks: when the measurement moves the record goes quietly false and nothing links the two. **One exception**, because a rule that cannot be falsified is not a rule — a `Reversed by:` clause names the evidence that would overturn the decision, and a threshold without a number names nothing. RFC and Research documents are outside this rule: reporting measurements is what they are for. `[L2]`
+26a. **A record carries no figures.** An ADR and a standards page state what is decided and what it costs in kind, not in numbers; where a decision rests on a measurement it cites the report and does not repeat the figure. `claims-and-evidence.md` rule 6 is this obligation's rule, and it is deliberately narrower than that file's rule 1: rule 1 permits a cited figure anywhere, which is how ADR-088 kept accumulating them across successive review rounds, each caught and removed on its own. They were measured — what was wrong was the page they were on. A repeated number is a maintenance obligation nobody tracks: when the measurement moves the record goes quietly false and nothing links the two. **One exception**, because a rule that cannot be falsified is not a rule — a `Reversed by:` clause names the evidence that would overturn the decision, and a threshold without a number names nothing. RFC and Research documents are outside this rule: reporting measurements is what they are for. `[L2]`
 
 ### H. Changelog and compatibility
 
@@ -169,8 +169,8 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 - **2026-09-16 — §G.26a: a record carries no figures, which rule 1 of
   `claims-and-evidence.md` never said.** That rule lets any figure sit anywhere so long as it cites a
-  report path and a figure state, and the gap showed: ADR-088 carried five performance figures
-  through four review rounds, each found and removed singly, none of them invented — every one was
+  report path and a figure state, and the gap showed: ADR-088 carried performance figures
+  through successive review rounds, each found and removed singly, none of them invented — every one was
   measured. The reviews kept catching them under other rules, because no rule said a record is the
   wrong place for a number however well sourced. §G.26a says it, `claims-and-evidence.md` rule 6
   carries it, and the falsification threshold of a `Reversed by:` clause is the one exception, since a
