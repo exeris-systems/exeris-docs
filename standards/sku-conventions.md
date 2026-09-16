@@ -43,10 +43,9 @@ A Platform SKU is a named, version-pinned, commercial-licensed composition of Ti
    - The composition manifest itself ships under the Exeris Commercial License (`commercial`).
    - Repository source visibility defaults to **source-available (public)** per ADR-023 §"SKU Repository Source-Visibility Policy" to enable Glass Box verification and customer Code Detachment.
    - The single closed-source (`enterprise-private`) exception is `exeris-sku-bot-blocker` on anti-abuse-security grounds.
-6. **Empirically measured default JVM settings and diagnostics.** `[L2]`
-   - Each SKU must establish and document its **optimal default JVM settings**, empirically verified via workload profiling:
-     - Workloads with zero-copy off-heap buffers (e.g. Gateway) recommend a lean heap with `SerialGC` (`-XX:+UseSerialGC -Xms128m -Xmx192m`) to eliminate background GC threads and memory footprint bloat.
-     - Heavier domain workloads (e.g. IDP document processing, graph traversals) tune GC selection (`ParallelGC` / `G1GC`) to throughput requirements.
+6. **Per-SKU measured default JVM settings and diagnostics.** `[L2]`
+   - Each SKU must establish its **default JVM settings** from a workload-profiling pass, bake them into the container entrypoint (rule 7), and record them in its own `README.md`. There they are figures like any other: rule 1 of [`claims-and-evidence.md`](claims-and-evidence.md) applies, so each carries a report path and a figure state — `unartifacted` where the pass was run but its report is not published.
+   - The settings are not written on this page. Collector choice and heap sizing follow the SKU's workload shape: zero-copy off-heap buffering in a Gateway, heap-resident document and graph work in an IDP domain. One SKU's result written here would be read as every SKU's default, and a record carries no figures at all (`claims-and-evidence.md` rule 6).
    - Every SKU must expose standard health and allocation diagnostics:
      - `/health` or `/actuator/health` (liveness and readiness probes).
      - `/actuator/allocations` (thread allocation tracking via `ThreadMXBean` or kernel telemetry).
@@ -110,7 +109,7 @@ Before publishing an SKU repository or creating a release tag:
 2. Does the SKU execute 100% kernel-direct without any Spring runtime dependencies in the data plane?
 3. Are all composed capabilities listed in `composition.json` genuine `@CapabilityModule` implementations matching the inventory in HLA §3.3?
 4. Is the manifest driver-swap transparent (no references to concrete driver implementations like `io_uring` or `NIO`)?
-5. Has an empirical JVM tuning pass been conducted to establish the documented optimal default JVM settings in `Dockerfile` and `README.md`?
+5. Has a workload-profiling pass established the SKU's default JVM settings, are they recorded in `README.md` with a report path and a figure state, and are they baked into the `Dockerfile` entrypoint?
 6. Are the diagnostics endpoints (`/health`, `/actuator/allocations`) wired and functional?
 7. Does the repository include a multi-stage `Dockerfile` targeting JDK 25?
 8. Are `AGENTS.md`, `CLAUDE.md`, and `README.md` present and compliant with repository hygiene standards?
