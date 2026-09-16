@@ -27,9 +27,9 @@ ADR-089 established the runtime execution contract and the *Build ≠ License* b
 
 1. **Strict Air-Gap Isolation:** Banking, telecom, and defense runtimes prohibit any outbound network socket during bootstrap or execution. Traditional license servers (FlexLM, SaaS license daemons, OCSP pings) are strictly forbidden. The license manifest must be completely self-contained and mathematically verifiable offline.
 2. **The JSON Canonicalization Trap:** The manifest must be human-readable and GitOps-friendly (viewable in Git, inspectable in Kubernetes ConfigMaps, verifiable via `jq`). However, JSON allows non-semantic formatting variances (arbitrary key ordering, whitespace differences, numeric formatting). Standard digital signatures over raw text break whenever DevOps tooling reformats or pretty-prints the file.
-3. **Microsecond Startup Latency:** Exeris achieves cold-start times under 50 milliseconds by eliminating reflection and classpath scanning. Heavy cryptography, such as RSA-4096 signature verification, complex X.509 certificate chain parsing, or external crypto library dependencies (e.g. BouncyCastle), degrades startup performance and expands the attack surface.
+3. **Startup Latency Budget:** Exeris keeps cold start short by eliminating reflection and classpath scanning, and the licensing check has to fit inside that budget rather than enlarge it. No figure is quoted: a startup number belongs in a benchmark report with its environment and figure state. Heavy cryptography, such as RSA-4096 signature verification, complex X.509 certificate chain parsing, or external crypto library dependencies (e.g. BouncyCastle), degrades startup performance and expands the attack surface.
 
-We must define a deterministic, tamper-proof attestation format that guarantees authenticity, survives GitOps reformatting, executes in under a millisecond using standard JDK primitives, and requires zero outbound network calls.
+We must define a deterministic, tamper-proof attestation format that guarantees authenticity, survives GitOps reformatting, verifies with standard JDK primitives at a cost small enough not to change the startup budget, and requires zero outbound network calls.
 
 This ADR answers: **What is the canonical schema of `license-manifest.json`, how is deterministic canonicalization achieved, which digital signature algorithm provides offline attestation, and how is the root of trust managed in `exeris-kernel-core`?**
 
@@ -100,7 +100,7 @@ The manifest is an UTF-8 encoded JSON document conforming to `https://specs.exer
 
 #### Field Constraints:
 * `contract.commercialModel`: Restricted to `STANDARD`, `ENTERPRISE`, `CAPACITY`, `VALUE_SHARE`, or `OEM`.
-* `entitlement.edition`: Must be `community`, `commercial`, or `enterprise`.
+* `entitlement.edition`: Must be `community`, `commercial`, or `enterprise`. **This is not ADR-023's licence taxonomy**, which reads `community` / `commercial` / `enterprise-private` and classifies a single capability. `edition` classifies the whole platform an entitlement buys, so the two share two of three values by coincidence of vocabulary and differ in the third because they answer different questions. ADR-023's Trade-offs section names this collision as one to watch for; this line is that watch.
 * `entitlement.licenseMode`: Must be `SUBSCRIPTION` or `PERPETUAL_INTERNAL`.
 * `entitlement.capabilities`: An array of lowercase kebab-case capability identifiers matching the `@CapabilityModule.name()` ecosystem naming convention.
 * `execution.environments`: A set containing one or more of `development`, `staging`, `production`, `dr-cold`, `dr-hot`.
