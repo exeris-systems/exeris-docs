@@ -29,7 +29,7 @@ Each standard has the same shape: **hard rules** first, each tagged with the lay
 | [`capability-conventions.md`](capability-conventions.md) | Tier 2 capability repositories (`exeris-caps-*`): boundary isolation (The Wall), `@CapabilityModule`, lifecycle, two-pass build, licensing | `exeris-tooling` → `CapTierWall`, `exeris:verify-capabilities`, `exeris-processor` |
 | [`sku-conventions.md`](sku-conventions.md) | Tier 3 Platform SKU repositories (`exeris-sku-*`): `composition.json`, kernel-direct execution, driver-swap transparency, optimal default JVM baseline | `exeris-sdk-composition-spec`, `CompositionStampAssertion`, `exeris-tooling` |
 | [`ai-provenance.md`](ai-provenance.md) | AI-assisted contributions | `[L2]` + DCO app |
-| [`claims-and-evidence.md`](claims-and-evidence.md) | numbers in docs | `[L2]`; authority is `exeris-benchmarks/docs/CLAIMS.md` |
+| [`claims-and-evidence.md`](claims-and-evidence.md) | numbers in docs | `[L2]` per ADR-085 §G.26a; measurement methodology is `exeris-benchmarks/docs/CLAIMS.md` |
 | [`checklists/`](checklists/) | `pre-pr`, `doc-page`, `adr`, `release-notes`, `new-cap-repo`, `new-sku-repo` | `[L3]` only |
 
 ## Changing a rule
