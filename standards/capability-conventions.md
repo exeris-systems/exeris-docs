@@ -26,7 +26,7 @@ A capability is a self-contained, composable unit of platform functionality gove
    - Public contract types belong strictly under `eu.exeris.caps.<sanitized_name>.api`.
    - Implementation types belong strictly under `eu.exeris.caps.<sanitized_name>.internal` (or subpackages).
    - **No sibling `internal` access:** Reading any class inside a sibling's `internal` package fails the build.
-   - **No Spring, Netty, or Servlet imports:** Any direct or transitive bytecode reference to `org.springframework.*`, `io.netty.*`, or `jakarta.servlet.*` fails the build via the Class-File API scan (ADR-055).
+   - **No Spring, Netty, Servlet or Reactor imports:** Any direct or transitive bytecode reference to `org.springframework.*`, `io.netty.*`, `jakarta.servlet.*` or `reactor.*` fails the build via the Class-File API scan (ADR-055).
    - **No kernel-core or driver imports:** A capability may reference only `eu.exeris.kernel.spi.*`, never kernel internals or concrete execution drivers.
 3. **Module declaration class.** `[L1: exeris-processor]`
    - Exactly one class at the package root (`<Name>Module.java`) annotated with `@CapabilityModule`.
@@ -105,7 +105,7 @@ exeris-caps-<name>/
 Before opening a pull request or tagging a release on any capability:
 
 1. Did I place all public contracts in `eu.exeris.caps.<name>.api` and all implementation details in `eu.exeris.caps.<name>.internal`?
-2. Did I ensure zero imports of Spring (`org.springframework.*`), Netty (`io.netty.*`), and Servlet APIs in both source and test dependencies?
+2. Did I ensure zero imports of Spring (`org.springframework.*`), Netty (`io.netty.*`), Servlet APIs (`jakarta.servlet.*`) and Reactor (`reactor.*`) in both source and test dependencies?
 3. Did I declare only `@Requires` edges that are genuinely consumed by this capability?
 4. If implementing `CapabilityLifecycleHooks`, does my class have a public no-arg constructor and does `terminate()` avoid throwing checked exceptions?
 5. Did I verify that `exeris-codegen-maven-plugin` has both `generate` and `verify-capabilities` goals bound in `pom.xml`?
