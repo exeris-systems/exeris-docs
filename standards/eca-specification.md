@@ -135,7 +135,7 @@ Every commercial agreement adopts exactly one of five models, all of which compi
 
 | Model | Target Segment | Pricing Basis | Capacity Definition |
 | :--- | :--- | :--- | :--- |
-| **`STANDARD`** | SMB, Mid-Market | Published catalog tier per SKU | Standard throughput cap (e.g., 25k RPS, 5 environments) |
+| **`STANDARD`** | SMB, Mid-Market | Published catalog tier per SKU | Published throughput cap and environment count, both set by the catalog entry for the SKU |
 | **`ENTERPRISE`** | Large Enterprise | Negotiated custom annual fee | Custom capability set, custom environment quotas, 24/7 SLA |
 | **`CAPACITY` (EECA)** | Heavy Middleware Migrations | Fixed annual contract based on transformed baseline | Committed Workload Profile (W) + Node Cap (H) + Growth Allowance |
 | **`VALUE_SHARE`** | Cloud Cost Take-Out Programs | Shared infrastructure cost reduction | Fixed baseline fee + percentage of documented infrastructure savings |
