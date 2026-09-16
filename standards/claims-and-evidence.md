@@ -25,6 +25,7 @@ Thin by design. The methodology — figure states, retraction register, citation
 
 ## Filter
 
+- Is this page a record — an ADR or a `standards/` page? Then no figure belongs on it at all, however well sourced: cite the report instead. Rule 6 overrides rule 1's citation allowance here, and asking rule 1's question first is what let five sourced figures sit in one ADR.
 - Does every number on this page have a path and a state?
 - Is the qualifier next to the number, or three paragraphs away?
 - Did you check the retraction register before quoting?
