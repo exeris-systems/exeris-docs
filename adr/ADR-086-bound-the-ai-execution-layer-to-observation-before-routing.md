@@ -77,6 +77,8 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 13. **A model reference is `id + snapshot + harness + system-prompt hash`** (SCB §8), and all four are required. `system_prompt_sha256` covers the instruction material the *repository* controls — the prompt text a workflow passes, the routine file, `AGENTS.md` at the recorded commit — and the harness's own prompt changes are covered by `harness.version`. A producer that cannot compute the hash so defined records no row rather than a row with a convenient hash.
 14. **Accounting modes are never mixed.** `accounting.mode` is `api | subscription | local`; only an `api` row may carry `provider_reported_cost`, and a cost figure computed from a price list — including one a runtime prints under a subscription — is imputed and is dropped. The schema enforces the first half; the producer is responsible for the second.
 
+14a. **Two rows are comparable only where the runner's powers and the verdict's route are recorded, so both are fields.** `execution.tool_surface` is the identity of the allow-list the runner ran under, and `execution.verdict_route` is which of the transports actually carried the verdict. Neither is decoration. Until 2026-09-16 the tool surface was decided by the repository the review ran in rather than by the workflow: the same `docs-review.yml` denied every `gh` call in `exeris-systems/.github` and allowed all twenty-eight in `exeris-docs`, so `execution.tool_calls` and `permission_denials` counted different things in two rows that named the same runner and the same routine. And the route is not constant — a verdict has arrived by written file and by execution log on the same pull request within four hours. A row that records neither cannot be compared with another; it can only be assumed comparable, which is the failure this layer exists to avoid.
+
 ### D. Domains and their oracles
 
 15. **Each `workload.domain` names its oracle, and each oracle's standing is declared per row in `oracle.calibration`.** The domains this ADR admits, their oracles, and what each oracle's verdict is admissible as:
@@ -125,7 +127,7 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 ### H. Explicitly deferred
 
 36. **The sink contract's payload and version.** Direction is fixed (§A.2); the payload, the versioning and whether it ships in bundle 1.x or 2.0 are decided after CI-produced rows have shown what a run needs from the local dispatcher. It is an amendment to this ADR and a release of `exeris-agents`, reviewed against rule 8's reasoning as well as its letter.
-37. **Retention and the privacy boundary for event payloads.** How long the artefact `execution.event_stream.ref` points at is kept, and where the line between metadata and content falls, are policy questions; they are written down before the first `enterprise-private` row and recorded by amendment. Until then the inbox conventions stand on their own and do not depend on the answer.
+37. **The privacy boundary for event payloads.** Where the line between metadata and content falls is a policy question; it is written down before the first `enterprise-private` row and recorded by amendment. Until then the inbox conventions stand on their own and do not depend on the answer. **Retention is no longer part of this question.** §C.12a settles it: a run's outcome is carried by the row and by judgement records, so a row never needs the artefact to outlive the pull request it came from, and the seven days the produce job keeps it are sufficient rather than merely current. What remains open is the boundary, and the measurement of 2026-09-15 is what makes it urgent rather than tidy — the stream carries tool results, which are excerpts of repository files.
 38. **When SCB enters as the second oracle** — tracked against SCB's Phase 1, not against this layer.
 39. **Whether the documentation domain is representative enough to seed a router.** Held open on purpose: a negative answer is a result, and its consequence is a second domain, not a failed V0.
 
@@ -170,6 +172,22 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 - **Risk:** a producer fills a required field with a convenient value (a hash of the wrong thing, a `public` from a directory name, a cost from a price list). The validator catches the cross-file half; the producer-side half is caught only by the review of the producer's own derivations, which is why ADR-087 owns them and why this ADR names the field definitions precisely. The founder notices first, which is the problem.
 
 ## Amendments
+
+- **2026-09-16 — a row that records neither the runner's powers nor the verdict's route cannot be
+  compared, so §C gains 14a and §H.37 loses its retention half.** Four more CI reviews ran, and what
+  they added to the 2026-09-15 measurement was not more of the same. Two runs of the *same*
+  `docs-review.yml` had different powers, because the tool surface was the target repository's to
+  decide until `exeris-systems/.github` pull request 43 pinned it: every `gh` call denied in
+  `.github`, all twenty-eight allowed in `exeris-docs`. Any row produced before that pin counted
+  `tool_calls` and `permission_denials` against a different surface from any row after it, and
+  nothing in the row said so. The verdict's transport is not constant either: run 35094148031 on
+  `exeris-docs` carried it as a written `verdict.json` while every other run that day carried it in
+  the execution log — four hours apart, on one pull request.
+
+  Retention leaves the open question because §C.12a already answered it: the outcome lives in the row
+  and in judgement records, so the artefact need not outlive its pull request and seven days is
+  enough. The boundary between metadata and content stays open and stays urgent, for the reason the
+  previous amendment measured — the stream carries tool results, and those are repository files.
 
 - **2026-09-15 — the runner's execution log is measured, and it answers more than it was asked.**
   The first L2 review to actually run in CI (`exeris-systems/.github` pull request 33, run
