@@ -201,58 +201,11 @@ PRODUCTION -----------+--- Active Disaster Recovery (Hot/Warm standby serving tr
 
 The manifest is an immutable, canonical JSON document (`license-manifest.json`):
 
-```json
-{
-  "$schema": "https://specs.exeris.eu/schema/v1/license-manifest.json",
-  "contract": {
-    "id": "EXR-2026-CAP-0082",
-    "framework": "ECSL-1.0",
-    "commercialModel": "CAPACITY"
-  },
-  "entitlement": {
-    "edition": "enterprise",
-    "sku": "exeris-sku-api-gateway",
-    "licenseMode": "SUBSCRIPTION",
-    "workloadProfileRef": "WP-2026-FINTECH-01",
-    "capabilities": [
-      "gateway.core",
-      "gateway.routing",
-      "gateway.rate-limit",
-      "security.jwt",
-      "security.tls",
-      "security.bot-fingerprinting"
-    ]
-  },
-  "execution": {
-    "environments": ["production"],
-    "workloadEnvelope": {
-      "maxThroughputRps": 200000,
-      "maxConnections": 50000,
-      "growthAllowancePercent": 20
-    },
-    "authorizedInstances": 25,
-    "validFrom": "2026-10-01T00:00:00Z",
-    "validUntil": "2027-09-30T23:59:59Z",
-    "gracePeriodDays": 14
-  },
-  "enforcementRules": {
-    "capability": "HARD",
-    "environment": "HARD",
-    "authorizedInstances": "SOFT",
-    "workloadEnvelope": "AUDIT"
-  },
-  "issuer": {
-    "authority": "Exeris License Issuer CA",
-    "keyId": "exeris-root-2026-k1",
-    "issuedAt": "2026-09-12T12:00:00Z"
-  },
-  "signature": {
-    "algorithm": "Ed25519",
-    "canonicalization": "RFC-8785",
-    "value": "base64EncodedEd25519SignatureString..."
-  }
-}
-```
+Its fields, their constraints and the example document are defined once, in
+[ADR-088](../adr/ADR-088-cryptographic-license-manifest-and-offline-verification.md) — the record that
+decides the schema. This page states what the manifest is FOR and where it sits in the architecture;
+what it contains is ADR-088's to say, and restating it here would put the same schema in two places
+with nothing keeping them equal.
 
 ### 5.2 Canonicalization and Verification
 
@@ -295,41 +248,10 @@ Constraint enforcement is decoupled from raw network blocking:
 
 The kernel never parses JSON on request paths. Phase 0 bootstrap transforms the validated manifest into a typed, immutable Java record:
 
-```java
-package eu.exeris.kernel.core.contract;
-
-import java.time.Instant;
-import java.util.Map;
-import java.util.Set;
-
-public record ExecutionContract(
-    String contractId,
-    String commercialModel,
-    String edition,
-    String licenseMode,
-    String sku,
-    Set<String> entitledCapabilities,
-    Set<String> authorizedEnvironments,
-    int authorizedInstances,
-    WorkloadEnvelope envelope,
-    Instant validFrom,
-    Instant validUntil,
-    int gracePeriodDays,
-    Map<String, EnforcementLevel> enforcementRules
-) {
-    public boolean allowsCapability(String capabilityId) {
-        return entitledCapabilities.contains(capabilityId);
-    }
-
-    public boolean isEnvironmentAuthorized(String environment) {
-        return authorizedEnvironments.contains(environment);
-    }
-
-    public EnforcementLevel getEnforcement(String constraintKey) {
-        return enforcementRules.getOrDefault(constraintKey, EnforcementLevel.AUDIT);
-    }
-}
-```
+The record's fields, its package and the contract it carries are defined once, in
+[ADR-089](../adr/ADR-089-capability-entitlement-enforcement-and-runtime-contract.md) — the record that
+decides them. This page does not restate the declaration: a second copy is a second thing to keep
+in step, and the one that drifts is always the copy rather than the decision.
 
 ---
 

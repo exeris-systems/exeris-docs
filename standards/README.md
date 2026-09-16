@@ -25,6 +25,7 @@ Each standard has the same shape: **hard rules** first, each tagged with the lay
 | [`adr-conventions.md`](adr-conventions.md) | ADR / RFC / RESEARCH files and the registry | `exeris-systems/.github` → `scripts/registry_check.py` |
 | [`changelog-conventions.md`](changelog-conventions.md) | CHANGELOG, release notes, accepted API changes | per-repo japicmp / revapi |
 | [`agents-md-schema.md`](agents-md-schema.md) | `AGENTS.md`, `.agents/`, role profiles, hooks (L0), decision schemas, evals, provider adapters | `exeris-systems/.github` → `scripts/agents_file_check.py`, `scripts/agents_render.py`, `agents/adapters/<vendor>.yaml` |
+| [`eca-specification.md`](eca-specification.md) | The Exeris Contract Architecture — what an entitlement permits, how it is proved offline, and the taxonomy the manifest draws on | `[L2]`; the manifest schema and the runtime record are ADR-088's and ADR-089's |
 | [`capability-conventions.md`](capability-conventions.md) | Tier 2 capability repositories (`exeris-caps-*`): boundary isolation (The Wall), `@CapabilityModule`, lifecycle, two-pass build, licensing | `exeris-tooling` → `CapTierWall`, `exeris:verify-capabilities`, `exeris-processor` |
 | [`sku-conventions.md`](sku-conventions.md) | Tier 3 Platform SKU repositories (`exeris-sku-*`): `composition.json`, kernel-direct execution, driver-swap transparency, optimal default JVM baseline | `exeris-sdk-composition-spec`, `CompositionStampAssertion`, `exeris-tooling` |
 | [`ai-provenance.md`](ai-provenance.md) | AI-assisted contributions | `[L2]` + DCO app |
