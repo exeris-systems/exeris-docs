@@ -16,7 +16,7 @@ slug: adr/ADR-088
 | **Date**        | 2026-09-12                                                                                                                                                                                                    |
 | **Scope**       | cross-repo (`exeris-kernel-core`, `exeris-tooling`)                                                                                                                             |
 | **Owning Repo** | `exeris-docs`                                                                                                                                                                                                 |
-| **Driven By**   | Technical implementation of ECA Part V; requirement for tamper-proof, air-gapped, zero-phone-home cryptographic license attestation with zero runtime performance impact                                      |
+| **Driven By**   | Technical implementation of ECA Part V; requirement for tamper-proof, air-gapped, zero-phone-home cryptographic license attestation that fits inside the startup budget                                      |
 | **Compliance**  | [`standards/eca-specification.md`](../standards/eca-specification.md) (ECA Specification §5), [ADR-089](ADR-089-capability-entitlement-enforcement-and-runtime-contract.md), the commercial entitlement and schedule taxonomy |
 
 ---
@@ -191,7 +191,7 @@ During Phase 0 (`FOUNDATION: Contract & Memory`) of `KernelBootstrap`, the runti
 **Concrete obligations:**
 
 1. **Deterministic RFC 8785 Canonicalizer:** `exeris-kernel-core` and `exeris-tooling` must implement a zero-allocation, zero-dependency RFC 8785 canonicalizer (`eu.exeris.kernel.core.contract.crypto.JsonCanonicalizer`). Third-party JSON libraries must not be introduced to the kernel SPI or core runtime.
-2. **Standard JDK Cryptography:** Signature verification must exclusively utilize the standard JDK `java.security.Signature.getInstance("Ed25519")` API over `NamedParameterSpec.ED25519`.
+2. **Standard JDK Cryptography:** Signature verification must use the standard JDK and nothing else: `java.security.Signature.getInstance("Ed25519")` API over `NamedParameterSpec.ED25519`.
 3. **Strict Tamper Detection:** A single bit modification in `license-manifest.json` outside the detached signature value must cause signature verification to fail immediately.
 4. **Pre-Allocation Phase 0 Gate:** Manifest verification must execute in Phase 0 of `KernelBootstrap` prior to off-heap memory segmentation, network socket binding, or capability initialization.
 5. **No Runtime Key Ingestion:** Public keys for verifying Exeris commercial licenses must not be read from dynamic remote network endpoints or unverified local files; they are permanently pinned in the immutable `TrustedIssuerKeyStore`.
@@ -205,7 +205,7 @@ During Phase 0 (`FOUNDATION: Contract & Memory`) of `KernelBootstrap`, the runti
 * **[+] Absolute Air-Gap Guarantee:** Verification is 100% offline; systems operate in high-security, classified, or zero-trust air-gapped networks without telemetry leaks.
 * **[+] GitOps & DevOps Resilient:** Because canonicalization complies with RFC 8785, manifests can be reformatted, minified, or pretty-printed by CI/CD pipelines and Helm charts without invalidating the cryptographic signature.
 * **[+] Bounded Startup Cost:** Verification adds one signature check to Phase 0 bootstrap and no network round trip, so the startup budget is spent locally.
-* **[+] Zero External Cryptographic Dependencies:** Leverages native JDK 15+ EdDSA support, avoiding bloated dependencies such as BouncyCastle.
+* **[+] Zero External Cryptographic Dependencies:** Uses the JDK's own EdDSA support from 15 onward, avoiding bloated dependencies such as BouncyCastle.
 * **[+] Clean Separation of Concerns:** Complements ADR-089 by providing the cryptographic attestation proof that produces the typed `ExecutionContract`.
 
 ### ⚠️ Trade-offs
