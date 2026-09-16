@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-09
+last-verified: 2026-09-12
 ---
 
 # Exeris Standards
@@ -25,9 +25,11 @@ Each standard has the same shape: **hard rules** first, each tagged with the lay
 | [`adr-conventions.md`](adr-conventions.md) | ADR / RFC / RESEARCH files and the registry | `exeris-systems/.github` → `scripts/registry_check.py` |
 | [`changelog-conventions.md`](changelog-conventions.md) | CHANGELOG, release notes, accepted API changes | per-repo japicmp / revapi |
 | [`agents-md-schema.md`](agents-md-schema.md) | `AGENTS.md`, `.agents/`, role profiles, hooks (L0), decision schemas, evals, provider adapters | `exeris-systems/.github` → `scripts/agents_file_check.py`, `scripts/agents_render.py`, `agents/adapters/<vendor>.yaml` |
+| [`capability-conventions.md`](capability-conventions.md) | Tier 2 capability repositories (`exeris-caps-*`): boundary isolation (The Wall), `@CapabilityModule`, lifecycle, two-pass build, licensing | `exeris-tooling` → `CapTierWall`, `exeris:verify-capabilities`, `exeris-processor` |
+| [`sku-conventions.md`](sku-conventions.md) | Tier 3 Platform SKU repositories (`exeris-sku-*`): `composition.json`, kernel-direct execution, driver-swap transparency, optimal default JVM baseline | `exeris-sdk-composition-spec`, `CompositionStampAssertion`, `exeris-tooling` |
 | [`ai-provenance.md`](ai-provenance.md) | AI-assisted contributions | `[L2]` + DCO app |
 | [`claims-and-evidence.md`](claims-and-evidence.md) | numbers in docs | `[L2]`; authority is `exeris-benchmarks/docs/CLAIMS.md` |
-| [`checklists/`](checklists/) | `pre-pr`, `doc-page`, `adr`, `release-notes` | `[L3]` only |
+| [`checklists/`](checklists/) | `pre-pr`, `doc-page`, `adr`, `release-notes`, `new-cap-repo`, `new-sku-repo` | `[L3]` only |
 
 ## Changing a rule
 
