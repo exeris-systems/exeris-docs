@@ -11,7 +11,7 @@ last-verified: 2026-09-16
 
 Run before publishing an `exeris-sku-*` repository or marking its initial pull request ready for review. Aligned with [sku-conventions.md](../sku-conventions.md).
 
-1. **Manifest presence & validity.** Is `composition.json` authored at the repository root and does it conform to the `CapManifest` schema (`schemaVersion: 2`) with a valid SHA-256 `contentBinding`?
+1. **Manifest presence & validity.** Is `composition.json` authored at the repository root and does it conform to the `CapManifest` schema — at the version `exeris-sdk-composition-spec` states, which this checklist does not restate — with a valid SHA-256 `contentBinding`?
 2. **Composition assertion.** Does the test suite assert manifest consistency using `CompositionStampAssertion.assertConsistent(manifest)`?
 3. **Kernel-Direct execution.** Does the application boot directly on the Exeris Kernel (`KernelBootstrap` + `CompositionConductor`) with zero Spring dependencies in the data plane or API surface?
 4. **Driver-swap transparency.** Are capability requirements in `composition.json` bounded strictly to kernel SPIs, ensuring the manifest is byte-identical across Community and Enterprise drivers?

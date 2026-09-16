@@ -152,7 +152,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 ### ⚠️ Risks and Assumptions
 
 * **Assumes:** Enterprise customers will comply with annual self-certification audits when operating under `AUDIT` enforcement models.
-* **Reversed by:** Evidence that major enterprise customers refuse offline cryptographic manifests in favor of centralized cloud licensing agents, or benchmark measurements showing that Phase 0 contract validation introduces non-negligible startup latency (>5ms).
+* **Reversed by:** Evidence that major enterprise customers refuse offline cryptographic manifests in favor of centralized cloud licensing agents, or benchmark measurements showing that Phase 0 contract validation introduces non-negligible startup latency, taken here as more than 5 ms. That figure is a **threshold, not a measurement**: it states what evidence would overturn this decision rather than asserting what the implementation costs, and a `Reversed by:` clause without a number is not falsifiable. Nothing in this record claims the threshold is met or missed.
 * **Risk:** A compromised private signing key at the Exeris Issuer could allow unauthorized parties to generate valid manifests. Mitigated by epoch key rotations and offline CRL distribution in security patch streams.
 
 ---
