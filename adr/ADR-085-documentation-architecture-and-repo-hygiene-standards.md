@@ -136,6 +136,10 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 36. Enterprise-private documentation site (trigger: first commercial customer needing docs outside the repo; path: Cloudflare Access on a second Pages project). Versioned docs per release line (trigger: Kernel 1.0 GA). Both require an amendment, not a new ADR.
 
+### M. Tier 2 and Tier 3 repository conventions
+
+37. **`capability-conventions.md` governs Tier 2 capability repositories (`exeris-caps-*`) and `sku-conventions.md` governs Tier 3 Platform SKU repositories (`exeris-sku-*`).** They sit outside §D–§I because those sections are organised by artefact kind — a commit message, a pull request, a Javadoc comment — and these two are organised by repository tier: the same artefact kinds bind inside them, and what is added is where the boundary runs, what a module declares, and what a composition may contain. Enforcement is the tier's own build (`exeris-tooling`'s `CapTierWall`, `exeris:verify-capabilities` and the composition stamp), not a documentation gate, so the two pages are `[L2]` under §J until that build is the thing CI runs. Lettered after §L rather than before it because the sections are cited by letter across the corpus and renumbering would break every citation.
+
 ## Consequences
 
 ### ✅ Positive Outcomes
@@ -164,6 +168,16 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 - Business ADRs (`BUS-NNN`) and portfolio-product internal namespaces.
 
 ## Amendments
+
+- **2026-09-16 — §M adds the Tier 2 and Tier 3 repository conventions, which had no obligation to
+  cite.** `standards/README.md` gives every standard a column naming the ADR-085 obligation it
+  traces to, and `capability-conventions.md` and `sku-conventions.md` arrived with a bare "Binding
+  per ADR-085." — because no obligation covered them: §C.10 names §D–§I, and those sections are cut
+  by artefact kind while these two are cut by repository tier. The review that caught it offered
+  both repairs, and pointing the pages at an existing obligation that does not cover them is the
+  worse one: it makes the column say something untrue and leaves the next reader to discover that
+  the section named says nothing about capability repositories. §M.37 is the obligation, and the
+  two pages now cite it.
 
 - **2026-09-10 — §B.7 narrows `last-verified` to narrative pages; records carry none.** The key is
   defined as *the date a human last confirmed this page matches the code*, and a record makes no

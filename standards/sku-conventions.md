@@ -4,12 +4,14 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-12
+last-verified: 2026-09-16
 ---
 
 # SKU Conventions
 
-Binding per ADR-085. Applies to every Platform SKU repository (`exeris-sku-*`) in the Tier 3 Platform SKU layer.
+Binding per ADR-085 §M.37. Applies to every Platform SKU repository (`exeris-sku-*`) in the Tier 3 Platform SKU layer.
+
+**Where this does not apply, and what it costs.** Not to a capability, which `capability-conventions.md` governs, and not to a customer's own assembly of capabilities: a SKU is a composition Exeris names, versions and licenses, and an assembly nobody sells is not one. Not to a demo or a benchmark harness that composes capabilities to exercise them rather than to ship them. The cost is that a SKU pins its capabilities by version, so a capability fix reaches a customer only when the SKU is re-composed and re-released — the driver-swap transparency rule below is what keeps that from meaning a re-qualification as well.
 
 A Platform SKU is a named, version-pinned, commercial-licensed composition of Tier 2 capabilities, packaged as an executable deployable artifact on top of the Exeris Kernel substrate. Governed by [ADR-024](../adr/ADR-024-capability-composition-model.md) (Composition Model), [ADR-053](../adr/ADR-053-sku-composition-manifest-format.md) (Manifest JSON format), [ADR-023](../adr/ADR-023-capability-licensing-taxonomy.md) (Licensing Taxonomy), and [HLA §3.3 / §5](../high-level-architecture.md) (Platform SKUs).
 
@@ -42,7 +44,7 @@ A Platform SKU is a named, version-pinned, commercial-licensed composition of Ti
    - Repository source visibility defaults to **source-available (public)** per ADR-023 §"SKU Repository Source-Visibility Policy" to enable Glass Box verification and customer Code Detachment.
    - The single closed-source (`enterprise-private`) exception is `exeris-sku-bot-blocker` on anti-abuse-security grounds.
 6. **Empirically measured default JVM settings and diagnostics.** `[L2]`
-   - Each SKU must establish and document its **optimal default JVM settings** (*optymalne domyślne ustawienia JVM*), empirically verified via workload profiling:
+   - Each SKU must establish and document its **optimal default JVM settings**, empirically verified via workload profiling:
      - Workloads with zero-copy off-heap buffers (e.g. Gateway) recommend a lean heap with `SerialGC` (`-XX:+UseSerialGC -Xms128m -Xmx192m`) to eliminate background GC threads and memory footprint bloat.
      - Heavier domain workloads (e.g. IDP document processing, graph traversals) tune GC selection (`ParallelGC` / `G1GC`) to throughput requirements.
    - Every SKU must expose standard health and allocation diagnostics:

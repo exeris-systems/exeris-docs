@@ -39,7 +39,7 @@ This ADR answers: **What is the canonical schema of `license-manifest.json`, how
 
 **We standardize on JSON Schema v1 for `license-manifest.json`, RFC 8785 (JSON Canonicalization Scheme - JCS) for deterministic serialization, and Ed25519 (RFC 8032) for asymmetric digital signatures verified offline against an embedded `TrustedIssuerKeyStore` during Phase 0 of the kernel bootstrap.**
 
-All cryptographic verification is strictly local, asymmetric, and executes in sub-millisecond time without third-party library dependencies.
+All cryptographic verification is strictly local, asymmetric, and free of third-party library dependencies. No latency figure is stated here; see the Verification Cost bullet for why.
 
 ### 1. Canonical Schema Specification: `license-manifest.json` (v1)
 
@@ -220,7 +220,7 @@ During Phase 0 (`FOUNDATION: Contract & Memory`) of `KernelBootstrap`, the runti
 * **XML-DSig / Enveloped XML Signatures:**
   * *Cost:* Extreme parsing complexity, bloated schemas, and a notorious history of canonicalization XML vulnerabilities (wrapping attacks, namespace injection, XML entity expansion). Rejected outright.
 * **RSA-4096 / ECDSA P-256:**
-  * *Cost:* RSA-4096 incurs large keys (512 bytes), large signatures (512 bytes), and significant verification CPU overhead. ECDSA requires random nonces during signing and is vulnerable to side-channel attacks and curve implementation flaws. Ed25519 is constant-time, compact (32/64 bytes), and orders of magnitude faster.
+  * *Cost:* RSA-4096 incurs large keys (512 bytes), large signatures (512 bytes), and significant verification CPU overhead. ECDSA requires random nonces during signing and is vulnerable to side-channel attacks and curve implementation flaws. Ed25519 is constant-time and compact (32/64 bytes), and its verification is cheaper — by how much is a benchmark question, and this record does not answer it.
 * **Online Centralized License Server / OCSP Phone-Home:**
   * *Cost:* Completely unusable in air-gapped defense and banking infrastructure; introduces external network dependencies where network jitter or firewall misconfiguration would crash the cluster at boot. Rejected outright.
 

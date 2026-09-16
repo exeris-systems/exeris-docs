@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-12
+last-verified: 2026-09-16
 ---
 
 # New Capability Repository Checklist — 10 questions before creating a repo or opening PR #1

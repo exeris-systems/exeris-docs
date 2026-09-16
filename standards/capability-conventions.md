@@ -4,12 +4,14 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-12
+last-verified: 2026-09-16
 ---
 
 # Capability Conventions
 
-Binding per ADR-085. Applies to every capability repository (`exeris-caps-*`) in the Tier 2 Capability Ecosystem.
+Binding per ADR-085 §M.37. Applies to every capability repository (`exeris-caps-*`) in the Tier 2 Capability Ecosystem.
+
+**Where this does not apply, and what it costs.** Not to the kernel and not to a SKU: the kernel's boundary is ADR-006's and a composition's is `sku-conventions.md`, and a repository that is neither is governed by the artefact-kind standards alone. Not to an internal module inside an existing capability either — the unit here is the repository, so splitting a capability to satisfy a rule about repositories is the rule being misread. The cost is real: one capability per repository buys an enforceable boundary and a separately versioned artefact, and pays for it in release coordination, because a change spanning two capabilities is then two pull requests in two repositories with a pin between them.
 
 A capability is a self-contained, composable unit of platform functionality governed by [ADR-024](../adr/ADR-024-capability-composition-model.md) (Composition Model), [ADR-023](../adr/ADR-023-capability-licensing-taxonomy.md) (Licensing Taxonomy), [ADR-006](../adr/ADR-006-spring-free-kernel-boundary.md) / [ADR-055](https://github.com/exeris-systems/exeris-tooling/blob/main/docs/adr/ADR-055-cap-tier-wall-guard.md) (The Wall), and [ADR-015](https://github.com/exeris-systems/exeris-tooling/blob/main/docs/adr/ADR-015-codegen-emission-strategy.md) (Tooling & Codegen).
 
