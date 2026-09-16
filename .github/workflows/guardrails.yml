@@ -14,7 +14,11 @@ on:
     types: [opened, edited, synchronize, ready_for_review, labeled, unlabeled]
 concurrency:
   group: guardrails-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  # Not `true`. The publishing half removes the review label as one of its last steps, and that
+  # removal is an `unlabeled` event whose run would cancel the run still publishing it — measured in
+  # exeris-systems/.github#35, where the cancel arrived in the same second the publishing job
+  # finished. A bot-triggered run queues instead; human pushes still collapse.
+  cancel-in-progress: ${{ !endsWith(github.actor, '[bot]') }}
 
 # A called workflow can only narrow the caller's permissions, never raise them, and this
 # repository's default token grants `pull-requests: none`. All three gates declare
@@ -22,6 +26,13 @@ concurrency:
 permissions:
   contents: read
   pull-requests: read
+  # Added with `docs-review`: `issues: read` lets the routine see the debt issues of
+  # issue-conventions.md rule 6, and `id-token: write` is the runner action's own token exchange.
+  # This block must be the UNION of what every called workflow declares — a called workflow can only
+  # narrow it — so omitting either does not run that job with less, it makes the whole file invalid.
+  # Neither job writes with them: every write goes through the App token the publish half mints.
+  issues: read
+  id-token: write
 
 jobs:
   docs:
@@ -35,4 +46,33 @@ jobs:
     uses: exeris-systems/.github/.github/workflows/commit-lint.yml@main
   pr-body:
     uses: exeris-systems/.github/.github/workflows/pr-body-check.yml@main
+  # The L2 review, run and PUBLISHED by the organisation's pipeline rather than by a workflow of this
+  # repository's own. What it replaces — `claude-code-review.yml`, deleted here — posted a review
+  # comment and nothing else: no required check, no verdict contract, no provenance, and no way to
+  # tell a review that found nothing from a review that never ran. This job's verdict decides a
+  # required check, and a run that produces no verdict goes red rather than silent.
+  #
+  # `needs` is an ordering decision, not a dependency: a review is the layer that judges what the
+  # gates cannot, so running it against a pull request whose commits do not lint spends a model to
+  # repeat what a script already said. A finished gate is also a gate whose result can be HANDED to
+  # the reviewer, which is all of `l1-results` — this runner's harness denies network calls, so a
+  # reviewer left to fetch them reports all three as `not-run`.
+  #
+  # `always()` so the publish half still reports when a gate failed: the produce job skips itself on
+  # the results below and the publish half turns that into a red naming the failing gates. Without
+  # it the review would vanish from the checks, and a check that does not report is worse than red.
+  docs-review:
+    needs: [docs, commits, pr-body]
+    if: ${{ always() }}
+    uses: exeris-systems/.github/.github/workflows/docs-review.yml@main
+    with:
+      publish: true
+      l1-results: >-
+        {"docs-lint": "${{ needs.docs.result }}",
+         "commit-lint": "${{ needs.commits.result }}",
+         "pr-body-check": "${{ needs.pr-body.result }}"}
+    secrets:
+      claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      exeris_bot_app_id: ${{ secrets.EXERIS_BOT_APP_ID }}
+      exeris_bot_private_key: ${{ secrets.EXERIS_BOT_PRIVATE_KEY }}
   # No javadoc job: this repository ships no Java.
