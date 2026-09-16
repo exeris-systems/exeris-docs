@@ -1,0 +1,32 @@
+# The issue-side footprint of issue-conventions.md rules 3 and 5, copied from
+# `caller-example/issues.yml` in exeris-systems/.github.
+#
+# It was missing, and the consequence is what blocks the review: `needs-l2-review` — the label the
+# readiness trigger waits for — does not exist in this repository, so nobody can ask for a re-review
+# after acting on findings. The rest of the taxonomy is absent for the same reason, and the labels
+# the publication applies were being created implicitly by the issues API in whatever colour it
+# chose. The sync is additive: it creates what is missing and corrects the colour and description of
+# what it owns. It deletes nothing.
+#
+# Separate from guardrails.yml because it is not pull-request-triggered and needs `issues: write`,
+# which the pull-request gates deliberately do not have.
+name: issues
+on:
+  schedule:
+    - cron: "17 4 * * 1"     # Monday, early. Label drift and stale evidence are not urgent.
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Report label changes without making them"
+        type: boolean
+        default: false
+permissions:
+  issues: write
+
+jobs:
+  labels:
+    uses: exeris-systems/.github/.github/workflows/labels-sync.yml@main
+    with:
+      dry-run: ${{ inputs.dry-run == true }}
+  hygiene:
+    uses: exeris-systems/.github/.github/workflows/issue-hygiene.yml@main
