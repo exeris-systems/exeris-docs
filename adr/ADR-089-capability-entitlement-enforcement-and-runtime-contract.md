@@ -14,7 +14,7 @@ slug: adr/ADR-089
 | **Status**      | **ACCEPTED**                                                                                                                                                          |
 | **Deciders**    | Arkadiusz Przychocki                                                                                                                                                  |
 | **Date**        | 2026-09-12                                                                                                                                                            |
-| **Scope**       | platform / cross-repo (`exeris-tooling`, `exeris-kernel-core`, `exeris-caps-*`, `exeris-sku-*`)                                                                      |
+| **Scope**       | cross-repo (`exeris-kernel-core`, `exeris-tooling`, `exeris-platform`)                                                                      |
 | **Owning Repo** | `exeris-docs`                                                                                                                                                         |
 | **Driven By**   | Commercialization of Tier 2/3 capabilities; need to enforce capability entitlement without violating the Glass Box developer experience or coupling runtime to legal jargon |
 | **Compliance**  | [`standards/eca-specification.md`](../standards/eca-specification.md) (ECA Specification), [ADR-023](ADR-023-capability-licensing-taxonomy.md) (Licensing Taxonomy), [ADR-024](ADR-024-capability-composition-model.md) (Capability Composition), the commercial entitlement and schedule taxonomy (Commercial Entitlement) |

@@ -23,7 +23,7 @@ A Platform SKU is a named, version-pinned, commercial-licensed composition of Ti
    - Package root: `eu.exeris.sku.<shortname>` (e.g. `eu.exeris.sku.gateway`, `eu.exeris.sku.content`).
 2. **Canonical manifest `composition.json`.** `[L1: JUnit test & composition assertion]`
    - The authored composition manifest must be located at the repository root and copied to `target/classes/composition.json` (or `src/main/resources/composition.json`).
-   - Must conform to the `CapManifest` JSON schema (`schemaVersion: 2`) defined in `exeris-sdk-composition-spec` (ADR-053).
+   - Must conform to the `CapManifest` JSON schema defined in `exeris-sdk-composition-spec` (ADR-053). The schema version is that spec's to state and is not pinned here: ADR-053 names no version, so a number written on this page would be sourced from nothing.
    - Must carry a valid `stamp` containing:
      - `validated: true`
      - `compositionVersion`: matching SKU version

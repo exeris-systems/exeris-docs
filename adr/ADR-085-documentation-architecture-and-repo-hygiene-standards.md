@@ -140,6 +140,8 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 37. **`capability-conventions.md` governs Tier 2 capability repositories (`exeris-caps-*`) and `sku-conventions.md` governs Tier 3 Platform SKU repositories (`exeris-sku-*`).** They sit outside §D–§I because those sections are organised by artefact kind — a commit message, a pull request, a Javadoc comment — and these two are organised by repository tier: the same artefact kinds bind inside them, and what is added is where the boundary runs, what a module declares, and what a composition may contain. Enforcement is the tier's own build (`exeris-tooling`'s `CapTierWall`, `exeris:verify-capabilities` and the composition stamp), not a documentation gate, so the two pages are `[L2]` under §J until that build is the thing CI runs. Lettered after §L rather than before it because the sections are cited by letter across the corpus and renumbering would break every citation.
 
+38. **`eca-specification.md` is the architecture both tiers are licensed under**, and it belongs in `standards/` for the same reason they do: it is what a repository in either tier is held to. It is normative about the model — the four truths, the entitlement taxonomy, the environment classification — and about nothing it does not own: the manifest schema is ADR-088's and the runtime record is ADR-089's, and the page links to them rather than restating them. `[L2]` for the same reason as §M.37.
+
 ## Consequences
 
 ### ✅ Positive Outcomes
@@ -177,7 +179,9 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
   both repairs, and pointing the pages at an existing obligation that does not cover them is the
   worse one: it makes the column say something untrue and leaves the next reader to discover that
   the section named says nothing about capability repositories. §M.37 is the obligation, and the
-  two pages now cite it.
+  two pages now cite it. §M.38 follows for `eca-specification.md`, which a later round of the same
+  review found listed in that table with no obligation of its own: it is the architecture both tiers
+  are licensed under, normative about the model and about nothing it does not own.
 
 - **2026-09-10 — §B.7 narrows `last-verified` to narrative pages; records carry none.** The key is
   defined as *the date a human last confirmed this page matches the code*, and a record makes no
