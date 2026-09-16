@@ -26,7 +26,7 @@ Each standard has the same shape: **hard rules** first, each tagged with the lay
 | [`changelog-conventions.md`](changelog-conventions.md) | CHANGELOG, release notes, accepted API changes | per-repo japicmp / revapi |
 | [`agents-md-schema.md`](agents-md-schema.md) | `AGENTS.md`, `.agents/`, role profiles, hooks (L0), decision schemas, evals, provider adapters | `exeris-systems/.github` → `scripts/agents_file_check.py`, `scripts/agents_render.py`, `agents/adapters/<vendor>.yaml` |
 | [`ai-provenance.md`](ai-provenance.md) | AI-assisted contributions | `[L2]` + DCO app |
-| [`claims-and-evidence.md`](claims-and-evidence.md) | numbers in docs | `[L2]`; authority is `exeris-benchmarks/docs/CLAIMS.md` |
+| [`claims-and-evidence.md`](claims-and-evidence.md) | numbers in docs | `[L2]` per ADR-085 §G.26a; measurement methodology is `exeris-benchmarks/docs/CLAIMS.md` |
 | [`checklists/`](checklists/) | `pre-pr`, `doc-page`, `adr`, `release-notes` | `[L3]` only |
 
 ## Changing a rule

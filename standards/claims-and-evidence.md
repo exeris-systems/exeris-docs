@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-04
+last-verified: 2026-09-16
 ---
 
 # Claims and Evidence in Documentation
@@ -18,6 +18,10 @@ Thin by design. The methodology — figure states, retraction register, citation
 3. **Retractions travel.** When a `CLAIMS.md` entry is retracted, every document that quoted it is edited in the same PR or listed in the retraction entry as pending; the commit carries `Claim: <id>`. `[L1: commit trailer check when `CLAIMS.md` changes]`
 4. **The registered drift patterns are lint.** The figures and phrasings withdrawn in the registered drift patterns (`.agents/policies/drift-patterns.md` in `exeris-docs`) (items 10–13) are Vale `existence` rules at **error** level — the one place Vale is allowed to fail a build. `[L1: vale Exeris.RetractedFigures]`
 5. **Benchmark reports** (`type: benchmark-report`) carry the section set `CLAIMS.md` requires and a frontmatter `claims:` list of the IDs they support. `[L1: frontmatter_check.py]`
+
+6. **A record carries no figures at all** (ADR-085 §G.26a). An ADR and a standards page say what is decided and what it costs in kind; where the decision rests on a measurement they cite the report and do not repeat the number. This is narrower than rule 1 on purpose: rule 1 permits a cited figure anywhere, and a figure repeated in a record is a maintenance obligation nobody tracks — when the measurement moves, the record goes quietly false. The figures this rule removes are usually real ones; the page is what makes them wrong. `[L2]`
+   - **Exception — a falsification threshold.** A `Reversed by:` clause names the evidence that would overturn the decision, and a threshold without a number is not falsifiable. It states a condition on future evidence, not a property of the system, and is written so a reader can tell the difference.
+   - **RFC and Research documents are outside this rule.** Reporting measurements is what they are for.
 
 ## Filter
 
