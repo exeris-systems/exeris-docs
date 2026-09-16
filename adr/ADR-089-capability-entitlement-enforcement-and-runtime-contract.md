@@ -14,7 +14,7 @@ slug: adr/ADR-089
 | **Status**      | **ACCEPTED**                                                                                                                                                          |
 | **Deciders**    | Arkadiusz Przychocki                                                                                                                                                  |
 | **Date**        | 2026-09-12                                                                                                                                                            |
-| **Scope**       | cross-repo (`exeris-kernel-core`, `exeris-tooling`, `exeris-platform`)                                                                      |
+| **Scope**       | cross-repo (`exeris-kernel`, `exeris-tooling`, `exeris-platform`)                                                                      |
 | **Owning Repo** | `exeris-docs`                                                                                                                                                         |
 | **Driven By**   | Commercialization of Tier 2/3 capabilities; need to enforce capability entitlement without violating the Glass Box developer experience or coupling runtime to legal jargon |
 | **Compliance**  | [`standards/eca-specification.md`](../standards/eca-specification.md) (ECA Specification), [ADR-023](ADR-023-capability-licensing-taxonomy.md) (Licensing Taxonomy), [ADR-024](ADR-024-capability-composition-model.md) (Capability Composition), the commercial entitlement and schedule taxonomy (Commercial Entitlement) |
@@ -25,7 +25,7 @@ slug: adr/ADR-089
 
 ADR-023 established the three-valued licensing taxonomy for capabilities (`community`, `commercial`, `enterprise-private`) and SKU visibility, and left the technical enforcement unbuilt rather than undecided. Its obligation 6 defers one CI job — the registry landed, the platform-wide check that reads it has not — and its obligation 10 answers the exposure contractually rather than technically, naming three mitigations and concluding that the leak rate is bounded. Neither is a mechanism a runtime can enforce, which is what this record supplies. The platform cannot rely on honor systems or post-hoc litigation alone to defend its commercial Tier 2/3 monetization, nor can it accept traditional license-enforcement patterns that break deep-tech development:
 
-1. **The Glass Box Developer Dilemma:** Developers must be able to clone public source-available repositories, compile code, execute tests, and evaluate capabilities locally without entering commercial license keys or talking to sales. A naive build-time check that rejects unstamped builds breaks the Glass Box thesis (whitepaper §1).
+1. **The Glass Box Developer Dilemma:** Developers must be able to clone public source-available repositories, compile code, execute tests, and evaluate capabilities locally without entering commercial license keys or talking to sales. A naive build-time check that rejects unstamped builds breaks the Glass Box thesis.
 2. **Runtime Leaks of Legal Vocabulary:** A runtime that parses legal terms ("Schedule B", "Enterprise Addendum", "Master Services Agreement") tightly couples code to mutable contracts. If legal counsel renames a schedule, the runtime engine must not break.
 3. **The Danger of Hard Network Blocking:** High-throughput systems handling financial or mission-critical traffic must never experience hard packet drops due to transient traffic spikes exceeding throughput quotas. A sudden burst beyond an agreed RPS cap on Black Friday is an accounting concern, not a security breach.
 
@@ -133,7 +133,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 * **Centralized SaaS / Phone-Home License Server (FlexLM / HashiCorp Vault / Cloud License Daemon):**
   * *Cost:* Violates the strict air-gapped deployment requirement of defense, sovereign cloud, and tier-1 banking institutions. Outbound network latency on boot or transient network partitions would cause mission-critical runtime crashes. Rejected outright.
 * **DRM Bytecode Obfuscation / Native Agent Wrapping:**
-  * *Cost:* Obfuscating or encrypting bytecodes severely degrades HotSpot JIT compiler optimizations (inlining, escape analysis), disrupts Project Panama zero-copy off-heap memory mapping, impedes debugging, and directly violates the Glass Box ethos (whitepaper §1). Rejected outright.
+  * *Cost:* Obfuscating or encrypting bytecodes severely degrades HotSpot JIT compiler optimizations (inlining, escape analysis), disrupts Project Panama zero-copy off-heap memory mapping, impedes debugging, and directly violates the Glass Box ethos. Rejected outright.
 * **Runtime Legal Vocabulary (Parsing "Schedule B", Order Forms, or SKU Names at Boot):**
   * *Cost:* Couples the kernel runtime lifecycle to legal contract terminology. Any contractual restructuring or schedule renegotiation would require recompiling and re-deploying the JVM engine. Rejected in favor of pure technical capability IDs.
 * **Hard Packet Dropping on Throughput Quota Exceeded:**

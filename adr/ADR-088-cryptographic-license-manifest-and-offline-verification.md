@@ -14,7 +14,7 @@ slug: adr/ADR-088
 | **Status**      | **ACCEPTED**                                                                                                                                                                                                  |
 | **Deciders**    | Arkadiusz Przychocki                                                                                                                                                                                          |
 | **Date**        | 2026-09-12                                                                                                                                                                                                    |
-| **Scope**       | cross-repo (`exeris-kernel-core`, `exeris-tooling`)                                                                                                                             |
+| **Scope**       | cross-repo (`exeris-kernel`, `exeris-tooling`)                                                                                                                             |
 | **Owning Repo** | `exeris-docs`                                                                                                                                                                                                 |
 | **Driven By**   | Technical implementation of ECA Part V; requirement for tamper-proof, air-gapped, zero-phone-home cryptographic license attestation that fits inside the startup budget                                      |
 | **Compliance**  | [`standards/eca-specification.md`](../standards/eca-specification.md) (ECA Specification §5), [ADR-089](ADR-089-capability-entitlement-enforcement-and-runtime-contract.md), the commercial entitlement and schedule taxonomy |
@@ -216,7 +216,7 @@ During Phase 0 (`FOUNDATION: Contract & Memory`) of `KernelBootstrap`, the runti
 ### 🔄 Alternatives Considered and Rejected
 
 * **JWT / JOSE (RFC 7519 / RFC 7515):**
-  * *Cost:* JWT tokens wrap the JSON payload in Base64URL encoding (`eyJhbGciOi...`). This obscures human inspectability and contradicts the Glass Box principle (whitepaper §1). License manifests must be directly readable and diffable in source control and Kubernetes manifests. Rejected in favor of cleartext JSON with RFC 8785 canonicalization.
+  * *Cost:* JWT tokens wrap the JSON payload in Base64URL encoding (`eyJhbGciOi...`). This obscures human inspectability and contradicts the Glass Box principle. License manifests must be directly readable and diffable in source control and Kubernetes manifests. Rejected in favor of cleartext JSON with RFC 8785 canonicalization.
 * **XML-DSig / Enveloped XML Signatures:**
   * *Cost:* Extreme parsing complexity, bloated schemas, and a notorious history of canonicalization XML vulnerabilities (wrapping attacks, namespace injection, XML entity expansion). Rejected outright.
 * **RSA-4096 / ECDSA P-256:**
