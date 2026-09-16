@@ -12,6 +12,8 @@ slug: standards/eca-specification
 
 Formal architectural and normative specification for legal, commercial, cryptographic, and execution contracts across the Exeris platform.
 
+**Where this does not apply, and what it costs.** It governs what an entitlement permits and how that permission is proved, not how a capability is built or a SKU assembled — `capability-conventions.md` and `sku-conventions.md` own those, and a rule about repository shape does not belong here however close it reads. It says nothing about pricing: the commercial terms sit in the private business registry, and this page names them by what they decide rather than restating them. The cost of proving entitlement offline is that revocation is not immediate — a manifest is valid until its epoch key rotates or its term ends, and there is no call home to shorten that. That is the trade the air-gap requirement buys.
+
 Binding per [ADR-023](../adr/ADR-023-capability-licensing-taxonomy.md) (Licensing Taxonomy), [ADR-024](../adr/ADR-024-capability-composition-model.md) (Capability Composition), [ADR-053](../adr/ADR-053-sku-composition-manifest-format.md) (SKU Composition Manifest), and the R&D cooperation model (IP sovereignty), a business decision kept in the private registry.
 
 ---
