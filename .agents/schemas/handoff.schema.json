@@ -1,13 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Handoff (exeris-docs)",
-  "description": "The bundle's shape, narrowed to this repository's roles. The shape is not restated here: if a field's meaning is in question, the base is the answer. agents-md-schema.md rule 13.",
+  "description": "The bundle's shape, narrowed to this repository's roles. The shape is not restated here: if a field's meaning is in question, the base is the answer. agents-md-schema.md rule 13.\n\nThe `unevaluatedProperties: false` in this file are this file's own: the bundle's bases declare none, because a base that closes itself refuses the very property a composing schema adds (exeris-agents 2.0.0). A closer stops at the object it sits in, so an array's items need one of their own — a root closer alone refuses a foreign property at the root and admits one inside an item. `agents_file_check.py` names every object left open.",
   "allOf": [
-    { "$ref": "../vendor/exeris-agents-1.4.0/schemas/handoff.base.schema.json" },
+    {
+      "$ref": "../vendor/exeris-agents-2.0.0/schemas/handoff.base.schema.json"
+    },
     {
       "properties": {
-        "from": { "$ref": "#/$defs/agent" },
-        "to":   { "$ref": "#/$defs/agent" }
+        "from": {
+          "$ref": "#/$defs/agent"
+        },
+        "to": {
+          "$ref": "#/$defs/agent"
+        }
       }
     }
   ],
@@ -23,5 +29,6 @@
         "human"
       ]
     }
-  }
+  },
+  "unevaluatedProperties": false
 }
