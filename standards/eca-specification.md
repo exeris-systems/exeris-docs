@@ -12,7 +12,7 @@ slug: standards/eca-specification
 
 Formal architectural and normative specification for legal, commercial, cryptographic, and execution contracts across the Exeris platform.
 
-Binding per [ADR-023](../adr/ADR-023-capability-licensing-taxonomy.md) (Licensing Taxonomy), [ADR-024](../adr/ADR-024-capability-composition-model.md) (Capability Composition), [ADR-053](../adr/ADR-053-sku-composition-manifest-format.md) (SKU Composition Manifest), and [BUS-001](../../exeris-business/business-adr/BUS-001-rd-cooperation-model.md) (IP Sovereignty).
+Binding per [ADR-023](../adr/ADR-023-capability-licensing-taxonomy.md) (Licensing Taxonomy), [ADR-024](../adr/ADR-024-capability-composition-model.md) (Capability Composition), [ADR-053](../adr/ADR-053-sku-composition-manifest-format.md) (SKU Composition Manifest), and the R&D cooperation model (IP sovereignty), a business decision kept in the private registry.
 
 ---
 
@@ -109,7 +109,7 @@ The core ECSL text establishes baseline terms. Commercial rights attach via four
 
 * **Schedule A (Commercial Production):** Grants production execution rights for named Platform SKUs within agreed workload boundaries.
 * **Schedule B (Enterprise Operations):** Unlocks the closed-source substrate driver (`exeris-kernel-enterprise` with `io_uring`, QUIC/HTTP/3, and NUMA slab pools), enterprise security modules (`bot-fingerprinting`), 24/7 L3 engineering support, and full Intellectual Property Indemnification.
-* **Schedule C (Code Detachment & Sovereignty):** Converts a recurring subscription into an irrevocable, perpetual internal-use grant for a version-pinned source tree (governed by [BUS-001](../../exeris-business/business-adr/BUS-001-rd-cooperation-model.md), [BUS-005](../../exeris-business/business-adr/BUS-005-code-detachment-and-perpetual-licensing.md), and Part IV).
+* **Schedule C (Code Detachment & Sovereignty):** Converts a recurring subscription into an irrevocable, perpetual internal-use grant for a version-pinned source tree (governed by the R&D cooperation model and the code detachment and perpetual sovereign licensing governance — both private business decisions — and by Part IV).
 * **Schedule D (Service Provider & OEM):** Authorizes multi-tenant hosting, white-label bundling, and infrastructure resale under commercial revenue-share or wholesale terms.
 
 ---
@@ -121,7 +121,7 @@ The core ECSL text establishes baseline terms. Commercial rights attach via four
 > **Normative Principle 2 (Capacity Monetization):**  
 > Exeris does not license infrastructure consumption. It licenses authorized capability execution within a defined workload envelope.
 
-Because the Exeris zero-copy architecture reduces CPU utilization by 25%–33% and memory footprint by up to 1/2.7 RSS compared to traditional frameworks, licensing per vCPU or per server node creates an **Efficiency Penalty** — penalizing Exeris for its own optimization. Conversely, billing for non-existent virtual hardware destroys customer ROI perception.
+Because the Exeris zero-copy architecture is designed to do the same work on less CPU and less resident memory than a traditional framework, licensing per vCPU or per server node creates an **Efficiency Penalty** — penalizing Exeris for its own optimization. Conversely, billing for non-existent virtual hardware destroys customer ROI perception.
 
 Exeris resolves this by monetizing the **economic result of workload transformation**.
 
@@ -340,11 +340,11 @@ The adoption of the Exeris Contract Architecture proceeds across the platform re
                                │
             ┌──────────────────┴──────────────────┐
             ▼                                     ▼
-   2. BUS-004 (Business ADR)             3. ADR-088 (Tech ADR)
+   2. Business decision                  3. ADR-088 (Tech ADR)
    Commercial & Entitlement Model        Manifest Schema & Ed25519 Proof
             │                                     │
             ▼                                     ▼
-   4. BUS-005 (Business ADR)             5. ADR-089 (Tech ADR)
+   4. Business decision                  5. ADR-089 (Tech ADR)
    Detachment & Sovereignty Governance   Tooling & Phase 0 Enforcement Engine
             │                                     │
             └──────────────────┬──────────────────┘
@@ -363,8 +363,8 @@ The adoption of the Exeris Contract Architecture proceeds across the platform re
 * [ADR-053: SKU Composition Manifest Format](../adr/ADR-053-sku-composition-manifest-format.md)
 * [ADR-088: Cryptographic License Manifest Format and Offline Verification](../adr/ADR-088-cryptographic-license-manifest-and-offline-verification.md)
 * [ADR-089: Capability Entitlement Enforcement and Runtime Execution Contract](../adr/ADR-089-capability-entitlement-enforcement-and-runtime-contract.md)
-* [BUS-001: R&D Cooperation Model (IP Sovereignty)](../../exeris-business/business-adr/BUS-001-rd-cooperation-model.md)
-* [BUS-003: Contributor Terms](../../exeris-business/business-adr/BUS-003-contributor-terms.md)
-* [BUS-004: Commercial Entitlement & Schedule Taxonomy](../../exeris-business/business-adr/BUS-004-commercial-entitlement-and-schedule-taxonomy.md)
-* [BUS-005: Code Detachment & Perpetual Sovereign Licensing Governance](../../exeris-business/business-adr/BUS-005-code-detachment-and-perpetual-licensing.md)
+* The R&D cooperation model (IP sovereignty), the contributor terms, the commercial entitlement and
+  schedule taxonomy, and the code detachment and perpetual sovereign licensing governance. These are
+  business decisions and live in the private business registry; a public page names them by what they
+  decide, never by their identifier or their path.
 * [B2B Technical Whitepaper](../b2b-technical-whitepaper.md)

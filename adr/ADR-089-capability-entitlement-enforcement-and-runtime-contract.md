@@ -17,7 +17,7 @@ slug: adr/ADR-089
 | **Scope**       | platform / cross-repo (`exeris-tooling`, `exeris-kernel-core`, `exeris-caps-*`, `exeris-sku-*`)                                                                      |
 | **Owning Repo** | `exeris-docs`                                                                                                                                                         |
 | **Driven By**   | Commercialization of Tier 2/3 capabilities; need to enforce capability entitlement without violating the Glass Box developer experience or coupling runtime to legal jargon |
-| **Compliance**  | [`standards/eca-specification.md`](../standards/eca-specification.md) (ECA Specification), [ADR-023](ADR-023-capability-licensing-taxonomy.md) (Licensing Taxonomy), [ADR-024](ADR-024-capability-composition-model.md) (Capability Composition), [BUS-004](../../exeris-business/business-adr/BUS-004-commercial-entitlement-and-schedule-taxonomy.md) (Commercial Entitlement) |
+| **Compliance**  | [`standards/eca-specification.md`](../standards/eca-specification.md) (ECA Specification), [ADR-023](ADR-023-capability-licensing-taxonomy.md) (Licensing Taxonomy), [ADR-024](ADR-024-capability-composition-model.md) (Capability Composition), the commercial entitlement and schedule taxonomy (Commercial Entitlement) |
 
 ---
 
@@ -142,7 +142,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 ### 📋 What is NOT in scope
 
 * **Cryptographic Schema and Signature Canonicalization:** The detailed JSON schema, RFC 8785 canonicalization algorithm, and Ed25519 signature payload format are governed by ADR-088.
-* **Pricing Multipliers and Detachment Fees:** Commercial pricing structures, SLA penalty matrices, and Detachment fee levels are internal business matters governed by BUS-004 and BUS-005.
+* **Pricing Multipliers and Detachment Fees:** Commercial pricing structures, SLA penalty matrices, and Detachment fee levels are internal business matters, governed by the commercial entitlement and schedule taxonomy and by the code detachment and perpetual sovereign licensing governance — decisions kept in the private business registry and deliberately not restated here.
 
 ### 🚫 Non-Goals
 
@@ -164,7 +164,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 * [ADR-024 (Capability Composition Model)](ADR-024-capability-composition-model.md) — The capability lifecycle and composition conductor.
 * [ADR-053 (SKU Composition Manifest Format)](ADR-053-sku-composition-manifest-format.md) — Canonical format for SKU capability compositions.
 * [ADR-088 (Cryptographic License Manifest and Offline Verification)](ADR-088-cryptographic-license-manifest-and-offline-verification.md) — Companion tech ADR specifying JSON schema and Ed25519 cryptography.
-* [BUS-004 (Commercial Entitlement & Schedule Taxonomy)](../../exeris-business/business-adr/BUS-004-commercial-entitlement-and-schedule-taxonomy.md) — Legal and commercial schedule definitions.
+* The commercial entitlement and schedule taxonomy — Legal and commercial schedule definitions.
 
 ---
 
