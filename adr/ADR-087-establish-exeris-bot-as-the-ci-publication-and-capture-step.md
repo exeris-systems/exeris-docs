@@ -142,6 +142,37 @@ Resolving the base from the caller's checkout instead was considered: it validat
 
 ## Amendments
 
+- **2026-09-16 — §B.12's trigger seam is readiness, and §B.8 gains staleness.** The first runs cost
+  about five minutes and $1.56 each, and the review fired on every push. The cost argument for
+  changing that turned out weaker than it first looked — `cancel-in-progress` collapses a burst of
+  pushes into one completed run, so the bill is one review per settled push rather than per push —
+  but examining it surfaced a correctness hole that matters more.
+
+  **A verdict covers the commit it reviewed, and nothing noticed when the head moved.** A pull
+  request reviewed green at one commit kept that green check while its tree changed underneath,
+  so a required check could rest on a review of code that is no longer there. Reviewing every push
+  hid this rather than solving it: the verdict was usually fresh by accident.
+
+  The review therefore runs on **readiness**: `opened`, `reopened`, `ready_for_review`, and a
+  dedicated label a human applies when the work is ready to look at. It does not run on
+  `synchronize` or `edited`.
+
+  **A label rather than a mention**, and that is a security decision as much as an ergonomic one. It
+  is one click rather than writing, it uses an event the caller already receives, and it opens no new
+  permission surface. `issue_comment` would raise who may spend a paid model run by commenting on a
+  public repository, and would put another App-token write on a path that triggers workflows — the
+  recursion recorded in the amendment above. The bot never applies the request label, so it cannot
+  trigger itself.
+
+  **§B.8 gains a fourth red.** The publication records the commit the verdict reviewed, and a head
+  that has moved past it is red with both commits named, while the standing verdict's comment stays
+  where it is. The consequence is stated rather than discovered: on an active pull request the
+  required check is red for most of its life, and that is the price of never publishing a verdict
+  about code that no longer exists. The alternative — keeping the last verdict green across pushes —
+  was considered and refused, because a `PASS` from five commits ago is the "skipped required check
+  is green" failure wearing a different hat.
+
+
 - **2026-09-15 — the first real run answers Engineering Protocol 4's first half, and breaks three
   things this record assumed.** Pull request 33 in `exeris-systems/.github`, run 35014655583: the
   model ran for 408 seconds over 68 turns and produced a schema-valid verdict. Everything below was
