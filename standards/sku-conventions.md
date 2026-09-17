@@ -51,7 +51,7 @@ A Platform SKU is a named, version-pinned, commercial-licensed composition of Ti
      - `/actuator/allocations` (thread allocation tracking via `ThreadMXBean` or kernel telemetry).
 7. **Containerization and packaging.** `[L1: docker build]`
    - Must include a production-ready multi-stage `Dockerfile` based on an official, minimal Java 25 runtime image.
-   - The entrypoint must incorporate the SKU's optimal default JVM settings as environment defaults while allowing operational overrides.
+   - The entrypoint must incorporate the SKU's default JVM settings as environment defaults while allowing operational overrides.
 8. **Standard repository anatomy.** `[L1: docs-lint]`
    - Every SKU repository must carry:
      - `pom.xml`
