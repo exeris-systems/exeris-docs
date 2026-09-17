@@ -65,10 +65,10 @@ Resolving the base from the caller's checkout instead was considered: it validat
 13. **One run record per L2 run, in the shape of `exeris-ai-execution/schemas/run-record.schema.json`**, assembled by the publish job from what CI already holds: the verdict; the check-run conclusions of the L1 gates as `oracle` state; `agent` from the runner's output (`model_id`, `model_snapshot`, `harness.client`, `harness.version`); `repository_state` from the checkout (`commit`, the bundle pin from `.agents/manifest.yaml`, `dirty: false`, `visibility` per §C.17); `accounting.mode` from the credential class; `execution` from the runner's execution log; `instrument` from the bot's own version and the fence in force. The bot adds nothing the schema does not name and interprets nothing — no aggregation, no comparison, no sentence about a model — per ADR-086 §A.2.
 14. **Producer-side derivations are this ADR's, not the schema's** (ADR-086 §C.12–14 and §F.30–31 name the fields; this names how a CI producer fills them):
     - `agent.system_prompt_sha256` — SHA-256 over, in this order and each terminated by a newline: the prompt text the workflow passed to the runner; the routine file at the checked-out `.github` SHA; `AGENTS.md` **as the runner read it**. The hash records what happened, not what should have; which `AGENTS.md` the runner reads is §C.14a's rule. The harness's own prompt changes are covered by `harness.version`. A runner that does not expose enough to compute this yields **no row**, not a row with a convenient hash.
-    - `agent.model_snapshot` — from the runner's execution log; absent there → no row.
+    - `agent.model_snapshot` — from the runner's execution log; absent there → no row. *(Amended 2026-09-17 by ADR-086: absent there yields a row carrying the alias marked `unresolved:<model_id>`, not no row. No log of this runner exposes a snapshot for the model that takes the turns, so "no row" meant no rows at all, for every review. The absence is a property of the instrument and `instrument.fence` carries it. See ADR-086 ## Amendments.)*
     - `execution.event_stream` — the runner's execution log, uploaded as a *separate* workflow artefact (it contains content), referenced by artefact URL, SHA-256 and event count. Never copied into the row, never committed to an inbox.
     - `accounting` — `mode: subscription` under an OAuth credential, `api` under an API key; usage from the log; **the USD figure a runtime prints under a subscription is a price-list computation and is dropped** — the schema refuses it, and a producer that relabels it is working around the schema (ADR-086 Engineering Protocol 8).
-    - `workload.fingerprint` — `ci:` class: a keyed MAC over `(repository, pull request number, head sha)` with the organisation secret `EXERIS_FINGERPRINT_KEY`; a key rotation writes a fence (ADR-086 §F.31).
+    - `workload.fingerprint` — `ci:` class: a keyed MAC over `(repository, pull request number, head sha)` with the organisation secret `EXERIS_FINGERPRINT_KEY`; a key rotation writes a fence (ADR-086 §F.31). *(Amended 2026-09-17: the key is dropped — the row publishes these inputs itself in `repository_state`, so the MAC guards what is printed beside it. A plain SHA-256 over the three, no rotation, no rotation fence. See ## Amendments.)*
     - `workload.scope` — from the pull request's *Scope class* (ADR-085 §E.16), mapped to the schema's pattern by a fixed table, not by convention: `runtime hot path` → `runtime-hot-path`, `runtime non-hot` → `runtime-non-hot`, `test-tooling` → `test-tooling`, `docs-only` → `docs-only`. The composed schema in `.github` narrows `workload.scope` to exactly these four for the review domains; a body whose scope class does not parse yields no row, which `pr_body_check.py` has already made red.
     - Any change to a derivation in this list changes what a row means and **writes a fence** (ADR-086 §E.20) before the first row under the new derivation lands.
 14a. **The instruction files the runner reads come from the base branch, not the pull request's head**, whenever the pull request's author is not a member of the organisation. The produce job restores `AGENTS.md`, `.agents/**` and every provider adapter (`.claude/**`, `.codex/**`, `.cursor/**`, `.gemini/**`) from the merge base before the runner starts; a pull request from outside that touches those paths is reviewed by a human before any runner reads it. Today every pull request is the maintainer's and this costs nothing; the rule is written now because it matters exactly when the §E.26 trigger fires and there is no time left to write it. `agents-md-schema.md` rule 8 is the reasoning: instructions an agent follows are pinned and reviewed, and a head-branch `AGENTS.md` from a stranger is neither.
@@ -110,7 +110,7 @@ Resolving the base from the caller's checkout instead was considered: it validat
 - **[-] Two verdicts on some pull requests** until `agents-md-schema.md` decides one routine or two. The bot makes either work; it does not decide.
 - **[-] Two more rule-shaped files in `.github`** — the label mapping and the downstream map — with the standing pull toward a third.
 - **[-] Inbox pull requests are toil** until §C.15's threshold is met, and the threshold is deliberately not pre-set.
-- **[-] Rows whose runner cannot supply a snapshot or a hash are not captured at all.** That is the honest reading of ADR-086 §C.13, and it means some runners produce no rows until their actions expose what a row needs.
+- **[-] Rows whose runner cannot supply a snapshot or a hash are not captured at all.** That is the honest reading of ADR-086 §C.13, and it means some runners produce no rows until their actions expose what a row needs. *(Amended 2026-09-17: the snapshot half no longer holds — an unexposed snapshot is recorded as `unresolved:<model_id>` rather than costing the row, because no log of this runner exposes one and "no rows" meant no rows at all. The hash half stands. See ADR-086 ## Amendments.)*
 
 ### ❌ Alternatives rejected
 
@@ -141,6 +141,51 @@ Resolving the base from the caller's checkout instead was considered: it validat
 - **Risk:** the bot becomes the third home for rules — the pull will exist on every review that finds something CI could have caught. §E.27 is the answer every time, and `.github`'s own `guardrails.yml` checks the two files it may have. The founder notices first, which is the problem ADR-086 names too.
 
 ## Amendments
+
+- **2026-09-17 — §C.14's `model_snapshot` clause is superseded by ADR-086; this record is marked,
+  not rewritten.** "Absent there → no row" now yields a row carrying the alias marked
+  `unresolved:<model_id>`. No execution log of this runner exposes a dated snapshot for the model
+  that takes the turns, so the clause as written meant no rows at all, for every review,
+  indefinitely — the rule making the measurement impossible rather than protecting it. ADR-086's
+  entry of the same date carries the measurement and the reasoning; §C.14's bullet and the
+  `[-] Rows whose runner cannot supply a snapshot or a hash` trade-off carry markers pointing at it.
+  The hash half of that trade-off is untouched: `system_prompt_sha256` is still a producer-side
+  obligation and a producer that cannot compute it still records no row.
+
+  Logged here because this file is edited in place, which is what `adr-conventions.md` rule 7
+  attaches a dated entry to — not the question of whose decision it was.
+
+- **2026-09-17 — the `ci:` fingerprint names a secret it does not need, and the key is dropped.**
+  §C.14 derives a `ci:`-class `workload.fingerprint` as a keyed MAC over `(repository, pull request
+  number, head sha)` with the organisation secret `EXERIS_FINGERPRINT_KEY`, and makes a key rotation
+  write a fence (ADR-086 §F.31). No such secret exists, and building the capture producer was the
+  first thing to ask for one.
+
+  **What the key is for, and where that reasoning holds.** `run-record.schema.json` states it on the
+  field: a plain digest is a confirmation oracle, because anyone who guesses the input verifies the
+  guess against a published row — "in a form that looks safe because it looks like a hash". That is
+  true of `reg:`, whose input is a task description the row carries nowhere else. A key there buys
+  secrecy that is otherwise absent.
+
+  **Where it does not.** The `ci:` inputs are not a description. `repository_state` **requires**
+  `repository` and `commit`, in clear, in the same row; the pull request number follows from the
+  commit for any reader who can read the repository at all. There is nothing left to confirm: the
+  MAC would guard inputs printed beside it. This holds in both inboxes and for the same reason —
+  whoever can read the row can read `repository_state` — so the private sibling does not rescue it
+  either.
+
+  **And it costs.** A secret to create, hold and rotate; and a rotation gives every task a new
+  identity and writes a fence, which is precisely the property that makes `reg:` the first choice
+  rather than a preference. A key that protects nothing, and periodically breaks the identity it
+  protects nothing about, is worse than no key.
+
+  Decided: the `ci:` derivation is a SHA-256 over the three inputs, with no key, no rotation and no
+  rotation fence. Opaque in form, and claiming no more than that. `reg:` is unchanged, and so is
+  every other derivation in §C.14. The capture producer needs no organisation secret.
+
+  The argument rests on one thing: `repository_state.repository` is a required field. If that ever
+  stops being true, the row stops publishing its own inputs and the key comes back — and this
+  paragraph is the place that says so, rather than the reasoning being rediscovered from an absence.
 
 - **2026-09-16 — §B.10's parenthetical said the runner never writes the file, and it does, sometimes.**
   The clause read "(today's `--allowedTools` allows no `Write`)" as a settled fact, and the publish
@@ -282,7 +327,7 @@ Resolving the base from the caller's checkout instead was considered: it validat
 - **2026-09-10 — the two Apps of §A.1 are registered; this is the rotation baseline.** `exeris-bot`
   and `exeris-inbox` were both created and installed on 2026-09-10, and their private keys stored as
   organisation secrets on the same day. §A.2 requires rotation to be a dated line per App, and this
-  is the line both rotations are measured from. `EXERIS_FINGERPRINT_KEY` belongs to §C.14's `ci:`
+  is the line both rotations are measured from. `EXERIS_FINGERPRINT_KEY` *(Amended 2026-09-17: dropped — see the entry of that date)* belongs to §C.14's `ci:`
   fingerprint and is not part of the publication path; Engineering Protocol 5 gates capture on it.
 
 ## Cross-references
@@ -297,7 +342,7 @@ Resolving the base from the caller's checkout instead was considered: it validat
 
 ## Engineering Protocol
 
-1. **Register the two Apps** of §A.1 — `exeris-bot` organisation-wide, `exeris-inbox` on the two inbox repositories only; store both private keys as organisation secrets; add `EXERIS_FINGERPRINT_KEY`. Record the three dates under `## Amendments` as the rotation baseline. Registration needs organisation-admin rights and a browser; nothing before it needs a token — the composed schema, the label mapping, the routine amendment and the produce→publish split (items 2–3) land first, by pull request, and run under the provider's identity until the Apps exist.
+1. **Register the two Apps** of §A.1 — `exeris-bot` organisation-wide, `exeris-inbox` on the two inbox repositories only; store both private keys as organisation secrets; add `EXERIS_FINGERPRINT_KEY`. Record the three dates under `## Amendments` as the rotation baseline. *(Amended 2026-09-17: no `EXERIS_FINGERPRINT_KEY` — the `ci:` derivation carries no key, so there are two dates, not three. See ## Amendments.)* Registration needs organisation-admin rights and a browser; nothing before it needs a token — the composed schema, the label mapping, the routine amendment and the produce→publish split (items 2–3) land first, by pull request, and run under the provider's identity until the Apps exist.
 2. **Split `docs-review.yml`** into produce and publish, and make the publish half **its own reusable workflow that every L2 producer calls**. §B.11 requires two reviews on one pull request to publish under one identity and one contract, and a publishing step reachable from one producer cannot satisfy it: `exeris-kernel`, `exeris-sdk` and `exeris-tooling` already run their own routine beside the organisation's, each ending in a verdict, and building the publication inside `docs-review.yml` would leave the review carrying most of the engineering work publishing under no identity and invisible to §C's capture. Wiring those three producers to it is its own pull request per repository, gated on the composition rule of §B.6a. Then: add the composed verdict schema with `tag`, `labels-from-verdict.json`, and the publish step's mutation suite to `.github`'s own `guardrails.yml` beside `caller_permissions_check.py`: absent verdict → red; invalid verdict → red; `BLOCKED` → `hard-block` + red; `PASS` after `BLOCKED` → label removed + green; mandatory `not-run` → published + not green; deterministic skip → green, distinguishable; a row with `exeris-bot` in `agent.*` → refused; the same merge event twice → one issue. Update `caller-example/guardrails.yml` and its permission block; `caller_permissions_check.py` gates the rest.
 3. **Amend `docs-guardrails-review.md`** with the verdict-file closing requirement, so both routines meet the bot at one shape.
 4. **One real run before the capture step is enabled**, answering the two assumptions: does the action expose the execution log, and do the checkout's hooks fire. Record both answers in ADR-086 §H.36 by amendment.
