@@ -156,11 +156,13 @@ Resolving the base from the caller's checkout instead was considered: it validat
 
   **Why it exists.** The runner refuses to start on a pull request that changes the workflow file
   its run enters through: its own supply-chain guard, which no caller can configure away. Measured
-  2026-09-17 — `exeris-ai-execution#4` changed its own `guardrails.yml` and the model step lasted
-  five seconds with no verdict; `exeris-systems/.github#56` changed a workflow the run only calls
-  and the model step ran six and a half minutes. Without a door, the repository where most pull
-  requests are workflow changes would need an administrator's override on almost every merge, and an
-  override used routinely has stopped being one.
+  2026-09-17 on two pull requests of different shapes: where the pull request changed the workflow
+  its own run enters through, the model step ended without a verdict; where it changed one the run
+  only calls, the step ran to completion and produced a full one. The runs are named in
+  `exeris-systems/.github#57`, which carries the measurement and the narrowing that follows from it.
+  Without a door, the repository where most pull requests are workflow changes would need an
+  administrator's override on almost every merge, and an override used routinely has stopped being
+  one.
 
   **It outranks this routine's verdict, and it does so everywhere.** It counted only inside that
   exception until today and decided nothing outside it, which had the layering backwards: the
