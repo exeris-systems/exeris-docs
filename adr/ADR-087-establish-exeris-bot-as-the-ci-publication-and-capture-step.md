@@ -142,6 +142,38 @@ Resolving the base from the caller's checkout instead was considered: it validat
 
 ## Amendments
 
+- **2026-09-17 — the `ci:` fingerprint names a secret it does not need, and the key is dropped.**
+  §C.14 derives a `ci:`-class `workload.fingerprint` as a keyed MAC over `(repository, pull request
+  number, head sha)` with the organisation secret `EXERIS_FINGERPRINT_KEY`, and makes a key rotation
+  write a fence (ADR-086 §F.31). No such secret exists, and building the capture producer was the
+  first thing to ask for one.
+
+  **What the key is for, and where that reasoning holds.** `run-record.schema.json` states it on the
+  field: a plain digest is a confirmation oracle, because anyone who guesses the input verifies the
+  guess against a published row — "in a form that looks safe because it looks like a hash". That is
+  true of `reg:`, whose input is a task description the row carries nowhere else. A key there buys
+  secrecy that is otherwise absent.
+
+  **Where it does not.** The `ci:` inputs are not a description. `repository_state` **requires**
+  `repository` and `commit`, in clear, in the same row; the pull request number follows from the
+  commit for any reader who can read the repository at all. There is nothing left to confirm: the
+  MAC would guard inputs printed beside it. This holds in both inboxes and for the same reason —
+  whoever can read the row can read `repository_state` — so the private sibling does not rescue it
+  either.
+
+  **And it costs.** A secret to create, hold and rotate; and a rotation gives every task a new
+  identity and writes a fence, which is precisely the property that makes `reg:` the first choice
+  rather than a preference. A key that protects nothing, and periodically breaks the identity it
+  protects nothing about, is worse than no key.
+
+  Decided: the `ci:` derivation is a SHA-256 over the three inputs, with no key, no rotation and no
+  rotation fence. Opaque in form, and claiming no more than that. `reg:` is unchanged, and so is
+  every other derivation in §C.14. The capture producer needs no organisation secret.
+
+  The argument rests on one thing: `repository_state.repository` is a required field. If that ever
+  stops being true, the row stops publishing its own inputs and the key comes back — and this
+  paragraph is the place that says so, rather than the reasoning being rediscovered from an absence.
+
 - **2026-09-16 — §B.10's parenthetical said the runner never writes the file, and it does, sometimes.**
   The clause read "(today's `--allowedTools` allows no `Write`)" as a settled fact, and the publish
   step's own comment repeated it. Measured against it: the execution log of the 10:16 run on
