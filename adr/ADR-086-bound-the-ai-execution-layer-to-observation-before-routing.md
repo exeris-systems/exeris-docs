@@ -173,6 +173,49 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 
 ## Amendments
 
+- **2026-09-17 — the harness does not delegate turns, and the model that takes them exposes no
+  snapshot. One owed schema change is withdrawn and one clause is decided.** Measured over every
+  execution log the two producing repositories still held on this date — a population bounded by the
+  seven-day retention the 2026-09-15 amendment named, not chosen. The artefacts expire; what is
+  written here is what survives them.
+
+  **The delegation reading is withdrawn.** The 2026-09-15 amendment read `modelUsage`'s two names as
+  the harness delegating turns, and owed a schema change before the first captured row: `agent.model_id`
+  becoming a list, or gaining a companion. Three signals refute it — on the same run that amendment
+  was measured on, and on every other run held. No run spawned a subagent. In every run, every
+  assistant turn in the event stream names one model. The second model produces no turn in any
+  stream at all and is visible only in the usage ledger. `agent.model_id` stays singular and names
+  the model that produced the turns. **The owed schema change is not owed**, and a list would have
+  baked a delegation that does not happen into the shape of every row.
+
+  What the earlier reading got right is that two names appear; what it inferred from that is what a
+  usage ledger cannot tell you. The ledger records who was billed. The event stream records who
+  acted. They are different questions and only the second one is about the agent.
+
+  **Model use with no turn is instrument, not agent.** A model the harness consults for its own
+  purposes belongs to `harness.version` and to §E.26's instrument-cost line; it never enters
+  `agent.*`. A provenance footer that lists every name in the usage ledger states that a model
+  reviewed when it did not, and ADR-087 §A.3's footer does exactly that today.
+
+  **`model_snapshot` is unavailable for the model that does the work.** In none of the runs held does
+  a dated snapshot for it appear anywhere in the log; the only dated snapshot present belongs to the
+  model that never speaks. §C.13 requires all four parts of the model reference and ADR-087 §C.14
+  turns a missing snapshot into no row — together, no rows at all, for every review, indefinitely.
+  That is not the rule protecting the dataset; it is the rule making the measurement impossible,
+  which is the one thing this layer exists to do.
+
+  Decided: **an unexposed snapshot is a property of the instrument, not a value of the datum.**
+  `model_snapshot` carries the alias explicitly marked unresolved, so that neither a reader nor a
+  query can mistake it for a snapshot; the fence of §E.20 carries the instrument state; rows are
+  comparable within a fence and never across one. A `model_snapshot` equal to `model_id` is refused
+  by the schema, because that is precisely the alias-written-as-a-snapshot failure the marking
+  exists to prevent. Writing the bare alias is refused for the reason §C.14a exists: one alias may
+  name different weights at different times, and a row that cannot tell is worse than a row that
+  says it cannot.
+
+  The harness version moved three times across the population held. The fence has work to do from
+  the first row, not eventually.
+
 - **2026-09-16 — a row that records neither the runner's powers nor the verdict's route cannot be
   compared, so §C gains 14a and §H.37 loses its retention half.** Four more CI reviews ran, and what
   they added to the 2026-09-15 measurement was not more of the same. Two runs of the *same*
