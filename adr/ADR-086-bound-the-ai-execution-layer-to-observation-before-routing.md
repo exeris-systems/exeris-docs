@@ -115,7 +115,7 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 28. **Visibility is the ADR-020 two-valued vocabulary and the mapping from the hosting platform is fail-closed:** only a repository the platform reports as public maps to `public`; every other value — private, internal, unknown — maps to `enterprise-private`. Visibility is recorded at capture time and is never re-derived: a repository made public later does not reclassify its earlier rows, and a row already published under `public` is not un-published by the repository going private.
 29. **One visibility per inbox, declared by the inbox itself** (`inbox/inbox.json`), read by the validator and never inferred from a directory name or a git remote. A row that does not match belongs in the sibling repository and is refused here. Filing a row under the wrong visibility is the one mistake that cannot be corrected afterwards; the remedy recorded in `inbox/README.md` treats it as a disclosure, not as a tidy-up.
 30. **`workload.scope` is a vocabulary, not prose.** The base schema leaves it open; the composing schema narrows it to an enum per domain. What a task *did* is carried by its fingerprint and its registry entry, what *kind* of task it was by `scope`. Free text in `scope` is the one field on a metadata-only row that can carry a roadmap, and it is closed on public and private rows alike.
-31. **`workload.fingerprint` is opaque and not derivable from the task text by anyone without private material.** Two producer classes, each namespaced in the value: `reg:` — an identifier assigned by the private task registry when the task is planned, stable across time and across arms; `ci:` — a keyed MAC over `(repository, pull request, head sha)` for workloads a CI producer observes rather than plans, stable across arms of one pull request and *not* across a key rotation, which is a fence. The classes are disjoint universes and the prefix makes an accidental join between them impossible rather than silent. A content hash of a short task description is rejected: published, it is an oracle that confirms a guess.
+31. **`workload.fingerprint` is opaque and not derivable from the task text by anyone without private material.** Two producer classes, each namespaced in the value: `reg:` — an identifier assigned by the private task registry when the task is planned, stable across time and across arms; `ci:` — a keyed MAC over `(repository, pull request, head sha)` for workloads a CI producer observes rather than plans, stable across arms of one pull request and *not* across a key rotation, which is a fence. The classes are disjoint universes and the prefix makes an accidental join between them impossible rather than silent. A content hash of a short task description is rejected: published, it is an oracle that confirms a guess. *(Amended 2026-09-17 by ADR-087: how a `ci:` value is derived is that ADR's to state — this clause names the field — and the key is dropped there, because `repository_state` publishes the inputs in the same row. `reg:` is unchanged. See ADR-087 ## Amendments.)*
 32. **The private task registry is the first thing `exeris-ai-execution-enterprise` holds**, and it exists before the first *planned* group, whatever that group's repository visibility — a group is declared before its arms run, and the registry is what declares it. It records, per task: the identifier, the description, the date planned, and any preregistered hypothesis with its falsification condition.
 
 ### G. Rules a schema cannot see
@@ -149,7 +149,7 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 - **[-] A router trained on oracle outcomes selects for the oracle's blind spots.** On a docs oracle that checks structure and not quality, that is a machine for finding the cheapest way to produce structurally perfect, substantively empty documentation. Partial mitigations: SCB §7.5's change-cost idea, and a human-judged sample held out of the training signal entirely. This risk does not go away and is stated in every report the layer produces.
 - **[-] Two more repositories** — `exeris-ai-execution` and `exeris-ai-execution-enterprise` — for one maintainer, before the first row.
 - **[-] The calibration set is not the deployment distribution.** `review-planted` gives high-quality labels on a seeded, frozen corpus; `review-disposition` gives weak labels on real, drifting work. Transferring anything between them is an extrapolation, and the gap is itself the thing to measure.
-- **[-] The `ci:` fingerprint class is not stable across a key rotation.** A rotation is a fence; the registry class exists so that planned tasks never depend on it.
+- **[-] The `ci:` fingerprint class is not stable across a key rotation.** A rotation is a fence; the registry class exists so that planned tasks never depend on it. *(Amended 2026-09-17 by ADR-087: there is no key and no rotation, so this cost is not paid; the registry class is still the first choice, for the stability-across-time reason above it.)*
 
 ### 📋 What is NOT in scope
 
@@ -219,6 +219,13 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 
   The harness version moved three times across the population held. The fence has work to do from
   the first row, not eventually.
+
+- **2026-09-17 — §F.31's `ci:` derivation is superseded by ADR-087; this record is marked, not
+  rewritten.** The key and the rotation fence are dropped, because `repository_state` publishes the
+  derivation's inputs in the same row. ADR-087 §C.14 owns how a producer fills the field and carries
+  the reasoning in full; §F.31 and the `ci:`-class Trade-offs bullet here carry markers pointing at
+  it. `reg:` is unchanged. Logged here because this file was edited in place, which is what
+  `adr-conventions.md` rule 7 attaches a dated entry to — not the question of whose decision it was.
 
 - **2026-09-16 — a row that records neither the runner's powers nor the verdict's route cannot be
   compared, so §C gains 14a and §H.37 loses its retention half.** Four more CI reviews ran, and what
