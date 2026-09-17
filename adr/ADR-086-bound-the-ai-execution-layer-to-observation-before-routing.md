@@ -173,6 +173,13 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 
 ## Amendments
 
+- **2026-09-17 — §F.31's `ci:` derivation is superseded by ADR-087; this record is marked, not
+  rewritten.** The key and the rotation fence are dropped, because `repository_state` publishes the
+  derivation's inputs in the same row. ADR-087 §C.14 owns how a producer fills the field and carries
+  the reasoning in full; §F.31 and the `ci:`-class Trade-offs bullet here carry markers pointing at
+  it. `reg:` is unchanged. Logged here because this file was edited in place, which is what
+  `adr-conventions.md` rule 7 attaches a dated entry to — not the question of whose decision it was.
+
 - **2026-09-16 — a row that records neither the runner's powers nor the verdict's route cannot be
   compared, so §C gains 14a and §H.37 loses its retention half.** Four more CI reviews ran, and what
   they added to the 2026-09-15 measurement was not more of the same. Two runs of the *same*
