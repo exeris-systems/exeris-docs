@@ -79,7 +79,7 @@ The Exeris Kernel strictly enforces **Zero Phone-Home Compliance**. The runtime 
 Offline contract lifecycles are governed by five mechanisms:
 
 1. **Natural Expiration:** Subscriptions carry an explicit `validUntil` ISO-8601 timestamp. Past this window, the runtime transitions to a deterministic grace period or halts.
-2. **Manifest Replacement:** A newer signed manifest with an incremented monotonic `sequenceNumber` supersedes earlier manifests.
+2. **Manifest Replacement:** A newer signed manifest installed in place supersedes the previous one. The runtime resolves a single `license-manifest.json` and verifies whatever it finds ([ADR-088](../adr/ADR-088-cryptographic-license-manifest-and-offline-verification.md) §5), so replacement is an operational act rather than a protocol, and it carries no offline rollback protection: refusing an older, broader manifest would need a high-water mark that survives a restart, which the Phase 0 pipeline has no store for. Named here rather than closed with a sequence field that nothing would read.
 3. **Root Key Epoch Rotation:** Exeris root keys rotate on planned 24-month epochs. Pinned detached licenses preserve historical epoch keys.
 4. **Offline Revocation Lists (CRL):** In extreme legal termination scenarios, signed cryptographic CRL artifacts are incorporated into substrate release streams and security patches.
 5. **Deterministic Grace Period:** A configurable window (`gracePeriodDays`, default: 14) during which expired production systems emit high-priority audit warnings to standard logging and JFR rings without immediately halting critical business traffic.

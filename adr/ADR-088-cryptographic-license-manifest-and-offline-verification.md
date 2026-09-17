@@ -104,6 +104,7 @@ The manifest is an UTF-8 encoded JSON document conforming to `https://specs.exer
 * `entitlement.licenseMode`: Must be `SUBSCRIPTION` or `PERPETUAL_INTERNAL`.
 * `entitlement.capabilities`: An array of lowercase kebab-case capability identifiers matching the `@CapabilityModule.name()` ecosystem naming convention.
 * `execution.environments`: A set containing one or more of `development`, `staging`, `production`, `production-load-sim`, `dr-cold`, `dr-hot`. These are the seven categories of `eca-specification.md` §4.3 collapsed to six on purpose, and the collapse is stated rather than left to be inferred: §4.3 item 1 treats Evaluation, Development, Test and Staging as one entitlement class — unstamped builds, no commercial manifest — so Evaluation carries no value of its own and is recorded as `development`. `production-load-sim` does have one, because §4.3 places Production Load Simulation under PRODUCTION and it therefore requires an active entitlement; an enum that cannot express it cannot express a manifest that entitles it.
+* `execution.gracePeriodDays`: A non-negative integer. **Defaults to `14` when the field is absent** — `eca-specification.md` §1.3 item 5 relies on that default, and a default named on one page and carried on neither is how the two stop agreeing.
 * `signature.algorithm`: Strictly `Ed25519`.
 * `signature.canonicalization`: Strictly `RFC-8785`.
 
@@ -150,7 +151,7 @@ We select **Ed25519** (Edwards-curve Digital Signature Algorithm over Curve25519
        }
    }
    ```
-2. **Epoch Key Lifecycles & Perpetual Detachment:** Exeris rotates license signing keys across defined multi-year epochs. When a customer executes Code Detachment under Schedule C (`licenseMode: PERPETUAL_INTERNAL`), historical epoch keys remain embedded in the pinned version line forever, guaranteeing that detached systems boot offline indefinitely without expiring trust roots.
+2. **Epoch Key Lifecycles & Perpetual Detachment:** Exeris rotates license signing keys across defined **24-month epochs**. When a customer executes Code Detachment under Schedule C (`licenseMode: PERPETUAL_INTERNAL`), historical epoch keys remain embedded in the pinned version line forever, guaranteeing that detached systems boot offline indefinitely without expiring trust roots.
 3. **Offline Revocation Lists (CRL):** In strict air-gapped environments where online revocation checks are impossible, compromised or breached manifests are blacklisted via SHA-256 digests in regular security patch updates (`BlockedManifestRegistry`).
 
 ### 5. Phase 0 Bootstrap Verification Pipeline
@@ -239,7 +240,7 @@ During Phase 0 (`FOUNDATION: Contract & Memory`) of `KernelBootstrap`, the runti
 
 * **Assumes:** All target JDK distributions (OpenJDK, Temurin, Corretto, GraalVM) maintain native support for standard `Ed25519` via Java Security Provider SPI.
 * **Reversed by:** Evidence that a critical enterprise customer operates on an exotic JDK distribution lacking native Ed25519 support, or mathematical compromise of the Edwards-curve discrete logarithm problem.
-* **Risk:** Loss or compromise of an active Exeris Issuer private key. Mitigated by short signing epochs (1–2 years), cold storage HSM keys, and offline blacklist distribution in patch releases.
+* **Risk:** Loss or compromise of an active Exeris Issuer private key. Mitigated by the 24-month signing epoch decided above, cold storage HSM keys, and offline blacklist distribution in patch releases.
 
 ---
 
