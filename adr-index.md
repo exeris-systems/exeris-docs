@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-16
+last-verified: 2026-09-17
 ---
 
 # ADR Index — Exeris Ecosystem

@@ -175,9 +175,13 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
 
 - **2026-09-17 — the harness does not delegate turns, and the model that takes them exposes no
   snapshot. One owed schema change is withdrawn and one clause is decided.** Measured over every
-  execution log the two producing repositories still held on this date — a population bounded by the
-  seven-day retention the 2026-09-15 amendment named, not chosen. The artefacts expire; what is
-  written here is what survives them.
+  execution log the two producing repositories still held on this date — the `l2-execution-*`
+  artefacts of `exeris-systems/.github` and `exeris-systems/exeris-docs`, workflow runs 35014655583
+  through 35186240322, a population bounded by the seven-day retention the 2026-09-15 amendment
+  named rather than chosen. The runs are named because the artefacts are not kept: the figures below
+  are `unartifacted` in the sense of `claims-and-evidence.md` rule 1, checkable against the
+  artefacts while they live and against the run list afterwards. What survives them is this
+  paragraph.
 
   **The delegation reading is withdrawn.** The 2026-09-15 amendment read `modelUsage`'s two names as
   the harness delegating turns, and owed a schema change before the first captured row: `agent.model_id`
