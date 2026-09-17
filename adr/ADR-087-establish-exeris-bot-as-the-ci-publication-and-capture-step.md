@@ -142,6 +142,46 @@ Resolving the base from the caller's checkout instead was considered: it validat
 
 ## Amendments
 
+- **2026-09-17 — §B.8's fail-closed check has one door, and this record did not describe it.**
+  A person can green the required check without a review, by applying `l2-human-reviewed`. The
+  mechanism has been in `exeris-systems/.github` since the check became required; it is named in the
+  review routine's Trigger section and implemented in `publish_verdict.py`, and it appears nowhere
+  in this ADR, which is the record that establishes the check. A gate's only exception belongs
+  beside the gate.
+
+  **What it is.** A person reviews the change themselves and applies the label. The publication
+  records who looked and at which commit, takes the label straight off, and greens the check on the
+  strength of that record — not of the label, which anyone can re-apply. The record is scoped to the
+  commit it names, so the next push leaves it behind and the check is red again.
+
+  **Why it exists.** The runner refuses to start on a pull request that changes the workflow file
+  its run enters through: its own supply-chain guard, which no caller can configure away. Measured
+  2026-09-17 on two pull requests of different shapes: where the pull request changed the workflow
+  its own run enters through, the model step ended without a verdict; where it changed one the run
+  only calls, the step ran to completion and produced a full one. The runs are named in
+  `exeris-systems/.github#57`, which carries the measurement and the narrowing that follows from it.
+  Without a door, the repository where most pull requests are workflow changes would need an
+  administrator's override on almost every merge, and an override used routinely has stopped being
+  one.
+
+  **It outranks this routine's verdict, and it does so everywhere.** It counted only inside that
+  exception until today and decided nothing outside it, which had the layering backwards: the
+  routine is an instrument, a person reading the diff is not, and a layer whose verdict outranks the
+  person it reports to has stopped being a review. §A.3 gives the bot publication and no judgement;
+  this is the same boundary read from the other side.
+
+  **One condition.** Where a `BLOCKED` verdict stands against the same commit, the label greens it
+  only once that person has said something on the pull request *after* the block — not approval,
+  which the label already is, but an account: what the block got wrong, or what was done about it.
+  A label event carries no text, so the text is a comment, and *after* is what makes it an answer
+  rather than something written before there was anything to answer. The record quotes it.
+
+  **The cost, stated rather than hidden.** A block is overridable, which it was not. What keeps that
+  from being a bypass is the record: it names the person, names the commit, quotes their account, and
+  the next push leaves it behind. `[L2]` until a report counts overrides by repository and by
+  author; a count that nobody looks at is the state this clause is most likely to decay into, and
+  the first quarterly audit after capture exists is where it is looked at.
+
 - **2026-09-17 — §C.14's `model_snapshot` clause is superseded by ADR-086; this record is marked,
   not rewritten.** "Absent there → no row" now yields a row carrying the alias marked
   `unresolved:<model_id>`. No execution log of this runner exposes a dated snapshot for the model
