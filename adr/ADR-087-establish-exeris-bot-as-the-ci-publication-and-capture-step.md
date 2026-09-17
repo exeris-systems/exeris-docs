@@ -110,7 +110,7 @@ Resolving the base from the caller's checkout instead was considered: it validat
 - **[-] Two verdicts on some pull requests** until `agents-md-schema.md` decides one routine or two. The bot makes either work; it does not decide.
 - **[-] Two more rule-shaped files in `.github`** — the label mapping and the downstream map — with the standing pull toward a third.
 - **[-] Inbox pull requests are toil** until §C.15's threshold is met, and the threshold is deliberately not pre-set.
-- **[-] Rows whose runner cannot supply a snapshot or a hash are not captured at all.** That is the honest reading of ADR-086 §C.13, and it means some runners produce no rows until their actions expose what a row needs.
+- **[-] Rows whose runner cannot supply a snapshot or a hash are not captured at all.** That is the honest reading of ADR-086 §C.13, and it means some runners produce no rows until their actions expose what a row needs. *(Amended 2026-09-17: the snapshot half no longer holds — an unexposed snapshot is recorded as `unresolved:<model_id>` rather than costing the row, because no log of this runner exposes one and "no rows" meant no rows at all. The hash half stands. See ADR-086 ## Amendments.)*
 
 ### ❌ Alternatives rejected
 
@@ -141,6 +141,19 @@ Resolving the base from the caller's checkout instead was considered: it validat
 - **Risk:** the bot becomes the third home for rules — the pull will exist on every review that finds something CI could have caught. §E.27 is the answer every time, and `.github`'s own `guardrails.yml` checks the two files it may have. The founder notices first, which is the problem ADR-086 names too.
 
 ## Amendments
+
+- **2026-09-17 — §C.14's `model_snapshot` clause is superseded by ADR-086; this record is marked,
+  not rewritten.** "Absent there → no row" now yields a row carrying the alias marked
+  `unresolved:<model_id>`. No execution log of this runner exposes a dated snapshot for the model
+  that takes the turns, so the clause as written meant no rows at all, for every review,
+  indefinitely — the rule making the measurement impossible rather than protecting it. ADR-086's
+  entry of the same date carries the measurement and the reasoning; §C.14's bullet and the
+  `[-] Rows whose runner cannot supply a snapshot or a hash` trade-off carry markers pointing at it.
+  The hash half of that trade-off is untouched: `system_prompt_sha256` is still a producer-side
+  obligation and a producer that cannot compute it still records no row.
+
+  Logged here because this file is edited in place, which is what `adr-conventions.md` rule 7
+  attaches a dated entry to — not the question of whose decision it was.
 
 - **2026-09-17 — the `ci:` fingerprint names a secret it does not need, and the key is dropped.**
   §C.14 derives a `ci:`-class `workload.fingerprint` as a keyed MAC over `(repository, pull request
@@ -314,7 +327,7 @@ Resolving the base from the caller's checkout instead was considered: it validat
 - **2026-09-10 — the two Apps of §A.1 are registered; this is the rotation baseline.** `exeris-bot`
   and `exeris-inbox` were both created and installed on 2026-09-10, and their private keys stored as
   organisation secrets on the same day. §A.2 requires rotation to be a dated line per App, and this
-  is the line both rotations are measured from. `EXERIS_FINGERPRINT_KEY` belongs to §C.14's `ci:`
+  is the line both rotations are measured from. `EXERIS_FINGERPRINT_KEY` *(Amended 2026-09-17: dropped — see the entry of that date)* belongs to §C.14's `ci:`
   fingerprint and is not part of the publication path; Engineering Protocol 5 gates capture on it.
 
 ## Cross-references
@@ -329,7 +342,7 @@ Resolving the base from the caller's checkout instead was considered: it validat
 
 ## Engineering Protocol
 
-1. **Register the two Apps** of §A.1 — `exeris-bot` organisation-wide, `exeris-inbox` on the two inbox repositories only; store both private keys as organisation secrets; add `EXERIS_FINGERPRINT_KEY`. Record the three dates under `## Amendments` as the rotation baseline. Registration needs organisation-admin rights and a browser; nothing before it needs a token — the composed schema, the label mapping, the routine amendment and the produce→publish split (items 2–3) land first, by pull request, and run under the provider's identity until the Apps exist.
+1. **Register the two Apps** of §A.1 — `exeris-bot` organisation-wide, `exeris-inbox` on the two inbox repositories only; store both private keys as organisation secrets; add `EXERIS_FINGERPRINT_KEY`. Record the three dates under `## Amendments` as the rotation baseline. *(Amended 2026-09-17: no `EXERIS_FINGERPRINT_KEY` — the `ci:` derivation carries no key, so there are two dates, not three. See ## Amendments.)* Registration needs organisation-admin rights and a browser; nothing before it needs a token — the composed schema, the label mapping, the routine amendment and the produce→publish split (items 2–3) land first, by pull request, and run under the provider's identity until the Apps exist.
 2. **Split `docs-review.yml`** into produce and publish, and make the publish half **its own reusable workflow that every L2 producer calls**. §B.11 requires two reviews on one pull request to publish under one identity and one contract, and a publishing step reachable from one producer cannot satisfy it: `exeris-kernel`, `exeris-sdk` and `exeris-tooling` already run their own routine beside the organisation's, each ending in a verdict, and building the publication inside `docs-review.yml` would leave the review carrying most of the engineering work publishing under no identity and invisible to §C's capture. Wiring those three producers to it is its own pull request per repository, gated on the composition rule of §B.6a. Then: add the composed verdict schema with `tag`, `labels-from-verdict.json`, and the publish step's mutation suite to `.github`'s own `guardrails.yml` beside `caller_permissions_check.py`: absent verdict → red; invalid verdict → red; `BLOCKED` → `hard-block` + red; `PASS` after `BLOCKED` → label removed + green; mandatory `not-run` → published + not green; deterministic skip → green, distinguishable; a row with `exeris-bot` in `agent.*` → refused; the same merge event twice → one issue. Update `caller-example/guardrails.yml` and its permission block; `caller_permissions_check.py` gates the rest.
 3. **Amend `docs-guardrails-review.md`** with the verdict-file closing requirement, so both routines meet the bot at one shape.
 4. **One real run before the capture step is enabled**, answering the two assumptions: does the action expose the execution log, and do the checkout's hooks fire. Record both answers in ADR-086 §H.36 by amendment.
