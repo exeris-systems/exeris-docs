@@ -71,3 +71,5 @@ The codebase is English-first. All documentation in this repository — ADRs, re
 ## When to open this repo (vs. a sub-repo)
 
 Open this repo for: looking up an ADR by number, drafting a new platform-scope ADR or template-driven document, reading the HLA or whitepaper, editing the central registries, or working on cross-cutting strategy documents. For any non-trivial implementation task, change in subsystem behaviour, or repo-specific tooling, work in the owning sibling repository instead — that is where the actionable `CLAUDE.md`, build commands, and code-level guardrails live.
+
+<!--PROBE-CONTROL-6995-->

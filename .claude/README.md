@@ -29,3 +29,5 @@ Claude Code keeps this workspace's persistent memory under its own per-user dire
 content, which is why it is described here rather than in `AGENTS.md`). Use it for **process
 feedback** and **user preferences**, never for project facts: those belong in `AGENTS.md`, in
 `.agents/`, or in the canonical documents and records, all versioned and visible to every tool.
+
+<!--PROBE-CLAUDE-6995-->

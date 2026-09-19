@@ -104,3 +104,5 @@ in `exeris-systems/exeris-agents`, each carrying a do-not-edit marker naming its
 provider-owned operational configuration. Regenerate them; never edit them. The five other provider
 directories are deferred, and the manifest says so rather than leaving it to be inferred.
 `CLAUDE.md` is a pointer to this file.
+
+<!--PROBE-AGENTS-6995-->

@@ -33,3 +33,5 @@ KERNEL READY
 <!-- VERIFY(sweep-2026-09): the bootstrap DAG block above is quoted from exeris-kernel/docs/subsystems/bootstrap.md, and that file contradicts itself on the phase-start mechanism. Its "Holy Order" block (:213-215) and Diagram 1 (:66, :71) still read "SERVICES (parallel)" / "RUNTIME (parallel)", while its own ADR-066 passage (:340-355) records that the per-subsystem fork was removed and "a phase takes the sum of its subsystems' start times rather than the longest". SubsystemOrchestrator.java settles it — :691 "Each round runs on THIS thread, in order." — and the wording above follows the code. Cross-repo [DOC DEBT] against exeris-kernel; do not re-sync this block to bootstrap.md's Holy Order text until that file is fixed. -->
 
 <!-- VERIFY(sweep-2026-09): exeris-spring-runtime/CLAUDE.md:83 carries the superseded form of the DAG corrected here — "SERVICES: Crypto & Persistence & Graph & Transport (parallel via StructuredTaskScope)" — contradicted by SubsystemOrchestrator.java:55-57 and :691 on both the default and preview kernel lines. That repo is outside this sweep's scope; cross-repo [DOC DEBT]. -->
+
+<!--PROBE-AGENTSTREE-6995-->
