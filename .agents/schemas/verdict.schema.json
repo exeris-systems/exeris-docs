@@ -4,7 +4,7 @@
   "description": "The bundle's shape, narrowed to this repository's reviewing roles and scope vocabulary. The three-state `decision` and the `checks_run` contract are the base's; only the vocabulary is local.\n\nThe `unevaluatedProperties: false` in this file are this file's own: the bundle's bases declare none, because a base that closes itself refuses the very property a composing schema adds (exeris-agents 2.0.0). A closer stops at the object it sits in, so an array's items need one of their own — a root closer alone refuses a foreign property at the root and admits one inside an item. `agents_file_check.py` names every object left open.",
   "allOf": [
     {
-      "$ref": "../vendor/exeris-agents-2.0.0/schemas/verdict.base.schema.json"
+      "$ref": "../vendor/exeris-agents-2.1.0/schemas/verdict.base.schema.json"
     },
     {
       "properties": {
@@ -29,7 +29,7 @@
           "items": {
             "allOf": [
               {
-                "$ref": "../vendor/exeris-agents-2.0.0/schemas/verdict.base.schema.json#/properties/findings/items"
+                "$ref": "../vendor/exeris-agents-2.1.0/schemas/verdict.base.schema.json#/properties/findings/items"
               }
             ],
             "unevaluatedProperties": false
@@ -39,7 +39,7 @@
           "items": {
             "allOf": [
               {
-                "$ref": "../vendor/exeris-agents-2.0.0/schemas/verdict.base.schema.json#/properties/checks_run/items"
+                "$ref": "../vendor/exeris-agents-2.1.0/schemas/verdict.base.schema.json#/properties/checks_run/items"
               }
             ],
             "unevaluatedProperties": false
@@ -49,7 +49,7 @@
           "items": {
             "allOf": [
               {
-                "$ref": "../vendor/exeris-agents-2.0.0/schemas/handoff.base.schema.json"
+                "$ref": "../vendor/exeris-agents-2.1.0/schemas/handoff.base.schema.json"
               }
             ],
             "unevaluatedProperties": false
