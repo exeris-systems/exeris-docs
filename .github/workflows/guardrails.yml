@@ -63,7 +63,14 @@ jobs:
   # it the review would vanish from the checks, and a check that does not report is worse than red.
   docs-review:
     needs: [docs, commits, pr-body]
-    if: ${{ always() }}
+    # `always()` so a review still runs when a gate above it went red — a review that vanishes
+    # from the checks exactly when something is wrong is the failure this job's condition exists
+    # to prevent. Narrowed to a human's event: the publishing half applies labels, a label is a
+    # `pull_request` event, and the runner refuses a non-human actor — so the bot woke this
+    # workflow on its own account and the run it woke could only end red. Adopted from
+    # `caller-example/guardrails.yml` (exeris-systems/.github#74); the gates live there, this
+    # file is the opt-in, and this line is part of the opt-in.
+    if: ${{ always() && github.event.sender.type == 'User' }}
     uses: exeris-systems/.github/.github/workflows/docs-review.yml@main
     with:
       publish: true
