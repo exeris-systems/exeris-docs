@@ -84,7 +84,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 17. **The body checker verifies presence and parseability of the headings and trailer lines, nothing more.** Substance is reviewed, not linted.
 17a. **Issues are the input side of the same conventions** (added 2026-09-05, see Amendments). Four forms and no blank issues; issue titles use commit grammar so they can become pull-request titles unchanged; labels come from one organisation taxonomy applied additively; and a review finding the pull request does not resolve is filed as an issue before it merges, which is what makes the monthly audit able to count debt rather than estimate it. `standards/issue-conventions.md` holds the rules; `exeris-systems/.github` holds the forms, the taxonomy and the two workflows.
 
-### F. Javadoc and TSDoc
+### F. Comments, Javadoc and TSDoc
 
 18. **Prose rules are the Oracle doc-comment conventions**: summary first sentence; third-person declarative; implementation-independent; `@param` on every parameter, `@return` on every non-void method, `@throws` for checked exceptions and for unchecked ones a caller would catch; no restating the signature; `{@code}`/`{@link}` over HTML.
 19. **Tag vocabulary:** `@implSpec` for what an implementer must honour, `@apiNote` for caller guidance, `@implNote` for facts about the current implementation, `@since` on every public element of a released module. `@author` and `@version` are banned (Git is the author record). Examples use `{@snippet}`, never pasted `<pre>` blocks.
@@ -96,6 +96,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 21. **Gate:** `maven-javadoc-plugin` with `failOnWarnings=true` on `exeris-kernel-spi`, `exeris-sdk-annotations` and every module published to Maven Central (the SDK configuration is the port target); Checkstyle Javadoc modules `JavadocType`, `JavadocMethod`, `JavadocStyle`, `NonEmptyAtclauseDescription`, `AtclauseOrder` (order `@param @return @throws @since @see @deprecated`) ~~in `exeris-kernel-build-config`~~ *(superseded 2026-09-05: the modules ship in `exeris-systems/.github` and the gate reads them from the checkout — see `## Amendments`)* *(added 2026-09-05: and a warning-level regexp for history in a doc comment, `javadoc-conventions.md` rule 12)*. Kernel Core and everything else: diff-aware only.
 
 21e. **Rule 1 has one exemption and it is opt-in.** The Javadoc gate takes `trivial-accessors`, `documented` by default. A repository whose published surface is fluent sets `exempt`, which drops the Checkstyle half of `javadoc-conventions.md` rule 1 for single-line method bodies, and only where the repository names what carries the coverage instead. The gate writes the policy in force into its step summary: an opt-out visible only in a caller's YAML is one nobody reviews, and a green tick that means two different things in two repositories is not a gate.
+21f. **A comment carries the contract, not the history — in every language** *(added 2026-09-18, see Amendments)*. A code comment states the stable semantic reason the code exists; what changed and how belongs to the commit and the pull request, and what happened, why and at what cost to an issue or a postmortem. A fact in two of those three is a fact the two come to disagree about. `standards/comment-conventions.md` is the rule; `javadoc-conventions.md` rule 12 and `tsdoc-conventions.md` rule 12 narrow it to the tags and the gate of one language. The token list every gate reads is authored once, in `exeris-systems/.github`.
 
 ### G. ADRs, RFCs and the registry
 
@@ -124,7 +125,7 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 
 31. **L1 (CI, hard):** commit format (`commitlint`); PR body headings; frontmatter schema; ADR/RFC filename regex and registry-row presence; link check (`lychee`) including public→private path detection; the Javadoc gates of §F.21 *(amended 2026-09-05: except its history regexp, which is warning-level by design and does not fail a build — see `## Amendments`)*; japicmp (ADR-065); TSDoc lint (`tsdoc/syntax`, eslint-plugin-jsdoc with the shared fragment), typedoc validation and the API goldens of §F.21c; Category-B files edited without regeneration marker.
 31a. **L0 (runtime, hard), the layer beneath every number above** *(added 2026-09-08, see Amendments; numbered `31a` because it sits beside 31, not after it — §J's items read in layer order, and this one is first)*: agent hooks rendered from `.agents/hooks/hooks.yaml`. It is the only layer that acts *before* a commit exists — denying an irreversible action, and blocking a session from reporting itself finished while a required check has not run. **L0 is a tripwire, not a proof:** a stop hook establishes that a command ran, never that it was the right command, and where a runtime cannot block a stop it degrades to a warning, which the repository's `manifest.yaml` records under `degradations`. A hook never states a rule for the first time and never permits what a policy forbids.
-32. **L1 (CI, warning):** Vale with the Exeris style (seeded from Quarkus's package plus the terminology in each repository's registered drift patterns (`exeris-docs/.agents/policies/drift-patterns.md`)); `markdownlint`.
+32. **L1 (CI, warning):** Vale with the Exeris style (seeded from Quarkus's package plus the terminology in each repository's registered drift patterns (`exeris-docs/.agents/policies/drift-patterns.md`)); `markdownlint`; the comment-history gate of `standards/comment-conventions.md` *(added 2026-09-18: it reads the languages Checkstyle and ESLint do not — see `## Amendments`)*.
 33. **L2 (Claude review):** a `docs-guardrails-review` step added to the `pr-review.md` router — a Claude Project document maintained outside the git repositories, whose patch is drafted and staged alongside the guardrail bundle together with the review routine itself; findings adopt a new bracketed severity tag **`[DOC DEBT]`**, added after the existing `[TCK DEBT]` tag in that document.
 34. **L3 (checklists):** `standards/checklists/{pre-pr,doc-page,adr,release-notes}.md`, each ≤ 10 questions. Not gated.
 
@@ -172,6 +173,29 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 - Business ADRs (`BUS-NNN`) and portfolio-product internal namespaces.
 
 ## Amendments
+
+- **2026-09-18 — §F is retitled and gains §F.21f, §J.32 gains the gate, and
+  `comment-conventions.md` gives rule 12 a single home.** §F.21's Javadoc rule 12 and its TSDoc twin
+  bind every comment; the gates behind
+  them read Java and TypeScript and nothing else. A repository written in Python and YAML carried
+  the obligation with nothing able to check it — measured on `exeris-agents`, which ships neither
+  language and whose comments the new gate reports narrated history throughout, with no gate
+  anywhere that could have said so before it existed. The run is in `exeris-systems/.github#67`. The rule is now authored once and language-neutrally in
+  `standards/comment-conventions.md`, which `javadoc-conventions.md` rule 12 and
+  `tsdoc-conventions.md` rule 12 narrow to their own tags and gate. §C.10 binds the standards
+  listed in §D–§I, so the rule needs an obligation there and not only a gate in §J: §F is retitled
+  *Comments, Javadoc and TSDoc* and gains §F.21f, which is the obligation the new page traces to —
+  the same repair §M.37 made for `capability-conventions.md`. §J.32 names the third gate,
+  warning-level like the two beside it, because whether a sentence is archaeology or a statement
+  about the present is a reviewer's call.
+
+  The token list moves with the rule, on a second measurement from the same reading:
+  `tsdoc-conventions.md` described the Java and TypeScript regexes as shared verbatim between
+  `java/checkstyle-javadoc.xml` and `ts/eslint.tsdoc.mjs`; they had drifted apart in both
+  directions, each silent on tokens the other fired on. The comparison is in
+  `exeris-systems/.github#67`. `comment-history.json` in `exeris-systems/.github` is the single list; ESLint and the
+  new gate read it, Checkstyle carries a regenerated copy because it reads no JSON, and
+  `comment_history_suite.py` asserts that all three agree.
 
 - **2026-09-16 — §G.26a: a record carries no figures, which rule 1 of
   `claims-and-evidence.md` never said.** That rule lets any figure sit anywhere so long as it cites a
