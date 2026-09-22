@@ -171,6 +171,30 @@ The threat is not a malicious agent; it is a model that finds a working credenti
 | **D. Vendor sandbox** — deny reads on credential paths through the L0 hooks `exeris-agents` already renders | paths, per vendor | no infrastructure; L0 exists | a tripwire, not a proof (ADR-085 §J.31a says so); per vendor; a shell bypasses it unless the vendor sandboxes the shell |
 | **E. Remove long-lived credentials from the machine** — short-lived `gh` tokens, SSH on a hardware key with touch | the root cause | independent of the harness; protects against every other process too | a change to the maintainer's own workflow; hardware; the keychain only partly |
 
+## Testing
+
+The RFC proposes one surface that a consumer will implement against — the `agent/*` service — and
+two checks that make claims about it falsifiable before V1 freezes it:
+
+- **The surface golden.** `api/agent-surface.json` in `exeris-agent-harness` lists every method,
+  its inputs and its outputs; the harness's own gate regenerates it from the implementation and is
+  red on any difference, the way ADR-085 §F.21c's tool-surface golden is. A removed method or a
+  newly required input is a MAJOR change and is refused without a version bump; an added optional
+  input is MINOR. The CLI is the reference client, so the golden is checked against it, not against
+  a plugin.
+- **The isolation closures of Q8-A**, each a test that fails when its closure is removed: a push
+  over an ssh remote fails inside the run environment; the credential helper answers for the
+  organisation's host and no other; the shell's own credentials are absent from the run's
+  environment; the clone's own configuration cannot override the run's hooks path or credential
+  boundary; a commit made in the run's worktree carries exactly one `Exeris-Run:` trailer.
+- **The record's own validator**, run by `flush` before an inbox pull request is opened, so a row
+  the harness assembles is checked against `exeris-ai-execution`'s schema and cross-file rules by
+  the same code the inbox runs, never by a copy.
+
+What cannot be tested before implementation: whether a vendor's session log exposes enough for
+`capture_level: full` on a given runtime, and the Q8 count of L0 denials on credential paths — both
+are the harness's first readings, not its preconditions.
+
 ## Recommendation
 
 **Q7: A and B together, C rejected on authorship, S1.e on from day one; the spike is one evening on a throwaway repository — five actions by the App (approve, dismiss, merge before and after a human approval, push after approval) against the five-rule ruleset. Q8: A and D for V0, stated honestly as convention plus tripwire, with a measurement that decides the next step: the count of L0 denials on credential paths over the first runs — zero after a reasonable number and C waits; more than zero and C is V1 for CLI-launched agents, because the "hmm, I probably can" has then been observed rather than assumed. B is the fallback if C proves too heavy for JVM builds. E is hygiene independent of everything here and is recommended regardless.**
