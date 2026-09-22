@@ -4,7 +4,6 @@ type: rfc
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-09
 ---
 
 # RFC-2026-09-08: The AI execution layer — against which oracle does V0 observe, and what must be preregistered before the dataset may justify a routing decision?
@@ -225,7 +224,7 @@ not `exeris-agents ──▶ AI Execution`. **The agent layer owns event semanti
 | **Outcome** | **ACCEPTED** |
 | **Date** | 2026-09-09 |
 | **Resulting ADR(s)** | **ADR-086** — reserved in [`adr-index.md`](../adr-index.md) by this pull request; content pending. |
-| **Notes** | Accepted on the founder's decision, and on a reason narrower than the routing question the RFC opens: the observability layer is needed for the System Construction Benchmark programme whatever the routing answer turns out to be. Nothing in §Recommendation was amended to reach acceptance. The open questions in the section below stay open — they need rows or another programme's timetable, and acceptance does not pretend otherwise. |
+| **Notes** | Accepted on the maintainer's decision, and on a reason narrower than the routing question the RFC opens: the observability layer is needed for the System Construction Benchmark programme whatever the routing answer turns out to be. Nothing in §Recommendation was amended to reach acceptance. The open questions in the section below stay open — they need rows or another programme's timetable, and acceptance does not pretend otherwise. |
 
 ## Open questions / follow-ups
 
