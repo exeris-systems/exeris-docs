@@ -323,7 +323,7 @@ The trajectory quantities a reader wants — turns, tool calls, tokens, wall tim
 
 Two sentences of discipline that the harness repository carries verbatim: no artefact under it names a model as appropriate for a workload (ADR-086 §B.5 applies to a producer as it applies to the layer); and the harness is a producer — every quantity in the table's lower three rows is computed in `exeris-ai-execution`, never in the harness, so the seam of §A.2 holds for this producer as it holds for the bundle.
 
-One addition worth its own line: **the human arm.** §E.23 wants the human baseline first, on every model row, and today nothing produces it reproducibly. `exeris-agent baseline --task reg:<id>` — a worktree under the *human's* identity, no model, no hooks beyond timing and the commit trailer — makes `human_baseline` a measured value with the same task fingerprint rather than a remembered one. It costs one subcommand and closes the field the pairing discipline depends on.
+One addition worth its own line: **the human arm.** §E.23 wants the human baseline first, on every model row, and today nothing produces it reproducibly. `exeris-agent baseline --task reg:<id>` — a worktree under the *human's* identity, no model, no hooks beyond timing and the commit trailer — makes `human_baseline` a measured value with the same task fingerprint rather than a remembered one. *(ADR-086 §E.23 amended 2026-09-23: the human arm is declared only where a group asks whether delegating pays; `baseline` exists for that case.)* It costs one subcommand and closes the field the pairing discipline depends on.
 
 ## Decision Record
 
