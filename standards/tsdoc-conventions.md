@@ -4,12 +4,12 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-06
+last-verified: 2026-10-01
 ---
 
 # TSDoc Conventions
 
-Binding per ADR-085 §F (amendment 2026-09-06). The TypeScript sibling of `javadoc-conventions.md`: the same twelve rule numbers and the same intent, adapted per rule rather than transliterated. The numbering is a lookup, not a promise of equivalence — rule 4 here (release tags) has no Javadoc analogue, rule 5 folds Javadoc's 4 and 5 together, and Javadoc's rule 6 contract tags (`@implSpec`/`@apiNote`/`@implNote`) have no numbered counterpart, only `@remarks` in the prose below. Applies to every `.ts` source in the ecosystem; the hard gates apply to the **published surfaces**: `@exeris/ai-bridge` (its tool surface), `@exeris-systems/ui-kit` (its exports), `@exeris/codegen-ts` (its config schema and emitted output). Angular applications (`exeris-studio-frontend`, budgetHQ, the landing) are checked on changed files only.
+Binding per ADR-085 §F (amendment 2026-09-06). The TypeScript sibling of `javadoc-conventions.md`: the same twelve rule numbers and the same intent, adapted per rule rather than transliterated. The numbering is a lookup, not a promise of equivalence — rule 4 here (release tags) has no Javadoc analogue, rule 5 folds Javadoc's 4 and 5 together, and Javadoc's rule 6 contract tags (`@implSpec`/`@apiNote`/`@implNote`) have no numbered counterpart, only `@remarks` in the prose below. Applies to every `.ts` source in the ecosystem; the hard gates apply to the **published surfaces**: `@exeris/ai-bridge` (its tool surface), `@exeris/ui-kit` (its exports), `@exeris/codegen-ts` (its config schema and emitted output). Angular applications (`exeris-studio-frontend`, budgetHQ, the landing) are checked on changed files only.
 
 Doc comments are TSDoc (`/** … */`, Markdown inside, tags from the TSDoc core/extended set plus typedoc's organisational tags). They are not Javadoc: no `<p>`, no `{@code}`, no `@author`, types never repeated in tags. TypeScript already carries the types; the comment carries the contract.
 
@@ -46,13 +46,13 @@ Doc comments are TSDoc (`/** … */`, Markdown inside, tags from the TSDoc core/
 - `@remarks` holds the paragraphs after the summary when the summary must stay short; `@example` holds a fenced code block, compiled by a test when longer than ~10 lines.
 - `@internal` symbols are stripped from typedoc output and from `.api.md`; they are still documented (rule 1 applies to the package's own developers too).
 
-## Example — `ExerisTheme` (`@exeris-systems/ui-kit`), before and after
+## Example — `ExerisTheme` (`@exeris/ui-kit`), before and after
 
 Before (today's file: Javadoc habits, no release tag, `@author`):
 
 ```ts
 /**
- * @exeris-systems/ui-kit
+ * @exeris/ui-kit
  * @author Exeris Team
  * @since 0.1.0
  */
