@@ -49,7 +49,7 @@ We explicitly decouple source compilation from production deployment authorizati
 * Stamping a build artifact for production target execution requires a valid, cryptographically verified `license-manifest.json`.
 * The tooling pipeline (`exeris-tooling`) validates that all composed capabilities declared via `@Requires` satisfy:
   `Capabilities_declared ⊆ Capabilities_entitled`
-* An unstamped artifact booted in an environment marked as `production` fails at bootstrap.
+* An unstamped artifact booted in an environment marked as `production` fails at bootstrap. _(Amended 2026-10-06: only an artifact that declares an `EntitlementRequirement`, and in any of the three production classes — see Amendments.)_
 
 ### 2. Typed Runtime Contract: `ExecutionContract`
 
@@ -99,7 +99,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 
 | Level | Failure Action | Applies To | Rationale |
 | :--- | :--- | :--- | :--- |
-| **`HARD`** | Throws `ContractBreachException` and terminates the JVM immediately. | Unlicensed commercial capabilities, unauthorized environment class, signature invalidity, detached version mismatch. | Structural breach of copyright and contract; system has no right to execute. |
+| **`HARD`** | Throws `ContractBreachException` and terminates the JVM immediately. _(Amended 2026-10-06: aborts the boot; the kernel never exits the JVM.)_ | Unlicensed commercial capabilities, unauthorized environment class, signature invalidity, detached version mismatch. | Structural breach of copyright and contract; system has no right to execute. |
 | **`SOFT`** | Logs structured error to `STDERR`, attaches high-priority event to in-process JFR ring, system remains operational. | Node count exceeds `authorizedInstances` during emergency failover; manifest enters `gracePeriodDays` window. | Operational resilience: transient infrastructure anomalies or invoice delays must not cause cascading downtime. |
 | **`AUDIT`** | Telemetry records continuous metrics in local buffers for reconciliation; traffic is served with zero dropped packets. | Throughput bursts beyond `maxThroughputRps`, concurrent connections beyond `maxConnections`. | Commercial monetization: capacity overages are financial reconciliation matters (true-up), not availability faults. |
 
@@ -107,10 +107,10 @@ Enforcement actions are partitioned into three orthogonal levels:
 **Concrete obligations:**
 
 1. **Tooling Capability Set Assertion:** `exeris-tooling` must extract all resolved capability identifiers from the composed `@CapabilityModule` DAG and assert `Capabilities_declared ⊆ Capabilities_entitled` whenever the build profile specifies a production target (`-Pproduction`). Missing entitlements must cause compilation to fail with an actionable diagnostic.
-2. **Phase 0 Bootstrap Verification:** `exeris-kernel-core`'s `KernelBootstrap` must resolve and validate `license-manifest.json` during Phase 0 (`FOUNDATION: Contract & Memory`). **This amends the canonical Bootstrap DAG**, which defines FOUNDATION as memory only and places cryptography in the parallel SERVICES phase (`high-level-architecture.md` §2, sourced from `exeris-kernel/docs/subsystems/bootstrap.md`). The amendment is deliberate — an entitlement that is checked after off-heap allocation has already been spent is checked too late — and it is a change to that diagram rather than a reading of it, so both pages owe an update; Engineering Protocol item 6 carries the obligation. If the manifest is missing, corrupt, or signature verification fails in an environment configured as `production`, the process must terminate before binding network sockets.
+2. **Phase 0 Bootstrap Verification:** `exeris-kernel-core`'s `KernelBootstrap` must resolve and validate `license-manifest.json` during Phase 0 (`FOUNDATION: Contract & Memory`). **This amends the canonical Bootstrap DAG**, which defines FOUNDATION as memory only and places cryptography in the parallel SERVICES phase (`high-level-architecture.md` §2, sourced from `exeris-kernel/docs/subsystems/bootstrap.md`). The amendment is deliberate — an entitlement that is checked after off-heap allocation has already been spent is checked too late — and it is a change to that diagram rather than a reading of it, so both pages owe an update; Engineering Protocol item 6 carries the obligation. If the manifest is missing, corrupt, or signature verification fails in an environment configured as `production`, the process must terminate before binding network sockets. _(Amended 2026-10-06: "in an environment configured as `production`" reads as the three production classes, and a missing manifest halts only when an `EntitlementRequirement` is declared.)_
 3. **Zero Phone-Home Invariant:** No enforcement routine in `exeris-kernel-core`, `exeris-tooling`, or any capability module may initiate an outbound network connection to verify license status. All verification is strictly local and asymmetric.
 4. **Offline Keystore Binding:** The public keys of the Exeris License CA must be embedded in `exeris-kernel-core` at build time. Historical epoch keys must remain accessible to validate version-pinned `PERPETUAL_INTERNAL` detached deployments.
-5. **Separation from APM Telemetry:** In-process JFR licensing events (`eu.exeris.telemetry.license.EnforcementEvent`) are strictly customer-controlled operational records. They must never be forwarded to third-party or Exeris servers without explicit customer configuration.
+5. **Separation from APM Telemetry:** In-process JFR licensing events (`eu.exeris.telemetry.license.EnforcementEvent`; _amended 2026-10-06: `eu.exeris.kernel.contract.Enforcement`_) are strictly customer-controlled operational records. They must never be forwarded to third-party or Exeris servers without explicit customer configuration.
 
 ---
 
@@ -157,6 +157,43 @@ Enforcement actions are partitioned into three orthogonal levels:
 
 ---
 
+## Amendments
+
+- **2026-10-06 — A production boot without a manifest fails only when the classpath declares an entitlement.**
+  §1's "an unstamped artifact booted in production fails" and obligation 2's "manifest missing in an
+  environment configured as `production`" stopped the Apache-2.0 Community kernel, which carries no
+  commercial code, from running in production — against `eca-specification.md` §4.1, where Community
+  is unrestricted. The kernel cannot tell from a provider's priority whether it is commercial, so the
+  declaration is explicit:
+  - `eu.exeris.kernel.spi.contract.EntitlementRequirement`, discovered through `ServiceLoader` in Phase 0,
+    is registered by every artifact whose production execution needs an entitlement and returns the
+    capability identifiers it needs. Community artifacts register none.
+  - `eu.exeris.kernel.spi.contract.ExecutionEnvironment` carries the six environment values of ADR-088;
+    `production`, `production-load-sim` and `dr-hot` require an entitlement. The environment is declared
+    through the configuration key `environment` and defaults to `development`; the kernel profile is
+    not consulted.
+  - In a production class, a missing manifest with any requirement declared halts with `EX-LIC-0005`;
+    with a manifest, the contract must authorize the environment and every required capability, each
+    through `assertEnvironment` / `assertCapability` at its enforcement level. This is the first runtime
+    caller of capability enforcement; a requirement that is not declared is not enforced by the kernel.
+  - Outside the production classes nothing is gated, and a manifest that is present is still verified.
+
+- **2026-10-06 — The contract types are SPI types.** `ExecutionContract`, `WorkloadEnvelope`,
+  `EnforcementLevel` and `ExecutionEnvironment` are in `eu.exeris.kernel.spi.contract`, and
+  `ContractBreachException` in `eu.exeris.kernel.spi.exceptions.contract`, not in
+  `eu.exeris.kernel.core.contract`: `KernelProviders.EXECUTION_CONTRACT` is an SPI `ScopedValue` and must
+  be typed, the SPI cannot depend on Core, and Community and Enterprise read the contract through the
+  SPI. The Phase 0 step is `eu.exeris.kernel.core.contract.ContractBootstrapStep`, as Engineering
+  Protocol item 2 names it.
+
+- **2026-10-06 — `HARD` aborts the boot; it does not exit the JVM.** A `HARD` breach throws
+  `ContractBreachException` out of the kernel boot. The kernel never calls `System.exit`: embedders and
+  the Spring host runtime own the process, and the launcher turns the failed boot into the exit.
+
+- **2026-10-06 — The enforcement JFR event is `eu.exeris.kernel.contract.Enforcement`.** Every kernel
+  event is named `eu.exeris.kernel.<area>.*`, and the name is a consumer contract for recordings; the
+  `eu.exeris.telemetry.license.*` namespace of obligation 5 belongs to no kernel event.
+
 ## Cross-references
 
 * [`standards/eca-specification.md`](../standards/eca-specification.md) — Exeris Contract Architecture normative specification.
@@ -170,7 +207,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 
 ## Engineering Protocol
 
-1. **`exeris-kernel-core` Implementation:** Add package `eu.exeris.kernel.core.contract` containing `ExecutionContract`, `WorkloadEnvelope`, `EnforcementLevel`, and `ContractBreachException`. `ContractBreachException` extends `eu.exeris.kernel.spi.exceptions.ExerisKernelException` — ADR-083 makes it an invariant that every kernel failure reaches a handler as a subclass of it, and a HARD enforcement failure is a kernel failure like any other.
+1. **`exeris-kernel-core` Implementation:** _(Amended 2026-10-06: the four types live in `exeris-kernel-spi` — see Amendments.)_ Add package `eu.exeris.kernel.core.contract` containing `ExecutionContract`, `WorkloadEnvelope`, `EnforcementLevel`, and `ContractBreachException`. `ContractBreachException` extends `eu.exeris.kernel.spi.exceptions.ExerisKernelException` — ADR-083 makes it an invariant that every kernel failure reaches a handler as a subclass of it, and a HARD enforcement failure is a kernel failure like any other.
 2. **Phase 0 Bootstrap Integration:** Wire `ContractBootstrapStep` into `KernelBootstrap.bootstrapFoundation()` prior to off-heap memory initialization.
 3. **TCK Assertion:** Implement `AbstractExecutionContractTck` in `exeris-kernel` validating fail-fast behavior on unentitled capabilities and non-fatal logging on `SOFT` overages.
 4. **Tooling Profile Gate:** Extend `exeris-tooling` annotation processor with `-Pproduction` validation against composed capability graphs.

@@ -138,8 +138,8 @@ We select **Ed25519** (Edwards-curve Digital Signature Algorithm over Curve25519
 
    public final class TrustedIssuerKeyStore {
        private static final Map<String, byte[]> TRUSTED_PUBLIC_KEYS = Map.of(
-           "exeris-root-2026-k1", HexFormat.of().parseHex("3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c"),
-           "exeris-root-2025-k1", HexFormat.of().parseHex("a5b9821d6f34e2c078a94511d9f82bc7194602ea91bc340982efcd18092a771f")
+           "exeris-root-2026-k1", HexFormat.of().parseHex("<64 hex digits: 2026 epoch issuer public key>"),
+           "exeris-root-2025-k1", HexFormat.of().parseHex("<64 hex digits: 2025 epoch issuer public key>")
        );
 
        public static byte[] getPublicKeyBytes(String keyId) {
@@ -151,6 +151,7 @@ We select **Ed25519** (Edwards-curve Digital Signature Algorithm over Curve25519
        }
    }
    ```
+   The map is immutable and has no mutator: a trust root enters it only through a source change and a release, never at runtime. Each value is the public half of a key generated in the issuer's key ceremony. A published test vector — the RFC 8032 §7.1 keys among them — has a known private key and must never be embedded, because anyone could then sign a manifest the kernel accepts.
 2. **Epoch Key Lifecycles & Perpetual Detachment:** Exeris rotates license signing keys across defined **24-month epochs**. When a customer executes Code Detachment under Schedule C (`licenseMode: PERPETUAL_INTERNAL`), historical epoch keys remain embedded in the pinned version line forever, guaranteeing that detached systems boot offline indefinitely without expiring trust roots.
 3. **Offline Revocation Lists (CRL):** In strict air-gapped environments where online revocation checks are impossible, compromised or breached manifests are blacklisted via SHA-256 digests in regular security patch updates (`BlockedManifestRegistry`).
 
@@ -189,9 +190,11 @@ During Phase 0 (`FOUNDATION: Contract & Memory`) of `KernelBootstrap`, the runti
 [Store in KernelProviders.EXECUTION_CONTRACT]
 ```
 
+_Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a missing manifest halts only in a production-class environment and only when code on the classpath declares that it needs an entitlement._
+
 **Concrete obligations:**
 
-1. **Deterministic RFC 8785 Canonicalizer:** `exeris-kernel-core` and `exeris-tooling` must implement a zero-allocation, zero-dependency RFC 8785 canonicalizer (`eu.exeris.kernel.core.contract.crypto.JsonCanonicalizer`). Third-party JSON libraries must not be introduced to the kernel SPI or core runtime.
+1. **Deterministic RFC 8785 Canonicalizer:** `exeris-kernel-core` and `exeris-tooling` must implement a zero-allocation _(amended 2026-10-06: zero-dependency, allocation bounded by the manifest size)_, zero-dependency RFC 8785 canonicalizer (`eu.exeris.kernel.core.contract.crypto.JsonCanonicalizer`). Third-party JSON libraries must not be introduced to the kernel SPI or core runtime.
 2. **Standard JDK Cryptography:** Signature verification must use the standard JDK and nothing else: `java.security.Signature.getInstance("Ed25519")` API over `NamedParameterSpec.ED25519`.
 3. **Strict Tamper Detection:** A single bit modification in `license-manifest.json` outside the detached signature value must cause signature verification to fail immediately.
 4. **Pre-Allocation Phase 0 Gate:** Manifest verification must execute in Phase 0 of `KernelBootstrap` prior to off-heap memory segmentation, network socket binding, or capability initialization.
@@ -243,6 +246,52 @@ During Phase 0 (`FOUNDATION: Contract & Memory`) of `KernelBootstrap`, the runti
 * **Risk:** Loss or compromise of an active Exeris Issuer private key. Mitigated by the 24-month signing epoch decided above, cold storage HSM keys, and offline blacklist distribution in patch releases.
 
 ---
+
+## Amendments
+
+- **2026-10-06 — The §4 example trust roots are placeholders, and a published test vector may never be one.**
+  The example `TrustedIssuerKeyStore` pinned `exeris-root-2026-k1` to
+  `3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c`, which is the public key of RFC 8032
+  §7.1 TEST 2. Its private key is printed in the RFC, so a keystore that copies the example accepts a
+  manifest anyone can sign. The example values are now placeholders, and §4 item 1 states the rule: each
+  embedded key is the public half of a key generated in the issuer's key ceremony, and the map is
+  immutable with no mutator, so a trust root enters it only through a source change and a release.
+
+- **2026-10-06 — A missing manifest halts only where an entitlement is both required and declared.**
+  §5 step 1 halted whenever the manifest was absent and the environment was `production`. The Community
+  edition is unrestricted (`eca-specification.md` §4.1), so that rule stopped an Apache-2.0 kernel with
+  no commercial code from booting in production. Step 1 now reads:
+  - The environment is declared through the configuration key `environment`, with the six values of §1
+    `execution.environments`; undeclared means `development`. The kernel profile, which governs what an
+    error discloses, plays no part.
+  - `production`, `production-load-sim` and `dr-hot` are the production classes (`eca-specification.md`
+    §4.3); the other three never require a manifest.
+  - Code that needs an entitlement declares it through the `EntitlementRequirement` SPI (ADR-089,
+    amendment of the same date). A missing manifest halts with `EX-LIC-0005` only in a production class
+    and only when at least one requirement is declared; otherwise the kernel boots under the Community
+    fallback, which authorizes every environment and entitles no capability.
+  - A manifest that is present is verified in every environment.
+
+- **2026-10-06 — A manifest is read strictly, and an omitted enforcement rule does not weaken it.** §1
+  names the fields and their values; it did not say what a verifier does with a value outside them, or with
+  a rule the manifest leaves out. Both are decided here, because a signed manifest that is read leniently
+  can mean something its issuer did not sign:
+  - A field of the wrong JSON type, a value outside its enumeration (matched exactly, case included), an
+    unknown top-level field, an unknown `enforcementRules` constraint or level, and a number that is not a
+    non-negative integer within its field's range are rejected with `EX-LIC-0001`, never coerced,
+    truncated or replaced by a default. `$schema` must name the v1 schema, and `signature.canonicalization`
+    is required.
+  - `execution.validFrom`, `execution.authorizedInstances` and `execution.environments` (non-empty) are
+    required; `execution.validUntil` is required unless `licenseMode` is `PERPETUAL_INTERNAL`.
+  - Every JSON number is an IEEE-754 double, as RFC 8785 serializes it, so an integer field holds at most
+    2^53.
+  - A constraint the manifest omits from `enforcementRules` takes the level ADR-089 §3 assigns it:
+    `capability` and `environment` `HARD`, `authorizedInstances` `SOFT`, `workloadEnvelope` `AUDIT`.
+
+- **2026-10-06 — Obligation 1's "zero-allocation" is not a property this path needs.** Verification runs
+  once, in Phase 0, over a document of a few kilobytes; the canonicalizer builds a parse tree and an
+  output buffer proportional to it. The obligation is: no third-party dependency, allocation bounded by
+  the manifest size, never on a request path.
 
 ## Cross-references
 
