@@ -272,6 +272,22 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
     fallback, which authorizes every environment and entitles no capability.
   - A manifest that is present is verified in every environment.
 
+- **2026-10-06 — A manifest is read strictly, and an omitted enforcement rule does not weaken it.** §1
+  names the fields and their values; it did not say what a verifier does with a value outside them, or with
+  a rule the manifest leaves out. Both are decided here, because a signed manifest that is read leniently
+  can mean something its issuer did not sign:
+  - A field of the wrong JSON type, a value outside its enumeration (matched exactly, case included), an
+    unknown top-level field, an unknown `enforcementRules` constraint or level, and a number that is not a
+    non-negative integer within its field's range are rejected with `EX-LIC-0001`, never coerced,
+    truncated or replaced by a default. `$schema` must name the v1 schema, and `signature.canonicalization`
+    is required.
+  - `execution.validFrom`, `execution.authorizedInstances` and `execution.environments` (non-empty) are
+    required; `execution.validUntil` is required unless `licenseMode` is `PERPETUAL_INTERNAL`.
+  - Every JSON number is an IEEE-754 double, as RFC 8785 serializes it, so an integer field holds at most
+    2^53.
+  - A constraint the manifest omits from `enforcementRules` takes the level ADR-089 §3 assigns it:
+    `capability` and `environment` `HARD`, `authorizedInstances` `SOFT`, `workloadEnvelope` `AUDIT`.
+
 - **2026-10-06 — Obligation 1's "zero-allocation" is not a property this path needs.** Verification runs
   once, in Phase 0, over a document of a few kilobytes; the canonicalizer builds a parse tree and an
   output buffer proportional to it. The obligation is: no third-party dependency, allocation bounded by
