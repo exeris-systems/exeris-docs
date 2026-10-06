@@ -190,6 +190,13 @@ Enforcement actions are partitioned into three orthogonal levels:
   `ContractBreachException` out of the kernel boot. The kernel never calls `System.exit`: embedders and
   the Spring host runtime own the process, and the launcher turns the failed boot into the exit.
 
+- **2026-10-06 — The Contract node of the Bootstrap DAG is a `KernelBootstrap` step, not a subsystem.**
+  Engineering Protocol item 6 asks for a Contract node in FOUNDATION. The gate is not a `Subsystem`: no
+  subsystem declares it in `dependsOn()`, it runs once before the orchestrator initializes anything, and
+  `KernelBootstrap.inspect()`, which initializes nothing, does not run it. `high-level-architecture.md` §2
+  and `exeris-kernel/docs/subsystems/bootstrap.md` therefore draw it as a step ahead of the FOUNDATION
+  phase, as they draw Config, which discharges item 6.
+
 - **2026-10-06 — The enforcement JFR event is `eu.exeris.kernel.contract.Enforcement`.** Every kernel
   event is named `eu.exeris.kernel.<area>.*`, and the name is a consumer contract for recordings; the
   `eu.exeris.telemetry.license.*` namespace of obligation 5 belongs to no kernel event.
