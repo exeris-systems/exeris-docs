@@ -195,8 +195,8 @@ Enforcement actions are partitioned into three orthogonal levels:
   subsystem declares it in `dependsOn()`, it runs once before the orchestrator initializes anything, and
   `KernelBootstrap.inspect()`, which initializes nothing, does not run it. Item 6's two pages therefore draw
   it as a step ahead of the FOUNDATION phase, as they draw Config. `high-level-architecture.md` §2 does so
-  from this amendment on. `exeris-kernel/docs/subsystems/bootstrap.md` does so in exeris-kernel#608, which is
-  not yet merged, so item 6's `[DOC DEBT]` stays open until that pull request lands.
+  from this amendment on. `exeris-kernel/docs/subsystems/bootstrap.md` does so from exeris-kernel#608, merged
+  into `development/0.13.0` on 2026-10-06. With both pages drawn, item 6 is discharged.
 
 - **2026-10-06 — The enforcement JFR event is `eu.exeris.kernel.contract.Enforcement`.** Every kernel
   event is named `eu.exeris.kernel.<area>.*`, and the name is a consumer contract for recordings; the
@@ -220,4 +220,4 @@ Enforcement actions are partitioned into three orthogonal levels:
 3. **TCK Assertion:** Implement `AbstractExecutionContractTck` in `exeris-kernel` validating fail-fast behavior on unentitled capabilities and non-fatal logging on `SOFT` overages.
 4. **Tooling Profile Gate:** Extend `exeris-tooling` annotation processor with `-Pproduction` validation against composed capability graphs.
 5. **Cross-Repo Stubs:** Land `docs/adr/ADR-089.link.md` stubs in `exeris-kernel`, `exeris-tooling`, and `exeris-platform`.
-6. **Bootstrap DAG Amendment:** Update `high-level-architecture.md` §2 and `exeris-kernel/docs/subsystems/bootstrap.md` so the Bootstrap DAG carries the Contract node in FOUNDATION _(amended 2026-10-06: as a step ahead of FOUNDATION — see Amendments)_. Until both say so, the diagrams and this record disagree, and the diagrams are what a reader trusts — tracked as `[DOC DEBT]`.
+6. **Bootstrap DAG Amendment:** Update `high-level-architecture.md` §2 and `exeris-kernel/docs/subsystems/bootstrap.md` so the Bootstrap DAG carries the Contract node in FOUNDATION _(amended 2026-10-06: as a step ahead of FOUNDATION; both pages now draw it, so this item is discharged — see Amendments)_. Until both say so, the diagrams and this record disagree, and the diagrams are what a reader trusts — tracked as `[DOC DEBT]`.
