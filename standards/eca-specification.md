@@ -230,7 +230,7 @@ To safeguard the Glass Box developer experience, build tooling (`exeris-tooling`
   1. The presence of a valid `license-manifest.json`.
   2. That all composed capabilities declared via `@Requires` satisfy:
      `Capabilities_declared ⊆ Capabilities_entitled`
-* Unstamped artifacts fail deployment validation if booted in environments declared as `production`.
+* An unstamped artifact that carries entitlement-requiring code fails at bootstrap if booted in a production-class environment (Production, Active Disaster Recovery, Production Load Simulation — §4.3). An artifact with no such code — the Community edition — boots in every environment without a manifest (§4.1; ADR-088 and ADR-089, amendments of 2026-10-06).
 
 ### 6.2 Enforcement Levels (`HARD`, `SOFT`, `AUDIT`)
 
