@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-16
+last-verified: 2026-10-07
 ---
 
 # exeris-docs: the central documentation hub for the Exeris Systems ecosystem
@@ -33,8 +33,8 @@ Conversation with the founder happens in Polish; persisted artefacts are English
 **Scoped bans.** Absolute. The reasoning lives in
 [`.agents/policies/`](.agents/policies), not here.
 
-- Never cite the 2026-05-05 `e2e-shop-order-saga` run, in whole or in part. "Axon" never appears
-  next to a number, and no figure may depend on the v1 unresolved-rate gap.
+- Never cite the 2026-05-05 `e2e-shop-order-saga` run, in whole or in part. No number from that run
+  appears next to "Axon", and no figure may depend on the v1 unresolved-rate gap.
 - Never assert a benchmark figure without its report path and figure state. A withdrawal is fenced
   with the Vale toggle, never edited away.
 - Never edit an ADR's decision text in place.

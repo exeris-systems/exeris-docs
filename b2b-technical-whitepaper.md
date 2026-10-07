@@ -185,6 +185,8 @@ Full results, including JFR profiles and reproducibility metadata, are published
 
 #### 4.1 Infrastructure Density — Where the Saga Engine Runs (ADR-013)
 
+<!-- vale Exeris.RetractedFigures = NO -->
+
 > **Retraction (2026-08-27) — the 2026-05-05 saga table is withdrawn in full.** Earlier revisions of this section carried a three-stack comparison from a dev-laptop run on 2026-05-05: a compensation-correctness asymmetry (0% / 1.82% / 1.22% columns), a whole-deployment density table, and 3.4× / 4.7× memory multipliers derived from it. All of it is withdrawn, on three independent grounds, each verifiable in `exeris-benchmarks`:
 >
 > 1. **The arm was mislabelled.** One comparator was published as "Quarkus 3 + Axon Framework" saga orchestration. It never ran an Axon saga — `targets/quarkus-benchmark-app-tuned/src/main/java/.../axon/` contains no `@Saga` type; the orchestration was hand-rolled over Axon's command bus. Nothing in that run is a property of Axon Framework's saga implementation, and no figure from it is attributed to Axon Framework anywhere in this document.
@@ -192,6 +194,8 @@ Full results, including JFR profiles and reproducibility metadata, are published
 > 3. **The scenario contract superseded it.** `scenarios/e2e-shop-order-saga/CONTRACT-v2.md` §10 classes the v1 compensation-correctness finding as **superseded**, and any mixed-population latency table as **invalid under v2, do not cite**.
 >
 > The density figures shared that run and are withdrawn with the rest. **No re-derived multiplier replaces them.** What replaces them is a claim that never depended on that run, and an evidence table that states plainly what is measured, at what gate, and what is not measured yet.
+
+<!-- vale Exeris.RetractedFigures = YES -->
 
 **A saga engine is a deployment decision before it is a performance one.** Durable-execution and saga engines differ less in their programming models than in what they oblige the operator to run. Four deployment labels cover the field; every stack in the `e2e-shop-order-saga` matrix carries one, and the label is a property the buyer can check against a deployment diagram before running any benchmark at all.
 
