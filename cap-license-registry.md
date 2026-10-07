@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-04
+last-verified: 2026-10-07
 ---
 
 # Capability Licence Registry
@@ -41,9 +41,9 @@ Only `enterprise-private` implies a private repository.
 | Licence | Caps |
 |---|---|
 | `community` | 3 |
-| `commercial` | 50 |
+| `commercial` | 56 |
 | `enterprise-private` | 1 |
-| **total** | **54** |
+| **total** | **60** |
 
 The single `enterprise-private` cap is `bot-fingerprinting`, and the reason is structural rather
 than commercial: it depends on a kernel-tier SPI extension that ships in `exeris-kernel-enterprise`.
@@ -130,6 +130,12 @@ test fixtures.
 | `exeris-caps-content-versioning` | `commercial` | public | specified |
 | `exeris-caps-asset-management` | `commercial` | public | specified |
 | `exeris-caps-bank-aggregator` | `commercial (BudgetHQ → promotable)` | public | specified |
+| `exeris-caps-credential-store` | `commercial` | public | specified |
+| `exeris-caps-session-management` | `commercial` | public | specified |
+| `exeris-caps-mfa-totp` | `commercial` | public | specified |
+| `exeris-caps-federated-login` | `commercial` | public | specified |
+| `exeris-caps-token-issuer` | `commercial` | public | specified |
+| `exeris-caps-invitations` | `commercial` | public | specified |
 
 ### Layer 6 — AI Abstraction Layer caps
 
@@ -161,6 +167,11 @@ test fixtures.
 - **`exeris-caps-cors-policy`** is the first cap repository. It provides a transport-blind decision
   function and needs no kernel SPI, which makes it the cheapest possible exercise of the full
   build-time path.
+- **`credential-store`, `session-management`, `mfa-totp`, `federated-login`, `token-issuer` and
+  `invitations`** are the layer-5 caps of the Identity SKU, specified by
+  [ADR-099](adr/ADR-099-compose-identity-as-a-tier-3-platform-sku.md). The private operational plane
+  of [ADR-098](adr/ADR-098-split-the-platform-control-plane-on-the-time-axis.md) composes that SKU for
+  operator identity.
 - **`financial-ledger`** and the SKU-specific edge-failover cap are named elsewhere in the HLA but
   are **not** in the §3.2 layer tables, so they are deliberately absent here. This registry counts
   only what the inventory admits.
@@ -169,5 +180,5 @@ test fixtures.
 
 The tables above are parsed from HLA §3.2 — cap name from the first column, licence from the last,
 grouped by the `**Layer N — …**` headings. Re-derive after any §3.2 edit rather than hand-patching a
-row, and re-check the totals against ADR-023's stated 3 / 50 / 1 split; a mismatch means one of the
+row, and re-check the totals against HLA §6.2's 3 / 56 / 1 split; a mismatch means one of the
 two documents moved without the other.
