@@ -4,7 +4,7 @@ type: explanation
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-02
+last-verified: 2026-10-07
 ---
 
 # Layer build order — what is actually unblocked, and what is waiting on whom
