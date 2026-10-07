@@ -210,7 +210,9 @@ deciding surface by surface which parts are differentiating enough to keep priva
    `.agents/policies/composition-runtime-placement.md`, which cite obligation 8c as "the deploy-time
    control plane". The removal of Studio's frontend and backend modules from `exeris-platform` is
    commit `3703b21` on its branch `chore/remove-studio-from-open-core`, not yet on `main`.
-   Obligation 6 holds once that branch merges.
+   Obligation 6 holds once that branch merges. `exeris-sdk` updates its
+   `docs/adr/ADR-024.link.md`, which names `exeris-platform` "the deploy-time control plane"
+   under obligation 8c, in a pull request of its own.
 3. **The private repository** (working name `exeris-control-plane`) is created when the first
    operational code is written, not before. It takes its *(private repo)* marker in the
    cross-repo-stubs table of `adr-index.md` then.
