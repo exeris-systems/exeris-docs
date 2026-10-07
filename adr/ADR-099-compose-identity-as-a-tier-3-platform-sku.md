@@ -275,7 +275,7 @@ sold standalone, as an identity service a customer runs on premises.
    pull request.
 5. **Kernel prerequisite.** Kernel-edge verification of Identity tokens requires that the Community
    `TokenValidator` accepts EdDSA, with the algorithm pinned as ADR-040 requires. The prerequisite is
-   tracked in `exeris-kernel`.
+   tracked in [exeris-systems/exeris-kernel#620](https://github.com/exeris-systems/exeris-kernel/issues/620).
 6. **Review-time assertion.** A change to an Identity capability that imports a driver class, a
    Spring type or another capability's internal package, or that persists a raw token, fails
    obligations 5, 6 or 9. Until a check exists, this is `[L2]`; the capability-tier Wall scan of the
