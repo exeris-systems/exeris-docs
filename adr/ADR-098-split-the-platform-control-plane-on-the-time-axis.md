@@ -84,7 +84,9 @@ deciding surface by surface which parts are differentiating enough to keep priva
    yet, and gets its entry and licence under ADR-023 when it is specified. A private-plane module that
    reimplements what one of these capabilities provides, such as a second credential store, tenancy
    model, audit log, metering path or workflow engine, violates this obligation. A gap in a
-   capability is fixed in the capability.
+   capability is fixed in the capability. *(Superseded in part by the 2026-10-07 amendment: the
+   operator identity capability is the Identity Platform SKU of ADR-099, a composition of
+   capabilities, not a single capability.)*
 6. **Frontends follow the same line.** The public marketing site is public. The Console UI (the
    operator-facing interface of the control plane), the control plane itself, and the Studio
    product surface are private. Studio is a closed consumer of the public LSP server. It is private
@@ -200,6 +202,25 @@ deciding surface by surface which parts are differentiating enough to keep priva
 - [ADR-053](ADR-053-sku-composition-manifest-format.md) — the manifest format the public plane
   validates.
 - [`cap-license-registry.md`](../cap-license-registry.md) — the state of the six capabilities.
+
+## Amendments
+
+- **2026-10-07 — Obligation 5: operator identity is the Identity SKU.** Obligation 5 composes the
+  private plane from six capabilities "plus an operator identity capability". That capability is
+  specified by [ADR-099](ADR-099-compose-identity-as-a-tier-3-platform-sku.md) as the Identity
+  Platform SKU, `exeris-sku-identity`, a Service Boundary composition of `service-boundary-core`,
+  `rate-limiting`, `jwt-validation`, `multi-tenancy`, `rbac-policy`, `audit-trail`,
+  `notification-dispatch` and `outbound-credentials` with six new layer-5 capabilities:
+  `credential-store`, `session-management`, `mfa-totp`, `federated-login`, `token-issuer` and
+  `invitations`. Read obligation 5 as: the private plane is built from `multi-tenancy`,
+  `rbac-policy`, `audit-trail`, `usage-metering`, `outbound-credentials` and `workflow-engine`, and
+  composes the Identity SKU for operator identity. The six identity capabilities have entries in
+  [`cap-license-registry.md`](../cap-license-registry.md), all `specified`; `token-issuer` is
+  `community` and the other five are `commercial`. The rule
+  against reimplementing a capability's function in the plane applies to them as to the other six.
+  The deployment Exeris runs for its operators sits in the private plane under obligation 4; the
+  SKU's source is public like any other SKU's. The decision, obligations 1 to 4 and 6 to 7, and the
+  placement test are unchanged.
 
 ## Engineering Protocol
 
