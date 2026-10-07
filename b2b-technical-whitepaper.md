@@ -4,7 +4,7 @@ type: explanation
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-04
+last-verified: 2026-10-07
 ---
 
 # Exeris: B2B Technical Whitepaper
@@ -181,7 +181,7 @@ Each SKU below is a named composition of layered capabilities. The full manifest
 
 Full results, including JFR profiles and reproducibility metadata, are published from `exeris-benchmarks` under matched-contract fairness gating — every comparative claim carries a `claim-status.json: comparison_eligible`, scenario id, and `track_id` to prevent apples-to-oranges aggregation.
 
-**How to read the evidence in this section, including its retractions.** `exeris-benchmarks/docs/CLAIMS.md` is the claim registry, and it carries two sections a buyer should read before quoting anything from here: a **retraction register** listing every claim the lab has withdrawn and whether it reached a distributed artefact, and a **citation canon** naming the figures that must never be quoted alone. §4.1 below opens with the register's most consequential entry, and the only one that did reach distributed artefacts before it was caught. The discipline is the product claim as much as the numbers are: a lab that never retracts anything is not more careful than one that retracts before publishing, it is only less observed.
+**How to read the evidence in this section, including its retractions.** `exeris-benchmarks/docs/CLAIMS.md` is the claim registry. Its **Registered claims** section holds the copy for every quotable result, and two further sections are what a buyer should read before quoting anything from here: the **Withdrawn** list, naming every figure the lab has withdrawn and what replaces it, and the **Never quote alone** rules, naming the figures that must not be quoted without their context. §4.1 below opens with the most consequential entry on the Withdrawn list. The discipline is the product claim as much as the numbers are: a lab that never retracts anything is not more careful than one that retracts before publishing, it is only less observed.
 
 #### 4.1 Infrastructure Density — Where the Saga Engine Runs (ADR-013)
 
