@@ -114,7 +114,7 @@ sold standalone, as an identity service a customer runs on premises.
 
 1. **`exeris-sku-identity` is a Service Boundary SKU listed in HLA §3.3, §5 and §6.3**, with the
    composition above as its full manifest. The composition is `commercial`-licensed (ADR-023
-   obligation 3) whatever the licences of its capabilities. It is and source-available in a
+   obligation 3) whatever the licences of its capabilities. It is source-available in a
    public repository under ADR-023's SKU Repository Source-Visibility Policy. It is not a
    closed-source exception of the Bot Blocker kind.
 2. **The six capabilities are rows of HLA §3.2 layer 5 and of
