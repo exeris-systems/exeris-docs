@@ -4,7 +4,7 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-05
+last-verified: 2026-10-07
 slug: adr/ADR-024
 ---
 
@@ -186,7 +186,7 @@ The deeper error was conflating **two orchestrations at two different altitudes*
 | Shared contract | Composition-spec | `exeris-sdk-composition-spec` (small SDK module, no codegen deps) | The `cap-manifest.json` schema + the **one** canonical content-binding implementation, depended on by both the tooling emitter and the runtime asserter. Retires the verbatim port. |
 | Cap authoring/runtime contract | Lifecycle hooks | `exeris-sdk` | `CapabilityLifecycleHooks` (`initialize`/`ready`/`drain`/`terminate`) — the runtime twin of the `@CapabilityLifecycle` marker (open follow-up 1). **Not** in the kernel (the body's "lives in kernel SPI" wording is void under obligation 9). |
 | SKU-boot runtime | Boot conductor + stamp assertion | an SDK-side runtime module (extractable to a dedicated `exeris-orchestrator` repo if a second host integration appears) | Asserts the stamp before any cap `initialize`, then drives caps through the four phases in `initOrder`, reverse on shutdown with the drain deadline. Binds to the kernel bootstrap as **one** opaque `Subsystem`. Ships into the SKU jar (realizes obligation 8). |
-| Deploy-time control plane | Studio + delivery integrations | `exeris-platform` | Composes multi-SKU / mesh / multi-host systems, integrates with git and cloud/Kubernetes delivery, deploys. **Consumes** the composition library for design/deploy-time validation and preview. Does **not** host the boot-time runtime. |
+| Deploy-time control plane | Studio + delivery integrations | `exeris-platform` | Composes multi-SKU / mesh / multi-host systems, integrates with git and cloud/Kubernetes delivery, deploys. **Consumes** the composition library for design/deploy-time validation and preview. Does **not** host the boot-time runtime. *(Split by the 2026-10-07 amendment: validation and preview stay in `exeris-platform`; Studio, delivery integrations and deployment move to the private operational plane of ADR-098.)* |
 | Substrate | Kernel | `exeris-kernel` | Cap-blind (obligation 9, unchanged). |
 
 ### Where the composition-spec lives — and when it would leave
@@ -203,7 +203,7 @@ This is the inverse of the `exeris-telemetry-spec` precedent. That wire format e
 
 8b. **The manifest schema and content-binding algorithm are defined once in `exeris-sdk-composition-spec`** (an SDK module, no codegen deps), depended on by both the tooling emitter and the runtime asserter. The byte-verbatim re-implementation is retired; the golden test vector is retained as a cross-module conformance pin. The spec stays in the SDK while its consumer set is the coupled tooling↔SDK-runtime pair (plus platform transitively); it extracts to a standalone `exeris-composition-spec` repo only if an SDK-independent direct consumer appears.
 
-8c. **`exeris-platform` is the deploy-time control plane.** It composes and deploys multi-SKU / mesh / multi-host systems and integrates with external delivery (git, cloud, Kubernetes). It **consumes** the composition library for design/deploy-time validation; it does not host the boot-time runtime, and reintroducing in-jar composition machinery into a Studio/LSP/backend module is a regression.
+8c. **`exeris-platform` is the deploy-time control plane.** It composes and deploys multi-SKU / mesh / multi-host systems and integrates with external delivery (git, cloud, Kubernetes). It **consumes** the composition library for design/deploy-time validation; it does not host the boot-time runtime, and reintroducing in-jar composition machinery into a Studio/LSP/backend module is a regression. *(Superseded by obligation 8c′ — see the 2026-10-07 amendment: `exeris-platform` is the validation and preview plane, and execution against customer infrastructure belongs to the private operational plane of ADR-098.)*
 
 ### Migration
 
@@ -268,6 +268,37 @@ it to a new repository.
 version. Nothing reads a manifest to check that: no `composition.json` reader exists in
 `exeris-tooling` or `exeris-sdk`. The discipline is stated and unenforced, which is a weaker position
 than the obligation implies but not a different decision.
+
+## Control Plane Split — Validation and Preview at Platform, Execution in the Private Operational Plane (2026-10-07 amendment)
+
+Obligation 8c named `exeris-platform` "the deploy-time control plane" and gave it two unlike jobs:
+validating and previewing a composition, which needs no credential, and deploying it to
+infrastructure Exeris does not own, which needs a customer's git and cloud credentials. ADR-098
+separates them on the time axis and places a surface by one test — *does this hold a credential to,
+or act upon, infrastructure we do not own?* This amendment restates 8c to match. The composition
+model, the boot-time runtime's home (8a′), the composition-spec (8b) and the cap-blind kernel (9) are
+unchanged.
+
+**Revised obligation (supersedes obligation 8c; obligations 7, 8a′, 8b and 9 stand):**
+
+8c′. **`exeris-platform` is the design- and deploy-time validation and preview plane.** It consumes
+the composition library (`exeris-sdk-composition-spec` / `-runtime`) to validate manifests, check
+the `@Requires` graph, enforce the Wall and preview a composition, and serves them through the LSP
+server and its protocol. It holds no credential to, and acts upon no, infrastructure Exeris does not
+own. Execution against customer infrastructure — provisioning, rollout, configuration and secrets,
+drift detection, and the git and cloud-provider integrations they imply — belongs to the private
+operational plane defined by ADR-098, as do operator identity, tenancy and subscription state. It does
+not host the boot-time runtime, and reintroducing in-jar composition machinery into it is a
+regression.
+
+### Cross-references for this amendment
+
+- [ADR-098](ADR-098-split-the-platform-control-plane-on-the-time-axis.md) (Split the Platform Control Plane on the Time Axis) — the boundary, the structural test,
+  the straddle rule and the composition of the private plane from Tier 2 capabilities.
+- [RFC-2026-09-02](../rfc/RFC-2026-09-02-platform-control-plane.md) — the options this restatement
+  was chosen from.
+- The 2026-06-25 amendment above — the "deploy-time control plane" row of its table and its
+  obligation 8c are the text this amendment supersedes.
 
 ## Cross-references
 

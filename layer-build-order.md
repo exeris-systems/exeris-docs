@@ -4,7 +4,7 @@ type: explanation
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-02
+last-verified: 2026-10-07
 ---
 
 # Layer build order — what is actually unblocked, and what is waiting on whom
@@ -28,7 +28,7 @@ them are edges *between* repositories.
 | Layer | Waiting on | Kind of blockage |
 |:---|:---|:---|
 | **Platform backend as an Exeris application**, and its generated front | nothing | — |
-| **Control plane** — operator identity, delivery, cloud/git integrations | acceptance of [RFC-2026-09-02](rfc/RFC-2026-09-02-platform-control-plane.md) | a decision, not code |
+| **Control plane** — operator identity, delivery, cloud/git integrations | the six Tier 2 caps [ADR-098](adr/ADR-098-split-the-platform-control-plane-on-the-time-axis.md) composes it from, all `specified` in [`cap-license-registry.md`](cap-license-registry.md), and an operator identity capability not yet in it | other repositories' code |
 | **`relationships` in `exeris/domainDescribe`** | an ADR — ADR-025 pins that method's wire shape for the agent bridge | process latency, not implementation |
 | **Studio live editing** | kernel 0.12 (ADR-084, WebSocket provider SPI) | another repository's release |
 | **Presentation IR / the CMS lane** | the presentation RFC's build gate (emitter + corpus) | partly self-created — see below |

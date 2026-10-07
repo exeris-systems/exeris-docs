@@ -3,21 +3,21 @@ title: "RFC-2026-09-02: The platform control plane — which operational concern
 type: rfc
 visibility: public
 owning-repo: exeris-docs
-status: draft
-last-verified: 2026-09-02
+status: active
+last-verified: 2026-10-07
 ---
 
 # RFC-2026-09-02: The platform control plane — which operational concerns have no home in the three-tier model, where should they live, and what does that make public?
 
 | Field             | Value                                                                 |
 |:------------------|:----------------------------------------------------------------------|
-| **Status**        | **DRAFT**                                                            |
+| **Status**        | **ACCEPTED**                                                         |
 | **Author(s)**     | arkstack-dev                                                          |
 | **Date Opened**   | 2026-09-02                                                           |
-| **Date Closed**   | —                                                                    |
+| **Date Closed**   | 2026-10-07                                                           |
 | **Scope**         | platform / cross-repo (binds ADR-024's obligation 8c, the open-core boundary of `exeris-platform`, and the Studio / CMS split) |
 | **Owning Repo**   | `exeris-docs` (an ecosystem-shape question, not a platform-internal one) |
-| **Target ADR(s)** | TBD — one platform-scope ADR fixing the control-plane boundary, plus an amendment to [ADR-024](../adr/ADR-024-capability-composition-model.md) disambiguating obligation 8c. Numbers reserved in [`adr-index.md`](../adr-index.md) only once this RFC is accepted. |
+| **Target ADR(s)** | **[ADR-098](../adr/ADR-098-split-the-platform-control-plane-on-the-time-axis.md)** — the platform-scope ADR fixing the control-plane boundary, reserved in [`adr-index.md`](../adr-index.md); plus the 2026-10-07 amendment to [ADR-024](../adr/ADR-024-capability-composition-model.md), which restates obligation 8c as 8c′. |
 | **Affected Repos**| `exeris-docs` (this RFC, the eventual ADR, HLA §2/§6 alignment), `exeris-platform` (what stays and what leaves), a new private repository if the recommendation is adopted. **Commercial terms — pricing, licence enforcement, IP-detachment mechanics — belong to the private business decision registry and are referenced here descriptively only.** |
 | **Reviewers**     | —                                                                    |
 
@@ -128,14 +128,12 @@ I am proposing neither technical licence enforcement — ADR-023 decided against
 
 ## Decision Record
 
-<Filled in when status reaches ACCEPTED / REJECTED / WITHDRAWN.>
-
 | Field                | Value                                                              |
 |:---------------------|:-------------------------------------------------------------------|
-| **Outcome**          | TBD                                                                |
-| **Date**             | TBD                                                                |
-| **Resulting ADR(s)** | TBD — control-plane boundary ADR + ADR-024 amendment               |
-| **Notes**            | TBD                                                                |
+| **Outcome**          | **ACCEPTED** — Option C (split on the time axis) for placement, with Option D (build the private operational plane from Tier 2 capabilities) for construction |
+| **Date**             | 2026-10-07                                                         |
+| **Resulting ADR(s)** | [ADR-098](../adr/ADR-098-split-the-platform-control-plane-on-the-time-axis.md) (the control-plane boundary); the 2026-10-07 amendment to [ADR-024](../adr/ADR-024-capability-composition-model.md) (obligation 8c′) |
+| **Notes**            | Accepted on the maintainer's decision, with §Recommendation unchanged. §Investigation describes licence enforcement as contractual only, per ADR-023. ADR-088 and ADR-089 have since added an offline, signed entitlement check at build and boot, so ADR-098 states the current position rather than repeating that sentence. The open questions below stay open. |
 
 ## Open questions / follow-ups
 
