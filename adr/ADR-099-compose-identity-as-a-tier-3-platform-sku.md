@@ -48,8 +48,8 @@ built?**
 
 **Identity is a Tier 3 Platform SKU in the Service Boundary family, `exeris-sku-identity`, composed
 of capabilities as every other SKU is. Its own logic lives in six new layer-5 domain-primitive
-capabilities, each `commercial` and public, and the rest of the composition reuses existing
-capabilities.**
+capabilities, all public, and the rest of the composition reuses existing capabilities. Five of
+the six are `commercial`; `token-issuer` is `community`.**
 
 The SKU is named **Identity**. It is not "IDP": in HLA §3.3 and §6.3, IDP names the Intelligent
 Document Processing SKU (`exeris-sku-idp`).
@@ -62,26 +62,46 @@ Document Processing SKU (`exeris-sku-idp`).
 | `exeris-caps-session-management` | `SessionStore` (one session per sign-in: list, revoke one, revoke all for a subject), `RefreshTokenRotation` (opaque single-use refresh tokens stored hashed, rotated on every use) | `service-boundary-core`, `token-issuer`, kernel Persistence SPI, `audit-trail` (optional) | commercial |
 | `exeris-caps-mfa-totp` | `TotpFactorRegistry` (enrol with a secret and an `otpauth://` provisioning URI, confirm, disable), `TotpVerifier` (RFC 6238), `RecoveryCodes` (batches of single-use codes stored hashed), `MfaChallenge` (the short-lived step between the password and the second factor) | `service-boundary-core`, `credential-store`, kernel Persistence SPI, `audit-trail` (optional) | commercial |
 | `exeris-caps-federated-login` | `FederatedLoginFlow` (OAuth 2.0 authorization code with PKCE, `state` and `nonce`; OIDC ID-token validation), `ExternalIdentityLink` (binds an issuer and subject pair to a local subject), `FederationProviderRegistry` (provider adapters, GitHub and Google first) | `service-boundary-core`, `outbound-credentials`, kernel HTTP SPI, kernel Security SPI (`TokenValidator`), kernel Persistence SPI | commercial |
-| `exeris-caps-token-issuer` | `AccessTokenIssuer` (short-lived JWT access tokens signed with EdDSA over Ed25519), `JwksPublisher` (the JWKS document of the current and retiring public keys), `SigningKeyRotation` (key generations, overlap window, retirement) | `service-boundary-core`, kernel Persistence SPI, kernel Scheduling SPI | commercial |
+| `exeris-caps-token-issuer` | `AccessTokenIssuer` (short-lived JWT access tokens signed with EdDSA over Ed25519), `JwksPublisher` (the JWKS document of the current and retiring public keys), `SigningKeyRotation` (key generations, overlap window, retirement) | `service-boundary-core`, kernel Persistence SPI, kernel Scheduling SPI | community |
 | `exeris-caps-invitations` | `InvitationService` (issue, list, revoke and consume single-use hashed invitation tokens bound to a tenant, a role and an invitee address, with an expiry) | `service-boundary-core`, `multi-tenancy`, `rbac-policy`, `notification-dispatch`, kernel Persistence SPI, `audit-trail` (optional) | commercial |
 
 **The SKU composition** (HLA §3.3, sorted by layer):
 
 | Layer | Caps | Role in Identity |
 |:---|:---|:---|
-| 1 | `gateway-core`, `service-boundary-core` | `service-boundary-core` is the SB substrate. `gateway-core` resolves the `policy-chain` requirement below. |
-| 2 | `policy-chain` | Resolves the `@Requires` that HLA §3.2 gives `rate-limiting` and `jwt-validation`. |
-| 3 | `rate-limiting`, `jwt-validation` | Login, recovery and verification throttling; verification of the tokens Identity issues. |
+| 1 | `service-boundary-core` | The SB substrate, and the `RequestFilterChain` the two policies below run in. |
+| 3 | `rate-limiting`, `jwt-validation` | Login, recovery and verification throttling; verification of the tokens Identity issues. Both run as `RequestFilterChain` filters, with no gateway chain. |
 | 4 | `multi-tenancy`, `audit-trail`, `rbac-policy`, `notification-dispatch`, `rest-emission`, `openapi-emission` | Tenant scope, the security audit log, role grants, verification and reset mail, the emitted HTTP surface and its OpenAPI description. |
 | 5 | `credential-store`, `session-management`, `mfa-totp`, `federated-login`, `token-issuer`, `invitations` | The identity logic. |
 | 7 | `outbound-credentials`, `observability-bridge` | OAuth client secrets; telemetry. |
 
-Nineteen capabilities in all. The flows (register, verify email, log in, refresh, list and revoke sessions,
+Seventeen capabilities in all. The flows (register, verify email, log in, refresh, list and revoke sessions,
 forgot, reset and change password, enrol and verify TOTP, use and regenerate recovery codes, invite
 and accept) are `@Action` methods of the SKU's `@ExerisDomain` types, which orchestrate the
 capabilities' `@Provides` services. The behavioural reference for those flows is BudgetHQ's
 identity service. It runs on Spring Runtime, so it is a reference for logic only and contributes no
 code, type or dependency.
+
+**The layer-3 policies run without the gateway.** `rate-limiting`, `jwt-validation` and
+`circuit-breaker` declared `@Requires` `policy-chain`, which `@Requires` `gateway-core`, so a Service
+Boundary SKU that throttled or verified a token had to carry the Gateway substrate. They now declare
+`policy-chain` optional. `service-boundary-core` has no filter surface today: `ApiSurfaceRegistry`
+dispatches a matched route straight to its handler, `ServiceLifecycleHooks` covers lifecycle only,
+and `RequestContext` carries tenant, correlation and principal but runs nothing. It gains the
+minimal one, `RequestFilterChain`: an ordered list of admission filters that `ApiSurfaceRegistry`
+runs between route match and handler, each of which reads the matched route and `RequestContext` and
+either passes the request on or answers it. `rate-limiting` and `jwt-validation` declare
+`service-boundary-core` optional too and register in whichever host is present. `circuit-breaker`
+needs no host outside the gateway, because it guards an outbound call: the capability that calls an
+upstream invokes `CircuitBreakerPolicy` around that call. This changes the contract of four
+`specified` capabilities, none of which has an implementation, so HLA §3.2 is edited directly and no
+amendment is needed.
+
+**`token-issuer` is `community`.** EdDSA token issuance and JWKS publication are a standard that
+other systems integrate against, which is what the `community` tier exists for. The licence is set
+at specification, before any repository exists, so it is not the relicensing that ADR-023
+obligation 2 restricts. The Identity SKU stays `commercial`, and `token-issuer` keeps its Apache 2.0
+grant inside it (ADR-023 obligation 3).
 
 **Why an SKU and not one capability.** Each concern is a capability that a composition can swap or
 omit: a deployment without federation leaves out `federated-login`, and a second factor other than
@@ -93,50 +113,58 @@ sold standalone, as an identity service a customer runs on premises.
 **Concrete obligations:**
 
 1. **`exeris-sku-identity` is a Service Boundary SKU listed in HLA §3.3, §5 and §6.3**, with the
-   composition above as its full manifest. It is `commercial`-licensed and source-available in a
+   composition above as its full manifest. The composition is `commercial`-licensed (ADR-023
+   obligation 3) whatever the licences of its capabilities. It is and source-available in a
    public repository under ADR-023's SKU Repository Source-Visibility Policy. It is not a
    closed-source exception of the Bot Blocker kind.
 2. **The six capabilities are rows of HLA §3.2 layer 5 and of
-   [`cap-license-registry.md`](../cap-license-registry.md)**, each `commercial`, public and
-   `specified`, with the `@Provides` and `@Requires` above. A change to a capability's contract
+   [`cap-license-registry.md`](../cap-license-registry.md)**, each public and `specified`, with the
+   `@Provides`, `@Requires` and licence above: `token-issuer` `community` (Apache 2.0), the other
+   five `commercial`. A change to a capability's contract
    changes HLA §3.2 first and regenerates the registry.
-3. **The manifest resolves every `@Requires`** (ADR-024, validity predicate 1). Every edge in the
-   tables above resolves inside the composition. `rate-limiting` and `jwt-validation` keep the
-   `@Requires` on `policy-chain` that HLA §3.2 gives them, so the manifest carries `policy-chain`
-   and `gateway-core`.
-4. **No Spring and no host runtime.** The SKU is kernel-direct: its HTTP surface is emitted by
+3. **The manifest resolves every `@Requires`** (ADR-024, validity predicate 1). Every required edge
+   in the tables above resolves inside the composition, and the manifest carries neither
+   `gateway-core` nor `policy-chain`.
+4. **The policy capabilities declare `policy-chain` optional; their Service Boundary binding is
+   `RequestFilterChain`.** `rate-limiting` and `jwt-validation` declare `policy-chain` and
+   `service-boundary-core` optional. With `policy-chain` present they register in the gateway chain;
+   without it they register as filters in `service-boundary-core`'s `RequestFilterChain`; with
+   neither, they refuse to initialize. `circuit-breaker` declares `policy-chain` optional and,
+   without it, is invoked by the capability that makes the guarded call. `service-boundary-core`
+   provides `RequestFilterChain`, run by `ApiSurfaceRegistry` between route match and handler.
+5. **No Spring and no host runtime.** The SKU is kernel-direct: its HTTP surface is emitted by
    `rest-emission` and `openapi-emission` from `@ExerisDomain` types and `@Action` methods (ADR-015)
    and registered through `service-boundary-core`. No capability of this ADR imports
    `org.springframework.*` or any package the capability-tier Wall of ADR-024 forbids, and none
    `@Requires` `exeris-spring-runtime` (ADR-006).
-5. **The capabilities code against kernel SPIs, never against a driver.** `credential-store` hashes
+6. **The capabilities code against kernel SPIs, never against a driver.** `credential-store` hashes
    through the kernel's `KernelPasswordEncoder` SPI. That SPI has no `ServiceLoader` lifecycle, so
    the SKU supplies the implementation, `exeris-kernel-community`'s `Argon2idPasswordEncoder` or
    another one, and no capability names a driver class. `federated-login` validates OIDC ID tokens
    through the kernel's `TokenValidator` SPI in the same way.
-6. **The kernel gains nothing.** No kernel SPI gains a type for a session, a refresh token, an
+7. **The kernel gains nothing.** No kernel SPI gains a type for a session, a refresh token, an
    invitation, a TOTP factor or a federated provider, and the capabilities consume only the kernel
    SPIs that exist: Security (with the identity-provider SPI of ADR-040), Persistence, HTTP and
    Scheduling. The kernel stays capability-blind (ADR-024 obligation 9).
-7. **Access tokens are EdDSA, and their verification is published.** `token-issuer` signs with
+8. **Access tokens are EdDSA, and their verification is published.** `token-issuer` signs with
    Ed25519 and publishes its public keys as a JWKS document, keyed by `kid`, with a retired key kept
    for an overlap window after rotation. `jwt-validation`'s `JwtAdmissionPolicy` gains EdDSA
    signature verification against a JWKS document, with the algorithm pinned before the signature
-   is checked. Its `@Provides` and `@Requires` are unchanged.
-8. **Tokens and secrets are stored hashed or not at all.** Refresh tokens, verification, reset and
+   is checked. Its `@Provides` is unchanged.
+9. **Tokens and secrets are stored hashed or not at all.** Refresh tokens, verification, reset and
    invitation tokens, and recovery codes are persisted as hashes only; the raw value leaves the
    service once, to the user. A replayed refresh token is refused and revokes the session it
    belongs to. A completed password reset or change revokes every session of the subject.
-9. **Subjects are per deployment; membership is per tenant.** Credential, session and factor
+10. **Subjects are per deployment; membership is per tenant.** Credential, session and factor
    records are keyed by subject. Tenant membership and role grants are tenant-scoped through
    `multi-tenancy` and `rbac-policy`, with row-level security at the data plane (ADR-012). Every
    administrative `@Action` (inviting, revoking an invitation, revoking another subject's sessions)
    carries a compile-time role requirement (ADR-014).
-10. **Identity's token keys are not licence keys.** `token-issuer` signs access tokens only. It
+11. **Identity's token keys are not licence keys.** `token-issuer` signs access tokens only. It
     holds no ADR-088 issuer key, and the Identity SKU issues, validates and revokes no licence. The
     SKU is itself subject to entitlement like any SKU: its declared capabilities are checked
     against the entitled set at build time and at boot (ADR-089).
-11. **The operator deployment is private; the source is not.** The deployment of the Identity SKU
+12. **The operator deployment is private; the source is not.** The deployment of the Identity SKU
     that Exeris runs for its own operators (its configuration, data and signing keys) belongs to the
     private operational plane under ADR-098 obligation 4. The SKU's and the capabilities' source is
     public and source-available like any other SKU's. A change that moves operator configuration or
@@ -162,9 +190,12 @@ sold standalone, as an identity service a customer runs on premises.
 - **[-] Six more capabilities to build before the control plane has operator sign-in.** All six are
   `specified`, and ADR-098 obligation 5 still forbids writing their function into the plane in the
   meantime.
-- **[-] A Service Boundary SKU carries the Gateway substrate.** Because `rate-limiting` and
-  `jwt-validation` `@Requires` `policy-chain`, the Identity manifest includes `policy-chain` and
-  `gateway-core`.
+- **[-] Four `specified` contracts change.** `service-boundary-core` gains `RequestFilterChain`,
+  and `rate-limiting`, `jwt-validation` and `circuit-breaker` lose a required edge. A policy
+  capability now has two hosts to support.
+- **[-] Kernel-edge verification waits on the kernel.** Tokens issued by Identity authenticate at a
+  kernel-direct edge only once the Community `TokenValidator` accepts EdDSA; today
+  `CommunityOidcTokenValidator` pins RS256. Until then, consumers verify through `jwt-validation`.
 - **[-] Flows span capabilities.** Login touches `credential-store`, `mfa-totp`,
   `session-management` and `token-issuer`. The orchestration lives in the SKU's `@Action` methods,
   so it is SKU code that a second consumer of the same capabilities writes again.
@@ -179,9 +210,6 @@ sold standalone, as an identity service a customer runs on premises.
   later capability.
 - **Workload identity.** `exeris-caps-service-identity` (layer 7) stays the service-to-service axis;
   this ADR covers people.
-- **Kernel-edge verification of Identity tokens.** The kernel's Community OIDC `TokenValidator`
-  (`CommunityOidcTokenValidator`) pins RS256. Accepting EdDSA there is a kernel decision this ADR
-  does not make.
 - **BudgetHQ's migration.** Whether and when BudgetHQ moves onto the SKU is a BudgetHQ decision.
 - **Licence issuance and commercial terms.** Governed by ADR-088 and the commercial policy.
 
@@ -203,11 +231,11 @@ sold standalone, as an identity service a customer runs on premises.
   another outside its declared `@Requires`, which would show the split is wrong; or a second
   consumer that needs all six capabilities and never one of them alone, which would remove the
   case for decomposing.
-- **Risk:** the `policy-chain` edge makes Service Boundary SKUs drag the Gateway substrate whenever
-  they compose a layer-3 policy. The first `exeris-sku-identity` scaffold measures what it costs.
-- **Risk:** tokens issued by Identity do not authenticate at a kernel-direct edge that uses the
-  Community OIDC provider until that provider verifies EdDSA. The control plane is the first
-  consumer to hit it.
+- **Risk:** a composition that carries a layer-3 policy but neither `policy-chain` nor
+  `service-boundary-core` passes build-time validation, because ADR-024 has no either-or
+  requirement. The policy's refusal to initialize is what stops it, at boot rather than at build.
+- **Risk:** the control plane is the first consumer to need kernel-edge verification of Identity
+  tokens, and the kernel prerequisite in the Engineering Protocol gates it.
 
 ## Cross-references
 
@@ -215,8 +243,9 @@ sold standalone, as an identity service a customer runs on premises.
   plane; obligation 5 is amended by this ADR, and obligation 4 places the operator deployment.
 - [ADR-024](ADR-024-capability-composition-model.md) — composition validity, the capability-tier Wall and
   obligation 9.
-- [ADR-023](ADR-023-capability-licensing-taxonomy.md) — the `commercial` licence and the SKU
-  Repository Source-Visibility Policy.
+- [ADR-023](ADR-023-capability-licensing-taxonomy.md) — the `community` and `commercial` licences,
+  obligation 2 (a licence is fixed when the repository is created), obligation 3 (a `community` capability
+  keeps its grant inside a `commercial` SKU), and the SKU Repository Source-Visibility Policy.
 - [ADR-006](ADR-006-spring-free-kernel-boundary.md) — the Wall.
 - [ADR-088](ADR-088-cryptographic-license-manifest-and-offline-verification.md) and
   [ADR-089](ADR-089-capability-entitlement-enforcement-and-runtime-contract.md) — the licence key
@@ -238,13 +267,16 @@ sold standalone, as an identity service a customer runs on premises.
 1. **ADR-098 is amended in the same change.** Its obligation 5 composes the Identity SKU in place of
    an operator identity capability, and its registry row carries the amendment date.
 2. **HLA §3.2, §3.3, §5, §6.2 and §6.3, `cap-license-registry.md` and the whitepaper's §3.2 and
-   §3.3 change in the same change**, with the counts moving to 60 capabilities (3 / 56 / 1) and eight SKUs.
+   §3.3 change in the same change**, with the counts moving to 60 capabilities (4 / 55 / 1) and eight SKUs.
 3. **The capability repositories are created when their code is written**, each as an
    `exeris-caps-*` repository whose licence is declared in the three places ADR-023 obligation 1
    names. `exeris-sku-identity` follows the ADR-053 manifest format.
-4. **`exeris-caps-jwt-validation`** takes the EdDSA and JWKS verification of obligation 7 in its own
+4. **`exeris-caps-jwt-validation`** takes the EdDSA and JWKS verification of obligation 8 in its own
    pull request.
-5. **Review-time assertion.** A change to an Identity capability that imports a driver class, a
+5. **Kernel prerequisite.** Kernel-edge verification of Identity tokens requires that the Community
+   `TokenValidator` accepts EdDSA, with the algorithm pinned as ADR-040 requires. The prerequisite is
+   tracked in `exeris-kernel`.
+6. **Review-time assertion.** A change to an Identity capability that imports a driver class, a
    Spring type or another capability's internal package, or that persists a raw token, fails
-   obligations 4, 5 or 8. Until a check exists, this is `[L2]`; the capability-tier Wall scan of the
+   obligations 5, 6 or 9. Until a check exists, this is `[L2]`; the capability-tier Wall scan of the
    tooling covers the import half once the repositories exist.

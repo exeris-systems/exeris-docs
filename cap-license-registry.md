@@ -40,15 +40,17 @@ Only `enterprise-private` implies a private repository.
 
 | Licence | Caps |
 |---|---|
-| `community` | 3 |
-| `commercial` | 56 |
+| `community` | 4 |
+| `commercial` | 55 |
 | `enterprise-private` | 1 |
 | **total** | **60** |
 
 The single `enterprise-private` cap is `bot-fingerprinting`, and the reason is structural rather
 than commercial: it depends on a kernel-tier SPI extension that ships in `exeris-kernel-enterprise`.
-The three `community` caps are the commodity ones — `cors-policy`, `i18n`, `observability-bridge` —
-chosen to drive adoption and ecosystem integration rather than to carry revenue.
+The four `community` caps are the commodity ones — `cors-policy`, `i18n`, `token-issuer`,
+`observability-bridge` — chosen to drive adoption and ecosystem integration rather than to carry
+revenue. `token-issuer` is among them because EdDSA token issuance and JWKS publication are a
+standard that other systems integrate against (ADR-099).
 
 ## Status vocabulary
 
@@ -134,7 +136,7 @@ test fixtures.
 | `exeris-caps-session-management` | `commercial` | public | specified |
 | `exeris-caps-mfa-totp` | `commercial` | public | specified |
 | `exeris-caps-federated-login` | `commercial` | public | specified |
-| `exeris-caps-token-issuer` | `commercial` | public | specified |
+| `exeris-caps-token-issuer` | `community` | public | specified |
 | `exeris-caps-invitations` | `commercial` | public | specified |
 
 ### Layer 6 — AI Abstraction Layer caps
@@ -180,5 +182,5 @@ test fixtures.
 
 The tables above are parsed from HLA §3.2 — cap name from the first column, licence from the last,
 grouped by the `**Layer N — …**` headings. Re-derive after any §3.2 edit rather than hand-patching a
-row, and re-check the totals against HLA §6.2's 3 / 56 / 1 split; a mismatch means one of the
+row, and re-check the totals against HLA §6.2's 4 / 55 / 1 split; a mismatch means one of the
 two documents moved without the other.

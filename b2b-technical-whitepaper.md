@@ -62,13 +62,13 @@ The Wall (ADR-006) keeps `exeris-kernel-spi` and `exeris-kernel-core` Spring-fre
 A **capability** is a named, build-time-composable module with three contract surfaces: `@Provides` services exposed to other capabilities; `@Requires` declarations on capabilities it depends on; and a lifecycle (initialize, ready, drain, terminate) bound to the kernel bootstrap subsystem. A **composition** is a directed acyclic graph of capabilities with no unresolved `@Requires`. The kernel codegen pipeline (ADR-015) validates the graph at build time — cycles, missing dependencies, version mismatches, and Wall violations all fail the build before the first byte of traffic. Composition is the unit of product definition: an SKU is a named, signed composition of capabilities, not a runtime configuration knob.
 
 
-Capabilities are organized in seven layers. Each layer is independently reusable; SKUs compose capabilities by selecting from across the stack — the representative manifests in §3.3 range from 7 to 19, and no `exeris-sku-*` repository exists yet to settle a typical figure. The same domain primitive used by an OMS SKU (e.g. `exeris-caps-contact-graph`) is composable into a CRM, a PIM, or a customer-defined SKU without modification.
+Capabilities are organized in seven layers. Each layer is independently reusable; SKUs compose capabilities by selecting from across the stack — the representative manifests in §3.3 range from 7 to 17, and no `exeris-sku-*` repository exists yet to settle a typical figure. The same domain primitive used by an OMS SKU (e.g. `exeris-caps-contact-graph`) is composable into a CRM, a PIM, or a customer-defined SKU without modification.
 
 **License taxonomy.** The two-valued open-core split from ADR-020 (`public` / `enterprise-private`) covers the Tier 1 substrate cleanly, but Tier 2 capabilities require a third value because the cap layer is where most of the platform's commercial value lives. Capabilities ship under one of three licenses:
 
 | License tier | Terms | What it covers |
 |---|---|---|
-| **community** | Apache 2.0 / MIT | ~3 commodity caps that drive adoption and ecosystem integration (CORS, i18n, observability bridge). Code public, free for any use. |
+| **community** | Apache 2.0 / MIT | ~4 commodity caps that drive adoption and ecosystem integration (CORS, i18n, token issuer, observability bridge). Code public, free for any use. |
 | **commercial** | Exeris Commercial License (source-available; BSL-style) | The bulk of Tier 2 — substrate aggregates, Gateway building blocks, Gateway policies, all SB platform caps, all domain primitives, all AI Abstraction caps. Code visible in public repositories; production use requires an active Platform SKU subscription or Platform-tier license. |
 | **enterprise-private** | Closed-source | One Tier 2 cap (`exeris-caps-bot-fingerprinting`, which depends on a kernel-tier SPI extension). Available to Enterprise-tier subscribers only. |
 
@@ -78,11 +78,11 @@ This taxonomy is formalized in **ADR-023 (Capability Licensing Taxonomy, accepte
 
 | Layer | Capability repository | License | Used by |
 |---|---|---|---|
-| **1. Substrate aggregates** | `exeris-caps-gateway-core` | commercial | Gateway family SKUs, Identity |
+| **1. Substrate aggregates** | `exeris-caps-gateway-core` | commercial | Gateway family SKUs |
 |  | `exeris-caps-service-boundary-core` | commercial | Service Boundary family SKUs |
 | **2. Gateway building blocks** | `exeris-caps-route-registry` | commercial | Gateway SKUs |
 |  | `exeris-caps-upstream-pool` | commercial | API Gateway, Edge Proxy |
-|  | `exeris-caps-policy-chain` | commercial | Gateway SKUs, Identity |
+|  | `exeris-caps-policy-chain` | commercial | Gateway SKUs |
 |  | `exeris-caps-backend-health` | commercial | API Gateway, Edge Proxy |
 |  | `exeris-caps-admin-control-plane` | commercial | Gateway SKUs |
 | **3. Gateway policies (reusable across Gateway SKUs)** | `exeris-caps-rate-limiting` | commercial | Gateway SKUs, SB SKUs at API edge |
@@ -126,7 +126,7 @@ This taxonomy is formalized in **ADR-023 (Capability Licensing Taxonomy, accepte
 |  | `exeris-caps-session-management` (sessions, refresh-token rotation, revocation) | commercial | Identity |
 |  | `exeris-caps-mfa-totp` (TOTP factors, recovery codes) | commercial | Identity |
 |  | `exeris-caps-federated-login` (OAuth 2.0 / OIDC relying party) | commercial | Identity |
-|  | `exeris-caps-token-issuer` (EdDSA access tokens, JWKS, key rotation) | commercial | Identity |
+|  | `exeris-caps-token-issuer` (EdDSA access tokens, JWKS, key rotation) | community | Identity |
 |  | `exeris-caps-invitations` (tenant invitations) | commercial | Identity |
 | **6. AI Abstraction Layer** | `exeris-caps-ai-llm-abstraction` (OpenAI/Anthropic/Azure SPI) | commercial | IDP, CMS, CRM |
 |  | `exeris-caps-ai-vector-store` | commercial | IDP, semantic search composers |
@@ -181,7 +181,7 @@ Each SKU below is a named composition of layered capabilities. The full manifest
 - **PIM SKU** = `service-boundary-core` + `multi-tenancy` + `audit-trail` + `rbac-policy` + `i18n` + `attachment-storage` + `asset-management` + `search-index` + `entity-versioning` + `content-versioning` + `product-catalog` + `import-export` + `rest-emission` + `graphql-emission` + `openapi-emission` + `observability-bridge`.
 - **OMS SKU** = `service-boundary-core` + `multi-tenancy` + `audit-trail` + `rbac-policy` + `workflow-engine` + `notification-dispatch` + `circuit-breaker` + `product-catalog` + `pricing-engine` + `inventory-tracking` + `order-lifecycle` + `payment-gateway` + `contact-graph` + `rest-emission` + `openapi-emission` + `observability-bridge`. The L4 Flow saga engine (ADR-013) is consumed via the kernel SPI, not as a separate cap.
 - **Headless CMS API SKU** = `service-boundary-core` + `multi-tenancy` + `audit-trail` + `rbac-policy` + `i18n` + `attachment-storage` + `asset-management` + `search-index` + `content-types` + `content-versioning` + `rest-emission` + `graphql-emission` + `openapi-emission` + `observability-bridge`.
-- **Identity SKU** = `gateway-core` + `service-boundary-core` + `policy-chain` + `rate-limiting` + `jwt-validation` + `multi-tenancy` + `audit-trail` + `rbac-policy` + `notification-dispatch` + `rest-emission` + `openapi-emission` + `credential-store` + `session-management` + `mfa-totp` + `federated-login` + `token-issuer` + `invitations` + `outbound-credentials` + `observability-bridge`. `gateway-core` and `policy-chain` are there because `rate-limiting` and `jwt-validation` require them.
+- **Identity SKU** = `service-boundary-core` + `rate-limiting` + `jwt-validation` + `multi-tenancy` + `audit-trail` + `rbac-policy` + `notification-dispatch` + `rest-emission` + `openapi-emission` + `credential-store` + `session-management` + `mfa-totp` + `federated-login` + `token-issuer` + `invitations` + `outbound-credentials` + `observability-bridge`. `rate-limiting` and `jwt-validation` run as Service Boundary request filters, without the gateway policy chain.
 
 **ERP as a customer-defined composition.** No Exeris-shipped SKU is "the ERP". An ERP-class deployment is what a customer assembles at the Platform tier by composing OMS + PIM + Context-Centric CRM + a financial-ledger cap (forthcoming) + the SB platform layer + AI Abstraction Layer where useful. The capabilities are shared — `contact-graph` is the same cap whether it backs a CRM, an OMS customer model, or the partner ledger of a custom ERP. This is the structural meaning of "composable platform": ERP, vertical industry suites, or one-off internal tools are all expressions of the same Tier 2 surface area, not separate product lines.
 

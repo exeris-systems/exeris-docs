@@ -215,7 +215,8 @@ deciding surface by surface which parts are differentiating enough to keep priva
   `invitations`. Read obligation 5 as: the private plane is built from `multi-tenancy`,
   `rbac-policy`, `audit-trail`, `usage-metering`, `outbound-credentials` and `workflow-engine`, and
   composes the Identity SKU for operator identity. The six identity capabilities have entries in
-  [`cap-license-registry.md`](../cap-license-registry.md), all `commercial` and `specified`. The rule
+  [`cap-license-registry.md`](../cap-license-registry.md), all `specified`; `token-issuer` is
+  `community` and the other five are `commercial`. The rule
   against reimplementing a capability's function in the plane applies to them as to the other six.
   The deployment Exeris runs for its operators sits in the private plane under obligation 4; the
   SKU's source is public like any other SKU's. The decision, obligations 1 to 4 and 6 to 7, and the

@@ -202,14 +202,14 @@ These are not user-space capabilities — they are properties of the substrate i
 
 User-space capabilities developed in `exeris-caps-*` repositories. Each is a named module with explicit `@Provides` and `@Requires` declarations. The capability composition model itself is specified in §4.
 
-Capabilities are organized in seven layers. Each layer is independently reusable; the SKU manifests in §3.3 compose 7–19 caps each, drawn from across the stack. Domain primitives (layer 5) are deliberately decomposed below the SKU granularity so the same cap can back a CRM, an OMS, a PIM, or a customer-defined ERP composition without forking.
+Capabilities are organized in seven layers. Each layer is independently reusable; the SKU manifests in §3.3 compose 7–17 caps each, drawn from across the stack. Domain primitives (layer 5) are deliberately decomposed below the SKU granularity so the same cap can back a CRM, an OMS, a PIM, or a customer-defined ERP composition without forking.
 
 **License taxonomy.** ADR-020's two-valued open-core split (`public` / `enterprise-private`) covers the Tier 1 substrate cleanly. Tier 2 capabilities require a third value because the cap layer carries most of the platform's commercial value; without it the model contradicts the SKU-monetization thesis of §3.3 and the B2B whitepaper §5.4. Capabilities therefore ship under one of three licenses:
 
 | License tier | Terms | Coverage |
 |---|---|---|
-| `community` | Apache 2.0 / MIT | ~3 commodity caps that drive adoption and ecosystem integration. Code public, free for any use. |
-| `commercial` | Exeris Commercial License (source-available; BSL-style) | The bulk of Tier 2 — substrate aggregates, Gateway building blocks, Gateway policies, all SB platform caps, all domain primitives, all AI Abstraction caps. Code visible in public repositories; production use requires an active Platform SKU subscription or Platform-tier license. |
+| `community` | Apache 2.0 / MIT | ~4 commodity caps that drive adoption and ecosystem integration. Code public, free for any use. |
+| `commercial` | Exeris Commercial License (source-available; BSL-style) | The bulk of Tier 2 — substrate aggregates, Gateway building blocks, Gateway policies, all SB platform caps, the domain primitives except `token-issuer`, all AI Abstraction caps. Code visible in public repositories; production use requires an active Platform SKU subscription or Platform-tier license. |
 | `enterprise-private` | Closed-source | One Tier 2 cap (`exeris-caps-bot-fingerprinting`, which depends on a kernel-tier SPI extension shipping in `exeris-kernel-enterprise`). Available to Enterprise-tier subscribers only. |
 
 This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026-05-13)** — a dedicated three-valued licence axis orthogonal to ADR-020 visibility. The column below labelled `License` mirrors ADR-023; on conflict, ADR-023 wins.
@@ -219,7 +219,7 @@ This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026
 | Cap | `@Provides` | `@Requires` | License |
 |---|---|---|---|
 | `exeris-caps-gateway-core` | `GatewayLifecycle`, `IngressBootstrap` (aggregates layer 2 services) | kernel Transport / Crypto / HTTP SPIs | commercial |
-| `exeris-caps-service-boundary-core` | `ApiSurfaceRegistry`, `ServiceLifecycleHooks`, `RequestContext` | kernel SPI | commercial |
+| `exeris-caps-service-boundary-core` | `ApiSurfaceRegistry`, `ServiceLifecycleHooks`, `RequestContext`, `RequestFilterChain` (ordered admission filters that `ApiSurfaceRegistry` runs between route match and handler; a filter reads the matched route and `RequestContext` and passes the request on or answers it) | kernel SPI | commercial |
 
 **Layer 2 — Gateway building blocks** (decomposed out of `gateway-core` as separately composable caps; the aggregate above re-exports them under one manifest entry, but SKUs may pin individual caps to swap implementations).
 
@@ -235,14 +235,16 @@ This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026
 
 | Cap | `@Provides` | `@Requires` | License |
 |---|---|---|---|
-| `exeris-caps-rate-limiting` | `RateLimitPolicy` | `policy-chain` | commercial |
-| `exeris-caps-jwt-validation` | `JwtAdmissionPolicy` | `policy-chain` | commercial |
+| `exeris-caps-rate-limiting` | `RateLimitPolicy` | `policy-chain` (optional), `service-boundary-core` (optional) | commercial |
+| `exeris-caps-jwt-validation` | `JwtAdmissionPolicy` | `policy-chain` (optional), `service-boundary-core` (optional) | commercial |
 | `exeris-caps-tls-termination` | `TlsTerminationPolicy` | `gateway-core`, kernel Crypto SPI | commercial |
 | `exeris-caps-request-routing` | `RoutingPolicy` | `policy-chain`, `route-registry` | commercial |
-| `exeris-caps-circuit-breaker` | `CircuitBreakerPolicy` | `policy-chain` | commercial |
+| `exeris-caps-circuit-breaker` | `CircuitBreakerPolicy` | `policy-chain` (optional) | commercial |
 | `exeris-caps-cors-policy` | `CorsPolicy` | `policy-chain` | **community** |
 | `exeris-caps-waf-rules` | `WafPolicy` (rule engine for L7 filtering) | `policy-chain` | commercial |
 | `exeris-caps-bot-fingerprinting` | `Ja3Ja4FingerprintExtractor`, `BotPolicy` | `tls-termination`, kernel Crypto proposal | enterprise-private |
+
+> **Policies outside the gateway.** `rate-limiting`, `jwt-validation` and `circuit-breaker` declare `policy-chain` optional (ADR-099). With `policy-chain` in the composition they register in the gateway chain. Without it, `rate-limiting` and `jwt-validation` register as filters in `service-boundary-core`'s `RequestFilterChain`, and a policy cap that finds neither refuses to initialize. `circuit-breaker` needs no host: without `policy-chain`, the cap that calls an upstream invokes `CircuitBreakerPolicy` around that call.
 
 **Layer 4 — Service Boundary platform caps** (reusable across every SB SKU; each is "you compose it once and it works regardless of domain").
 
@@ -286,7 +288,7 @@ This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026
 | `exeris-caps-session-management` | `SessionStore` (list, revoke one, revoke all for a subject), `RefreshTokenRotation` (single-use refresh tokens stored hashed, rotated on use) | `service-boundary-core`, `token-issuer`, kernel Persistence SPI, `audit-trail` (optional) | commercial |
 | `exeris-caps-mfa-totp` | `TotpFactorRegistry` (enrol, confirm, disable), `TotpVerifier` (RFC 6238), `RecoveryCodes`, `MfaChallenge` | `service-boundary-core`, `credential-store`, kernel Persistence SPI, `audit-trail` (optional) | commercial |
 | `exeris-caps-federated-login` | `FederatedLoginFlow` (OAuth 2.0 authorization code + PKCE, OIDC ID-token validation), `ExternalIdentityLink`, `FederationProviderRegistry` (GitHub, Google adapters) | `service-boundary-core`, `outbound-credentials`, kernel HTTP SPI, kernel Security SPI (`TokenValidator`), kernel Persistence SPI | commercial |
-| `exeris-caps-token-issuer` | `AccessTokenIssuer` (EdDSA / Ed25519-signed JWT access tokens), `JwksPublisher`, `SigningKeyRotation` | `service-boundary-core`, kernel Persistence SPI, kernel Scheduling SPI | commercial |
+| `exeris-caps-token-issuer` | `AccessTokenIssuer` (EdDSA / Ed25519-signed JWT access tokens), `JwksPublisher`, `SigningKeyRotation` | `service-boundary-core`, kernel Persistence SPI, kernel Scheduling SPI | **community** |
 | `exeris-caps-invitations` | `InvitationService` (issue, list, revoke, consume tenant invitations) | `service-boundary-core`, `multi-tenancy`, `rbac-policy`, `notification-dispatch`, kernel Persistence SPI, `audit-trail` (optional) | commercial |
 
 **Layer 6 — AI Abstraction Layer caps** (cross-cutting; consumed by any SKU that needs ML capability without hard-coding a vendor).
@@ -350,7 +352,7 @@ The manifests below show the full cap list per SKU. Where a cap is `community`-l
 | **PIM** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `i18n`, `attachment-storage`, `asset-management`, `search-index`, `entity-versioning`, `content-versioning`, `product-catalog`, `import-export`, `rest-emission`, `graphql-emission`, `openapi-emission`, `observability-bridge` |
 | **OMS** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `workflow-engine`, `notification-dispatch`, `circuit-breaker`, `product-catalog`, `pricing-engine`, `inventory-tracking`, `order-lifecycle`, `payment-gateway`, `contact-graph`, `rest-emission`, `openapi-emission`, `observability-bridge`. L4 Flow saga engine (ADR-013) consumed via kernel SPI. |
 | **Headless CMS API** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `i18n`, `attachment-storage`, `asset-management`, `search-index`, `content-types`, `content-versioning`, `rest-emission`, `graphql-emission`, `openapi-emission`, `observability-bridge` |
-| **Identity** | Service Boundary | Source-available (public repo) | `gateway-core`, `service-boundary-core`, `policy-chain`, `rate-limiting`, `jwt-validation`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `notification-dispatch`, `rest-emission`, `openapi-emission`, `credential-store`, `session-management`, `mfa-totp`, `federated-login`, `token-issuer`, `invitations`, `outbound-credentials`, `observability-bridge`. `gateway-core` and `policy-chain` resolve the `@Requires` of `rate-limiting` and `jwt-validation` (ADR-099). |
+| **Identity** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `rate-limiting`, `jwt-validation`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `notification-dispatch`, `rest-emission`, `openapi-emission`, `credential-store`, `session-management`, `mfa-totp`, `federated-login`, `token-issuer`, `invitations`, `outbound-credentials`, `observability-bridge`. `rate-limiting` and `jwt-validation` run as `RequestFilterChain` filters (ADR-099). |
 
 The **Identity** SKU (ADR-099) is registration and email verification, password login and recovery, sessions with refresh-token rotation, TOTP multi-factor authentication, OAuth 2.0 / OIDC federated login, EdDSA-signed access tokens with a published key set, and tenant invitations, each in its own layer-5 cap so that any SB SKU can compose sign-in without the SKU. It is not the IDP SKU, which is Intelligent Document Processing. The private operational plane of ADR-098 composes it for Exeris's own operators; that deployment is private, and the SKU's source is public like every other source-available SKU's.
 
@@ -466,8 +468,8 @@ Tier 2 introduces a third licensing value beyond ADR-020's `public` / `enterpris
 
 | License | Cap count | Examples |
 |---|---|---|
-| `community` (Apache 2.0 / MIT) | 3 | `exeris-caps-cors-policy`, `exeris-caps-i18n`, `exeris-caps-observability-bridge` |
-| `commercial` (Exeris Commercial License, source-available) | 56 | Gateway substrate + building blocks + remaining Gateway policies, SB substrate + all platform caps (except `i18n`), all domain primitives, all AI Abstraction caps, the cross-cutting caps except `observability-bridge` |
+| `community` (Apache 2.0 / MIT) | 4 | `exeris-caps-cors-policy`, `exeris-caps-i18n`, `exeris-caps-token-issuer`, `exeris-caps-observability-bridge` |
+| `commercial` (Exeris Commercial License, source-available) | 55 | Gateway substrate + building blocks + remaining Gateway policies, SB substrate + all platform caps (except `i18n`), all domain primitives except `token-issuer`, all AI Abstraction caps, the cross-cutting caps except `observability-bridge` |
 | `enterprise-private` (closed-source, Enterprise tier subscription only) | 1 | `exeris-caps-bot-fingerprinting` (depends on a kernel-tier SPI extension shipping in `exeris-kernel-enterprise`) |
 
 Total: 60 caps across the seven layers in §3.2.
