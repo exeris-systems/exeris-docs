@@ -78,16 +78,16 @@ C4Container
 
     Container_Boundary(caps, "Tier 2 — Capability Ecosystem") {
         Container(cap_substrate, "Substrate caps", "gateway-core, service-boundary-core", "Family-level substrate caps.")
-        Container(cap_policy, "Policy + SB platform + AI caps", "rate-limiting, jwt-validation, etc.", "54 caps across seven layers.<br/>References SPIs only.")
+        Container(cap_policy, "Policy + SB platform + AI caps", "rate-limiting, jwt-validation, etc.", "60 caps across seven layers.<br/>References SPIs only.")
     }
 
     Container_Boundary(skus, "Tier 3 — Platform SKUs") {
         Container(sku_gateway, "Gateway family", "api-gateway, edge-proxy, bot-blocker", "Kernel-level SKUs.")
-        Container(sku_sb, "Service Boundary family", "idp, pim, oms, content-api", "Kernel-direct API surface via codegen.")
+        Container(sku_sb, "Service Boundary family", "idp, pim, oms, content-api, identity", "Kernel-direct API surface via codegen.")
     }
 
     Container_Boundary(family, "Family products") {
-        Container(budgethq, "BudgetHQ", "Spring Runtime Pure Mode", "First Family product. Dogfoods IDP,<br/>OAuth/OIDC, billing, and bank-aggregator caps.")
+        Container(budgethq, "BudgetHQ", "Spring Runtime Pure Mode", "First Family product. Dogfoods IDP,<br/>billing, and bank-aggregator caps.")
     }
 
     Container_Boundary(telemetry, "Telemetry & Observability") {
@@ -202,14 +202,14 @@ These are not user-space capabilities — they are properties of the substrate i
 
 User-space capabilities developed in `exeris-caps-*` repositories. Each is a named module with explicit `@Provides` and `@Requires` declarations. The capability composition model itself is specified in §4.
 
-Capabilities are organized in seven layers. Each layer is independently reusable; the SKU manifests in §3.3 compose 7–16 caps each, drawn from across the stack. Domain primitives (layer 5) are deliberately decomposed below the SKU granularity so the same cap can back a CRM, an OMS, a PIM, or a customer-defined ERP composition without forking.
+Capabilities are organized in seven layers. Each layer is independently reusable; the SKU manifests in §3.3 compose 7–17 caps each, drawn from across the stack. Domain primitives (layer 5) are deliberately decomposed below the SKU granularity so the same cap can back a CRM, an OMS, a PIM, or a customer-defined ERP composition without forking.
 
 **License taxonomy.** ADR-020's two-valued open-core split (`public` / `enterprise-private`) covers the Tier 1 substrate cleanly. Tier 2 capabilities require a third value because the cap layer carries most of the platform's commercial value; without it the model contradicts the SKU-monetization thesis of §3.3 and the B2B whitepaper §5.4. Capabilities therefore ship under one of three licenses:
 
 | License tier | Terms | Coverage |
 |---|---|---|
-| `community` | Apache 2.0 / MIT | ~3 commodity caps that drive adoption and ecosystem integration. Code public, free for any use. |
-| `commercial` | Exeris Commercial License (source-available; BSL-style) | The bulk of Tier 2 — substrate aggregates, Gateway building blocks, Gateway policies, all SB platform caps, all domain primitives, all AI Abstraction caps. Code visible in public repositories; production use requires an active Platform SKU subscription or Platform-tier license. |
+| `community` | Apache 2.0 / MIT | ~4 commodity caps that drive adoption and ecosystem integration. Code public, free for any use. |
+| `commercial` | Exeris Commercial License (source-available; BSL-style) | The bulk of Tier 2 — substrate aggregates, Gateway building blocks, Gateway policies, all SB platform caps, the domain primitives except `token-issuer`, all AI Abstraction caps. Code visible in public repositories; production use requires an active Platform SKU subscription or Platform-tier license. |
 | `enterprise-private` | Closed-source | One Tier 2 cap (`exeris-caps-bot-fingerprinting`, which depends on a kernel-tier SPI extension shipping in `exeris-kernel-enterprise`). Available to Enterprise-tier subscribers only. |
 
 This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026-05-13)** — a dedicated three-valued licence axis orthogonal to ADR-020 visibility. The column below labelled `License` mirrors ADR-023; on conflict, ADR-023 wins.
@@ -219,7 +219,7 @@ This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026
 | Cap | `@Provides` | `@Requires` | License |
 |---|---|---|---|
 | `exeris-caps-gateway-core` | `GatewayLifecycle`, `IngressBootstrap` (aggregates layer 2 services) | kernel Transport / Crypto / HTTP SPIs | commercial |
-| `exeris-caps-service-boundary-core` | `ApiSurfaceRegistry`, `ServiceLifecycleHooks`, `RequestContext` | kernel SPI | commercial |
+| `exeris-caps-service-boundary-core` | `ApiSurfaceRegistry`, `ServiceLifecycleHooks`, `RequestContext`, `RequestFilterChain` (ordered admission filters that `ApiSurfaceRegistry` runs between route match and handler; a filter reads the matched route and `RequestContext` and passes the request on or answers it) | kernel SPI | commercial |
 
 **Layer 2 — Gateway building blocks** (decomposed out of `gateway-core` as separately composable caps; the aggregate above re-exports them under one manifest entry, but SKUs may pin individual caps to swap implementations).
 
@@ -235,14 +235,16 @@ This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026
 
 | Cap | `@Provides` | `@Requires` | License |
 |---|---|---|---|
-| `exeris-caps-rate-limiting` | `RateLimitPolicy` | `policy-chain` | commercial |
-| `exeris-caps-jwt-validation` | `JwtAdmissionPolicy` | `policy-chain` | commercial |
+| `exeris-caps-rate-limiting` | `RateLimitPolicy` | `policy-chain` (optional), `service-boundary-core` (optional) | commercial |
+| `exeris-caps-jwt-validation` | `JwtAdmissionPolicy` | `policy-chain` (optional), `service-boundary-core` (optional) | commercial |
 | `exeris-caps-tls-termination` | `TlsTerminationPolicy` | `gateway-core`, kernel Crypto SPI | commercial |
 | `exeris-caps-request-routing` | `RoutingPolicy` | `policy-chain`, `route-registry` | commercial |
-| `exeris-caps-circuit-breaker` | `CircuitBreakerPolicy` | `policy-chain` | commercial |
+| `exeris-caps-circuit-breaker` | `CircuitBreakerPolicy` | `policy-chain` (optional) | commercial |
 | `exeris-caps-cors-policy` | `CorsPolicy` | `policy-chain` | **community** |
 | `exeris-caps-waf-rules` | `WafPolicy` (rule engine for L7 filtering) | `policy-chain` | commercial |
 | `exeris-caps-bot-fingerprinting` | `Ja3Ja4FingerprintExtractor`, `BotPolicy` | `tls-termination`, kernel Crypto proposal | enterprise-private |
+
+> **Policies outside the gateway.** `rate-limiting`, `jwt-validation` and `circuit-breaker` declare `policy-chain` optional (ADR-099). With `policy-chain` in the composition they register in the gateway chain. Without it, `rate-limiting` and `jwt-validation` register as filters in `service-boundary-core`'s `RequestFilterChain`, and a policy cap that finds neither refuses to initialize. `circuit-breaker` needs no host: without `policy-chain`, the cap that calls an upstream invokes `CircuitBreakerPolicy` around that call.
 
 **Layer 4 — Service Boundary platform caps** (reusable across every SB SKU; each is "you compose it once and it works regardless of domain").
 
@@ -282,6 +284,12 @@ This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026
 | `exeris-caps-content-versioning` | `ContentDraft`, `PublishSchedule`, `ContentLifecycle` | `content-types`, `entity-versioning` | commercial |
 | `exeris-caps-asset-management` | `AssetLibrary` (media + binary management) | `attachment-storage`, `search-index` | commercial |
 | `exeris-caps-bank-aggregator` | `BankAggregator` SPI (Tink / Salt Edge adapters) | `service-boundary-core` | commercial (BudgetHQ → promotable) |
+| `exeris-caps-credential-store` | `CredentialStore` (password credentials: set, verify, change; Argon2id hashes; failed-attempt lockout), `AccountVerification` (email-verification tokens), `CredentialRecovery` (forgot / reset tokens) | `service-boundary-core`, `notification-dispatch`, kernel Security SPI (`KernelPasswordEncoder`), kernel Persistence SPI, `session-management` (optional), `audit-trail` (optional) | commercial |
+| `exeris-caps-session-management` | `SessionStore` (list, revoke one, revoke all for a subject), `RefreshTokenRotation` (single-use refresh tokens stored hashed, rotated on use) | `service-boundary-core`, `token-issuer`, kernel Persistence SPI, `audit-trail` (optional) | commercial |
+| `exeris-caps-mfa-totp` | `TotpFactorRegistry` (enrol, confirm, disable), `TotpVerifier` (RFC 6238), `RecoveryCodes`, `MfaChallenge` | `service-boundary-core`, `credential-store`, kernel Persistence SPI, `audit-trail` (optional) | commercial |
+| `exeris-caps-federated-login` | `FederatedLoginFlow` (OAuth 2.0 authorization code + PKCE, OIDC ID-token validation), `ExternalIdentityLink`, `FederationProviderRegistry` (GitHub, Google adapters) | `service-boundary-core`, `outbound-credentials`, kernel HTTP SPI, kernel Security SPI (`TokenValidator`), kernel Persistence SPI | commercial |
+| `exeris-caps-token-issuer` | `AccessTokenIssuer` (EdDSA / Ed25519-signed JWT access tokens), `JwksPublisher`, `SigningKeyRotation` | `service-boundary-core`, kernel Persistence SPI, kernel Scheduling SPI | **community** |
+| `exeris-caps-invitations` | `InvitationService` (issue, list, revoke, consume tenant invitations) | `service-boundary-core`, `multi-tenancy`, `rbac-policy`, `notification-dispatch`, kernel Persistence SPI, `audit-trail` (optional) | commercial |
 
 **Layer 6 — AI Abstraction Layer caps** (cross-cutting; consumed by any SKU that needs ML capability without hard-coding a vendor).
 
@@ -344,6 +352,9 @@ The manifests below show the full cap list per SKU. Where a cap is `community`-l
 | **PIM** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `i18n`, `attachment-storage`, `asset-management`, `search-index`, `entity-versioning`, `content-versioning`, `product-catalog`, `import-export`, `rest-emission`, `graphql-emission`, `openapi-emission`, `observability-bridge` |
 | **OMS** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `workflow-engine`, `notification-dispatch`, `circuit-breaker`, `product-catalog`, `pricing-engine`, `inventory-tracking`, `order-lifecycle`, `payment-gateway`, `contact-graph`, `rest-emission`, `openapi-emission`, `observability-bridge`. L4 Flow saga engine (ADR-013) consumed via kernel SPI. |
 | **Headless CMS API** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `i18n`, `attachment-storage`, `asset-management`, `search-index`, `content-types`, `content-versioning`, `rest-emission`, `graphql-emission`, `openapi-emission`, `observability-bridge` |
+| **Identity** | Service Boundary | Source-available (public repo) | `service-boundary-core`, `rate-limiting`, `jwt-validation`, `multi-tenancy`, `audit-trail`, `rbac-policy`, `notification-dispatch`, `rest-emission`, `openapi-emission`, `credential-store`, `session-management`, `mfa-totp`, `federated-login`, `token-issuer`, `invitations`, `outbound-credentials`, `observability-bridge`. `rate-limiting` and `jwt-validation` run as `RequestFilterChain` filters (ADR-099). |
+
+The **Identity** SKU (ADR-099) is registration and email verification, password login and recovery, sessions with refresh-token rotation, TOTP multi-factor authentication, OAuth 2.0 / OIDC federated login, EdDSA-signed access tokens with a published key set, and tenant invitations, each in its own layer-5 cap so that any SB SKU can compose sign-in without the SKU. It is not the IDP SKU, which is Intelligent Document Processing. The private operational plane of ADR-098 composes it for Exeris's own operators; that deployment is private, and the SKU's source is public like every other source-available SKU's.
 
 The **Context-Centric CRM data model** is `exeris-caps-contact-graph` from §3.2 layer 5. It is a single domain-primitive cap that Service Boundary SKUs may compose; it is not itself a standalone SKU until the 2029 product-form release planned in the whitepaper §7. When that SKU ships, its manifest will combine `contact-graph` with the SB platform layer and any CRM-specific caps that emerge.
 
@@ -419,6 +430,7 @@ SKUs are organized into two families plus one cross-cutting data model. Each fam
 | PIM | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission / graphql-emission codegen) | Marginal — Community driver typically sufficient | Cloud or on-prem |
 | OMS | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission codegen) + kernel-level (L4 Flow saga state) | Marginal — Community driver typically sufficient | Cloud; distributed saga state requires Postgres |
 | Headless CMS API | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission / graphql-emission codegen) | Marginal — Community driver typically sufficient | Cloud or edge-co-located for read replicas |
+| Identity | Service Boundary | Kernel-direct (@ExerisDomain + rest-emission codegen) | Marginal — Community driver typically sufficient | Cloud or on-prem |
 | Context-Centric CRM data model | Layer-5 domain-primitive cap | Composed by Service Boundary SKUs; not standalone | N/A (cap-layer, driver-agnostic) | N/A (cap-layer) |
 
 <!-- VERIFY(sweep-2026-09): the '>50k RPS' threshold on the API Gateway row in §5 has no public report path and no figure state. No io_uring or HTTP/3 campaign exists in exeris-benchmarks: origin/main results/reports/ holds seven top-level .md reports, all entity-read-by-id work plus the 2026-05-01 aggregate. H3 results exist only in exeris-benchmarks-enterprise, which is enterprise-private, so docs-style-guide rule 6 forbids this public page citing a path into it. Maintainer must decide whether to drop the threshold or publish a citable Enterprise-driver figure. -->
@@ -428,7 +440,7 @@ SKUs are organized into two families plus one cross-cutting data model. Each fam
 
 **Gateway family architecture.** Kernel-level HTTP path with no Spring dependency in the data plane (consistent with the clarified ADR-021). The control plane (admin API, configuration reload) is single-process or distributed depending on cap manifest selection; observability flows through `exeris-caps-observability-bridge` to the ADR-018 wire format. The Enterprise driver swap (custom NIO H1/H2 → `io_uring` + HTTP/3 + QUIC TLS) lives in `exeris-kernel-enterprise` and is activated by Maven coordinate substitution at the substrate layer — Gateway SKU composition manifests are byte-identical across Community and Enterprise deployments. Bot Blocker additionally requires a JA3/JA4 TLS fingerprinting kernel proposal modifying `CoreSslHandles` to expose ClientHello fingerprint material before the request reaches the policy chain — that proposal is on the kernel roadmap; the corresponding `exeris-caps-bot-fingerprinting` cap is the only enterprise-private cap in Tier 2 because it depends on this kernel-tier extension.
 
-**Service Boundary family architecture.** SB-family SKUs run **kernel-direct** — exactly like Gateway-family SKUs, with no Spring dependency anywhere in the data plane. The external API surface is generated at build time from `@ExerisDomain` types and `@Action` methods through `rest-emission` (and `graphql-emission` / `openapi-emission` where relevant) codegen capabilities (ADR-015); the emitted handlers register against `service-boundary-core`'s `ApiSurfaceRegistry` directly through kernel HTTP SPIs. There is no Spring `@RestController` in any first-party SKU. Heavy lifting (off-heap document processing for IDP, graph-attribute traversal for PIM, saga state for OMS, content-as-domain emission for Headless CMS API) happens at the kernel level via composed caps. The Spring-on-Exeris brownfield migration path (§7) is a separate offering for *customers* who already have Spring code — it does not sit under any first-party SKU.
+**Service Boundary family architecture.** SB-family SKUs run **kernel-direct** — exactly like Gateway-family SKUs, with no Spring dependency anywhere in the data plane. The external API surface is generated at build time from `@ExerisDomain` types and `@Action` methods through `rest-emission` (and `graphql-emission` / `openapi-emission` where relevant) codegen capabilities (ADR-015); the emitted handlers register against `service-boundary-core`'s `ApiSurfaceRegistry` directly through kernel HTTP SPIs. There is no Spring `@RestController` in any first-party SKU. Heavy lifting (off-heap document processing for IDP, graph-attribute traversal for PIM, saga state for OMS, content-as-domain emission for Headless CMS API, memory-hard password hashing for Identity) happens at the kernel level via composed caps. The Spring-on-Exeris brownfield migration path (§7) is a separate offering for *customers* who already have Spring code — it does not sit under any first-party SKU.
 
 **Context-Centric CRM data model.** A layer-5 domain-primitive cap consumed by several Service Boundary SKUs. It encodes the anti-account-centric thesis: relationships, not accounts, are the primary key. The data model uses the kernel's stack-portable graph subsystem (unified `MATCH` DSL — transpiles to SQL:2023 PGQ on Postgres or Cypher on Neo4j/Memgraph/FalkorDB depending on the active driver, with Enterprise alternatives) for the underlying traversal; the cap layer adds the relationship-first vocabulary. Standalone product-form release is on the 2029 horizon per whitepaper §7.
 
@@ -456,11 +468,11 @@ Tier 2 introduces a third licensing value beyond ADR-020's `public` / `enterpris
 
 | License | Cap count | Examples |
 |---|---|---|
-| `community` (Apache 2.0 / MIT) | 3 | `exeris-caps-cors-policy`, `exeris-caps-i18n`, `exeris-caps-observability-bridge` |
-| `commercial` (Exeris Commercial License, source-available) | 50 | Gateway substrate + building blocks + remaining Gateway policies, SB substrate + all platform caps (except `i18n`), all domain primitives, all AI Abstraction caps, the cross-cutting caps except `observability-bridge` |
+| `community` (Apache 2.0 / MIT) | 4 | `exeris-caps-cors-policy`, `exeris-caps-i18n`, `exeris-caps-token-issuer`, `exeris-caps-observability-bridge` |
+| `commercial` (Exeris Commercial License, source-available) | 55 | Gateway substrate + building blocks + remaining Gateway policies, SB substrate + all platform caps (except `i18n`), all domain primitives except `token-issuer`, all AI Abstraction caps, the cross-cutting caps except `observability-bridge` |
 | `enterprise-private` (closed-source, Enterprise tier subscription only) | 1 | `exeris-caps-bot-fingerprinting` (depends on a kernel-tier SPI extension shipping in `exeris-kernel-enterprise`) |
 
-Total: 54 caps across the seven layers in §3.2.
+Total: 60 caps across the seven layers in §3.2.
 
 Native-bypass transport (QUIC/HTTP/3, `io_uring`, IOCP) is **not** a Tier 2 cap — it ships as part of the `exeris-kernel-enterprise` substrate driver (Tier 1), activated by Maven-coordinate swap. See §6.1 and §4 for the swap mechanism.
 
@@ -479,6 +491,7 @@ Every Platform SKU is a **commercial-licensed composition** of underlying caps. 
 | `exeris-sku-pim` | commercial | Source-available (public) | |
 | `exeris-sku-oms` | commercial | Source-available (public) | Composes the L4 Flow saga engine via kernel SPI |
 | `exeris-sku-content-api` | commercial | Source-available (public) | |
+| `exeris-sku-identity` | commercial | Source-available (public) | Exeris's own operator deployment sits in the private operational plane (ADR-098); the source does not |
 
 ### 6.4 Family products (out of open-core taxonomy)
 
@@ -546,7 +559,7 @@ BudgetHQ is the first Family product. It is an independent SaaS spanning both B2
 - **Bank-aggregator capability.** Tink and Salt Edge SPI adapters, with the platform-level bank-aggregator SPI abstraction designed first inside BudgetHQ. The abstraction is on the promotion path to a reusable Service Boundary capability that any Service Boundary SKU (especially IDP and OMS) can compose.
 - **Receipt-scan capability.** Bridges to the platform's IDP capability via the AI Abstraction Layer SPI (the same AI Abstraction Layer that ships as the IDP Platform SKU). Prototyped inside BudgetHQ; the AI Abstraction Layer SPI itself is on the cap roadmap.
 - **Subscription-billing capability.** Stripe adapter, prototyped inside BudgetHQ. On the promotion path to a reusable platform cap (any Service Boundary SKU offering metered billing will consume the promoted cap).
-- **OAuth/OIDC B2C identity capability.** Prototyped inside BudgetHQ for end-user authentication.
+- **Identity.** BudgetHQ's identity service (registration, email verification, password and session flows, TOTP multi-factor authentication, invitations) is the behavioural reference for the Identity SKU's caps (ADR-099). It runs on Spring Runtime and is a candidate to move onto the Identity SKU.
 - **Telemetry.** BudgetHQ composes `exeris-caps-observability-bridge` and emits to a Repo B consumer running in BudgetHQ's own infrastructure — same wire format as a platform subscriber's telemetry, distinct consumer instance.
 
 Each prototyped capability lands in the platform's capability ecosystem **after** BudgetHQ has stabilized it in production, never before. BudgetHQ is not built to validate the platform: the platform is structurally sound enough that BudgetHQ runs on it from day one, and that is the validation. BudgetHQ's role in the platform is a capability-development pipeline — production hardening ahead of promotion.
