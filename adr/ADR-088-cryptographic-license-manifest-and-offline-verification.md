@@ -59,12 +59,13 @@ The manifest is an UTF-8 encoded JSON document conforming to `https://specs.exer
     "licenseMode": "SUBSCRIPTION",
     "workloadProfileRef": "WP-2026-FINTECH-01",
     "capabilities": [
-      "gateway.core",
-      "gateway.routing",
-      "gateway.rate-limit",
-      "security.jwt",
-      "security.tls",
-      "security.bot-fingerprinting"
+      "exeris-sku-api-gateway",
+      "exeris-caps-gateway-core",
+      "exeris-caps-request-routing",
+      "exeris-caps-rate-limiting",
+      "exeris-caps-jwt-validation",
+      "exeris-caps-tls-termination",
+      "exeris-caps-bot-fingerprinting"
     ]
   },
   "execution": {
@@ -102,7 +103,7 @@ The manifest is an UTF-8 encoded JSON document conforming to `https://specs.exer
 * `contract.commercialModel`: Restricted to `STANDARD`, `ENTERPRISE`, `CAPACITY`, `VALUE_SHARE`, or `OEM`.
 * `entitlement.edition`: Must be `community`, `commercial`, or `enterprise`. **This is not ADR-023's licence taxonomy**, which reads `community` / `commercial` / `enterprise-private` and classifies a single capability. `edition` classifies the whole platform an entitlement buys, so the two share two of three values by coincidence of vocabulary and differ in the third because they answer different questions. ADR-023 records a reuse of the same kind in its own Trade-offs — its `enterprise-private` takes ADR-020's value with a slightly different meaning — so the pattern is known here and this line is what keeps this instance from being silent.
 * `entitlement.licenseMode`: Must be `SUBSCRIPTION` or `PERPETUAL_INTERNAL`.
-* `entitlement.capabilities`: An array of lowercase kebab-case capability identifiers matching the `@CapabilityModule.name()` ecosystem naming convention.
+* `entitlement.capabilities`: An array of lowercase kebab-case capability identifiers matching the `@CapabilityModule.name()` ecosystem naming convention. _(Amended 2026-10-13: each identifier is the Maven artifactId of the artifact that needs the entitlement — `exeris-caps-<kebab-name>` for a capability, `exeris-sku-<kebab-name>` for an SKU; `@CapabilityModule` has no `name()` — see Amendments.)_
 * `execution.environments`: A set containing one or more of `development`, `staging`, `production`, `production-load-sim`, `dr-cold`, `dr-hot`. These are the seven categories of `eca-specification.md` §4.3 collapsed to six on purpose, and the collapse is stated rather than left to be inferred: §4.3 item 1 treats Evaluation, Development, Test and Staging as one entitlement class — unstamped builds, no commercial manifest — so Evaluation carries no value of its own and is recorded as `development`. `production-load-sim` does have one, because §4.3 places Production Load Simulation under PRODUCTION and it therefore requires an active entitlement; an enum that cannot express it cannot express a manifest that entitles it.
 * `execution.gracePeriodDays`: A non-negative integer. **Defaults to `14` when the field is absent** — `eca-specification.md` §1.3 item 5 relies on that default, and a default named on one page and carried on neither is how the two stop agreeing.
 * `signature.algorithm`: Strictly `Ed25519`.
@@ -292,6 +293,34 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
   once, in Phase 0, over a document of a few kilobytes; the canonicalizer builds a parse tree and an
   output buffer proportional to it. The obligation is: no third-party dependency, allocation bounded by
   the manifest size, never on a request path.
+
+- **2026-10-13 — A capability identifier is the Maven artifactId of the artifact that needs it.** §1
+  tied `entitlement.capabilities` to "the `@CapabilityModule.name()` ecosystem naming convention", and
+  its example listed dotted names such as `gateway.core` and `security.jwt`. `@CapabilityModule` has no
+  `name()`: it is a marker, and its contract states that a capability's identity comes from its
+  repository coordinate. No artifact declares a dotted name, so neither the issuer of a manifest nor an
+  `EntitlementRequirement` (ADR-089) has a source for one. The identifier is fixed as follows:
+  - A capability is identified by its artifactId, `exeris-caps-<kebab-name>`
+    ([`capability-conventions.md`](../standards/capability-conventions.md) rule 1); an SKU by its
+    artifactId, `exeris-sku-<kebab-name>` ([`sku-conventions.md`](../standards/sku-conventions.md)
+    rule 1). These are the row keys of [`cap-license-registry.md`](../cap-license-registry.md).
+  - The artifactId alone, never `groupId:artifactId`. The groupId is fixed per artefact kind
+    (`eu.exeris.caps`, `eu.exeris.sku`) and the prefix already names the kind. The kernel's
+    `ExecutionContract.CAPABILITY_ID_PATTERN` accepts `exeris-caps-cors-policy` and rejects
+    `eu.exeris.caps:exeris-caps-cors-policy`.
+  - One string serves every place an identifier appears: `entitlement.capabilities`,
+    `ExecutionContract.entitledCapabilities`, the set each `EntitlementRequirement` returns, and the
+    declared set `exeris-tooling` checks under ADR-089 obligation 1. Each comparison is exact string
+    equality.
+  - An SKU artifact that registers a requirement returns its own artifactId, and the manifest lists
+    it in `entitlement.capabilities`. `entitlement.sku` names the package the entitlement buys; the
+    capability check does not read it.
+  - A Community artifact registers no requirement, so its identifier never has to appear in a
+    manifest.
+
+  The §1 example lists artifactIds. `CAPABILITY_ID_PATTERN` admits dotted names as well, so it checks
+  the shape of an identifier and not its prefix: the `exeris-caps-` / `exeris-sku-` prefix is checked
+  at review, not by the kernel.
 
 ## Cross-references
 

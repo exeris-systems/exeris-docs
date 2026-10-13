@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-16
+last-verified: 2026-10-13
 ---
 
 # SKU Conventions
@@ -20,6 +20,7 @@ A Platform SKU is a named, version-pinned, commercial-licensed composition of Ti
 1. **Repository naming and Maven coordinates.** `[L1: pom enforcer]`
    - Repository name: `exeris-sku-<kebab-name>` (e.g. `exeris-sku-api-gateway`, `exeris-sku-content-api`).
    - Coordinates: `groupId=eu.exeris.sku`, `artifactId=exeris-sku-<kebab-name>`.
+   - The artifactId is the SKU's identifier wherever an entitlement names it: an SKU that registers an `EntitlementRequirement` returns its artifactId, and a licence manifest that entitles it lists that artifactId in `entitlement.capabilities` ([ADR-088](../adr/ADR-088-cryptographic-license-manifest-and-offline-verification.md), amendment of 2026-10-13). It is the artifactId alone, without the groupId.
    - Package root: `eu.exeris.sku.<shortname>` (e.g. `eu.exeris.sku.gateway`, `eu.exeris.sku.content`).
 2. **Canonical manifest `composition.json`.** `[L1: JUnit test & composition assertion]`
    - The authored composition manifest must be located at the repository root and copied to `target/classes/composition.json` (or `src/main/resources/composition.json`).

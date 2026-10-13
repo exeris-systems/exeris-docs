@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-16
+last-verified: 2026-10-13
 slug: standards/eca-specification
 ---
 
@@ -230,6 +230,8 @@ To safeguard the Glass Box developer experience, build tooling (`exeris-tooling`
   1. The presence of a valid `license-manifest.json`.
   2. That all composed capabilities declared via `@Requires` satisfy:
      `Capabilities_declared ⊆ Capabilities_entitled`
+
+     Both sets hold Maven artifactIds — `exeris-caps-<kebab-name>` for a capability, `exeris-sku-<kebab-name>` for an SKU — the identifier form ADR-088 §1 fixes (amendment of 2026-10-13). Community artifacts register no entitlement requirement and contribute nothing to the declared set (ADR-089, amendment of 2026-10-13).
 * An unstamped artifact that carries entitlement-requiring code fails at bootstrap if booted in a production-class environment (Production, Active Disaster Recovery, Production Load Simulation — §4.3). An artifact with no such code — the Community edition — boots in every environment without a manifest (§4.1; ADR-088 and ADR-089, amendments of 2026-10-06).
 
 ### 6.2 Enforcement Levels (`HARD`, `SOFT`, `AUDIT`)

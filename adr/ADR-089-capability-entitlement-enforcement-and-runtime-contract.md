@@ -106,7 +106,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 
 **Concrete obligations:**
 
-1. **Tooling Capability Set Assertion:** `exeris-tooling` must extract all resolved capability identifiers from the composed `@CapabilityModule` DAG and assert `Capabilities_declared ⊆ Capabilities_entitled` whenever the build profile specifies a production target (`-Pproduction`). Missing entitlements must cause compilation to fail with an actionable diagnostic.
+1. **Tooling Capability Set Assertion:** `exeris-tooling` must extract all resolved capability identifiers from the composed `@CapabilityModule` DAG and assert `Capabilities_declared ⊆ Capabilities_entitled` whenever the build profile specifies a production target (`-Pproduction`). Missing entitlements must cause compilation to fail with an actionable diagnostic. _(Amended 2026-10-13: the identifiers are Maven artifactIds, the same strings the manifest and `EntitlementRequirement` carry — see Amendments.)_
 2. **Phase 0 Bootstrap Verification:** `exeris-kernel-core`'s `KernelBootstrap` must resolve and validate `license-manifest.json` during Phase 0 (`FOUNDATION: Contract & Memory`) _(amended 2026-10-06: a `KernelBootstrap` step ahead of FOUNDATION, not a node in it — see Amendments)_. **This amends the canonical Bootstrap DAG**, which defines FOUNDATION as memory only and places cryptography in the parallel SERVICES phase (`high-level-architecture.md` §2, sourced from `exeris-kernel/docs/subsystems/bootstrap.md`). The amendment is deliberate — an entitlement that is checked after off-heap allocation has already been spent is checked too late — and it is a change to that diagram rather than a reading of it, so both pages owe an update; Engineering Protocol item 6 carries the obligation. If the manifest is missing, corrupt, or signature verification fails in an environment configured as `production`, the process must terminate before binding network sockets. _(Amended 2026-10-06: "in an environment configured as `production`" reads as the three production classes, and a missing manifest halts only when an `EntitlementRequirement` is declared.)_
 3. **Zero Phone-Home Invariant:** No enforcement routine in `exeris-kernel-core`, `exeris-tooling`, or any capability module may initiate an outbound network connection to verify license status. All verification is strictly local and asymmetric.
 4. **Offline Keystore Binding:** The public keys of the Exeris License CA must be embedded in `exeris-kernel-core` at build time. Historical epoch keys must remain accessible to validate version-pinned `PERPETUAL_INTERNAL` detached deployments.
@@ -201,6 +201,21 @@ Enforcement actions are partitioned into three orthogonal levels:
 - **2026-10-06 — The enforcement JFR event is `eu.exeris.kernel.contract.Enforcement`.** Every kernel
   event is named `eu.exeris.kernel.<area>.*`, and the name is a consumer contract for recordings; the
   `eu.exeris.telemetry.license.*` namespace of obligation 5 belongs to no kernel event.
+
+- **2026-10-13 — Both sides of the inclusion check are Maven artifactIds.** Obligation 1 has tooling
+  "extract all resolved capability identifiers from the composed `@CapabilityModule` DAG", and the
+  amendment of 2026-10-06 has each `EntitlementRequirement` return "the capability identifiers it
+  needs". Neither said what an identifier is, and `@CapabilityModule` carries none. ADR-088's amendment
+  of the same date fixes it: the artifact's Maven artifactId, `exeris-caps-<kebab-name>` for a
+  capability and `exeris-sku-<kebab-name>` for an SKU, without the groupId. So:
+  - `Capabilities_entitled` is `entitlement.capabilities` as the manifest lists it, which the kernel
+    holds as `ExecutionContract.entitledCapabilities`.
+  - `Capabilities_declared` is the set of artifactIds of the composed artifacts that register an
+    `EntitlementRequirement`, the SKU's own included when it registers one. A Community artifact
+    registers none and contributes nothing, so the build-time check and the Phase 0 check gate the
+    same set.
+  - `allowsCapability` and `assertCapability` take the same string, and a match is exact string
+    equality.
 
 ## Cross-references
 
