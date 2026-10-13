@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-16
+last-verified: 2026-10-13
 ---
 
 # New Capability Repository Checklist — 10 questions before creating a repo or opening PR #1
@@ -14,7 +14,7 @@ Run before provisioning a new `exeris-caps-*` repository or marking its initial 
 1. **Licensing entry.** Is the capability registered in `high-level-architecture.md` §3.2 and `cap-license-registry.md` with an agreed licence tier (`community`, `commercial`, or `enterprise-private`) and visibility?
 2. **Naming and coordinates.** Does the repository name start with `exeris-caps-` and does `pom.xml` declare `groupId=eu.exeris.caps` and matching `artifactId`?
 3. **The Wall (Boundary check).** Are public contracts strictly in `eu.exeris.caps.<name>.api` and internal details in `eu.exeris.caps.<name>.internal`? Are Spring, Netty, Servlet and Reactor APIs (`org.springframework.*`, `io.netty.*`, `jakarta.servlet.*`, `reactor.*`) completely absent from bytecode dependencies?
-4. **Module declaration.** Does the root package contain exactly one `@CapabilityModule` class declaring `@Provides` and only genuine, non-speculative `@Requires` edges?
+4. **Module declaration.** Does the root package contain exactly one `@CapabilityModule` class declaring `@Provides` and only genuine, non-speculative `@Requires` edges, with every contract at `0.1.0` while the capability is unreleased ([capability-conventions.md](../capability-conventions.md) rule 9)?
 5. **Lifecycle safety.** If `@CapabilityLifecycle` is implemented, does the hook class provide a public no-arg constructor, idempotent `initialize()`, and a non-throwing `terminate()`?
 6. **Plugin configuration.** Does `pom.xml` bind `exeris-codegen-maven-plugin` goals `generate` and `verify-capabilities`, and include `exeris-processor` on the compiler processor path?
 7. **Two-pass build.** Does the repository build cleanly on a fresh checkout via:

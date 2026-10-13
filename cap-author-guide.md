@@ -4,7 +4,7 @@ type: howto
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-04
+last-verified: 2026-10-13
 ---
 
 # Capability Author Guide
@@ -92,7 +92,7 @@ import eu.exeris.sdk.annotation.capability.CapabilityModule;
 import eu.exeris.sdk.annotation.capability.Provides;
 
 @CapabilityModule
-@Provides(service = CorsPolicy.class, version = "1.0.0")
+@Provides(service = CorsPolicy.class, version = "0.1.0")
 public final class CorsPolicyModule {
 }
 ```
@@ -113,7 +113,9 @@ the composition DAG and changes the derived `initOrder` for every SKU that inclu
 
 `service` is a `Class<?>` reference so your IDE and the compiler check it, but the processor never
 loads the class — it records the name. `version` and `versionRange` are asymmetric on purpose: a
-provider states one version, a consumer accepts a range.
+provider states one version, a consumer accepts a range. A capability that has not been released
+provides at `0.1.0` and is consumed at `[0.1.0,0.2.0)`; the rule and when it expires are
+[`capability-conventions.md`](standards/capability-conventions.md) rule 9.
 
 **An unversioned provide is not the same as version `"0.0.0"`.** The content binding normalizes a
 null version to the empty string — `service@`, distinct from `service@0.0.0`. The distinction is
