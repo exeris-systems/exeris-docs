@@ -191,7 +191,7 @@ PRODUCTION -----------+--- Active Disaster Recovery (Hot/Warm standby serving tr
                       +--- Production Load Simulation (Traffic on live data planes)
 ```
 
-1. **Evaluation / Development / Test / Staging:** Dedicated exclusively to verification, testing, and pre-release validation. Royalty-free. A kernel that carries a commercial artifact boots here only under a signed manifest: evaluation, development and test — the manifest value `development` — under a free developer licence, signed by the developer key and valid for at most 90 days; staging under the customer's manifest. A Community-only kernel needs none (ADR-088 and ADR-089, amendments of 2026-10-13).
+1. **Evaluation / Development / Test / Staging:** Dedicated exclusively to verification, testing, and pre-release validation. Royalty-free. A kernel that carries a commercial artifact boots here only under a signed manifest: evaluation, development and test — the manifest value `development` — under a free developer licence, signed by the developer key, valid for at most 30 days, throttled at `HARD` to 50 requests per second and 10 connections, and marked by `Exeris-License: development` on every HTTP response; staging under the customer's manifest. A Community-only kernel needs none (ADR-088 and ADR-089, amendments of 2026-10-13).
 2. **Cold Standby (Disaster Recovery):** Replicated storage and dormant compute nodes that process no live network traffic. Permitted without additional subscription fees across all commercial tiers; a node that boots a commercial artifact does so under the customer's manifest listing `dr-cold`.
 3. **Hot Standby / Active DR:** Redundant nodes actively running parallel state machines, in-memory caches, or processing live traffic splits. Counted towards active instance or throughput quotas as specified in the Order Form.
 
@@ -247,6 +247,7 @@ Constraint enforcement is decoupled from raw network blocking:
 3. **`AUDIT` Enforcement (Continuous Metering):**
    * Trigger: Traffic bursts exceed `maxThroughputRps` or connections exceed `maxConnections`.
    * Action: System serves traffic without dropping packets. Telemetry records the peak envelope in local metrics for subsequent commercial true-up reconciliation.
+   * Exception: under a developer licence — a manifest signed by the developer key, which never entitles a production environment — the envelope is enforced at `HARD` whatever `enforcementRules` say: a request beyond `maxThroughputRps` is refused before its handler runs and a connection beyond `maxConnections` is refused at accept (ADR-088 and ADR-089, amendments of 2026-10-13).
 
 ### 6.3 Typed Runtime Model: `ExecutionContract`
 

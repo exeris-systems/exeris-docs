@@ -101,7 +101,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 | :--- | :--- | :--- | :--- |
 | **`HARD`** | Throws `ContractBreachException` and terminates the JVM immediately. _(Amended 2026-10-06: aborts the boot; the kernel never exits the JVM.)_ | Unlicensed commercial capabilities, unauthorized environment class, signature invalidity, detached version mismatch. | Structural breach of copyright and contract; system has no right to execute. |
 | **`SOFT`** | Logs structured error to `STDERR`, attaches high-priority event to in-process JFR ring, system remains operational. | Node count exceeds `authorizedInstances` during emergency failover; manifest enters `gracePeriodDays` window. | Operational resilience: transient infrastructure anomalies or invoice delays must not cause cascading downtime. |
-| **`AUDIT`** | Telemetry records continuous metrics in local buffers for reconciliation; traffic is served with zero dropped packets. | Throughput bursts beyond `maxThroughputRps`, concurrent connections beyond `maxConnections`. | Commercial monetization: capacity overages are financial reconciliation matters (true-up), not availability faults. |
+| **`AUDIT`** | Telemetry records continuous metrics in local buffers for reconciliation; traffic is served with zero dropped packets. | Throughput bursts beyond `maxThroughputRps`, concurrent connections beyond `maxConnections`. _(Amended 2026-10-13: under a developer-key manifest the envelope is `HARD` — see Amendments.)_ | Commercial monetization: capacity overages are financial reconciliation matters (true-up), not availability faults. |
 
 
 **Concrete obligations:**
@@ -127,9 +127,9 @@ Enforcement actions are partitioned into three orthogonal levels:
 
 * **[-] Build Complexity:** Build tooling must maintain awareness of target profiles (`dev` vs `production`) to distinguish unstamped developer jars from production deliverables.
 * **[-] Reconciliation Latency:** Under `AUDIT` enforcement, customer throughput overages are reconciled asynchronously through periodic reports rather than enforced in real time.
-* **[-] A Copied Manifest Boots Elsewhere:** _(Added 2026-10-13, see Amendments.)_ Verification is offline, so a manifest that boots one installation boots any other that declares an environment it authorizes and carries the artifacts it entitles. `authorizedInstances` is `SOFT` and the workload envelope `AUDIT` (§3): a copy is found by audit and reconciliation, not refused at boot. The same holds for a developer licence on a host that declares `development` while serving production traffic — the kernel takes the environment from configuration and cannot tell the two apart; the 90-day bound of the developer key limits how long such a licence boots, not whether it does.
+* **[-] A Copied Manifest Boots Elsewhere:** _(Added 2026-10-13, see Amendments.)_ Verification is offline, so a manifest that boots one installation boots any other that declares an environment it authorizes and carries the artifacts it entitles. `authorizedInstances` is `SOFT` and the workload envelope `AUDIT` (§3): a copy is found by audit and reconciliation, not refused at boot. The same holds for a developer licence on a host that declares `development` while serving production traffic: the kernel takes the environment from configuration and cannot tell the two apart, so it does not refuse the boot. It bounds the result instead — at most 50 requests per second and 10 connections, refused beyond that; `Exeris-License: development` on every response, visible to every client; at most 30 days per licence; and a capped number of active licences per verified account and organisation, each traceable to its account.
 * **[-] Source-Available Code Can Drop the Check:** _(Added 2026-10-13, see Amendments.)_ Anyone holding the source can build a kernel or an artifact without the gate, or with a requirement that declares nothing. No runtime mechanism prevents it, and none is attempted (Non-Goals); the licence of ADR-023 is the backstop.
-* **[-] A Commercial Artifact Has No Anonymous Boot:** _(Added 2026-10-13, see Amendments.)_ Booting one needs a manifest in every environment, so a developer registers once and renews a developer licence at least every 90 days, and CI holds a token to obtain one.
+* **[-] A Commercial Artifact Has No Anonymous Boot:** _(Added 2026-10-13, see Amendments.)_ Booting one needs a manifest in every environment, so a developer registers once and renews a developer licence at least every 30 days, and CI holds a token to obtain one.
 
 ### 🔄 Alternatives Considered and Rejected
 
@@ -140,7 +140,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 * **Runtime Legal Vocabulary (Parsing "Schedule B", Order Forms, or SKU Names at Boot):**
   * *Cost:* Couples the kernel runtime lifecycle to legal contract terminology. Any contractual restructuring or schedule renegotiation would require recompiling and re-deploying the JVM engine. Rejected in favor of pure technical capability IDs.
 * **Hard Packet Dropping on Throughput Quota Exceeded:**
-  * *Cost:* Turning throughput overages into availability failures causes catastrophic cascade outages during organic demand spikes (e.g. Black Friday or market volatility). Capacity limits are commercial reconciliation matters, not availability kill-switches. Rejected in favor of `AUDIT` local telemetry.
+  * *Cost:* Turning throughput overages into availability failures causes catastrophic cascade outages during organic demand spikes (e.g. Black Friday or market volatility). Capacity limits are commercial reconciliation matters, not availability kill-switches. Rejected in favor of `AUDIT` local telemetry. _(Amended 2026-10-13: still rejected for every entitlement that may serve production; a developer licence, which may not, is throttled — see Amendments.)_
 
 ### 📋 What is NOT in scope
 
@@ -251,8 +251,19 @@ Enforcement actions are partitioned into three orthogonal levels:
     control plane authenticates the requester is out of scope here. Context item 1 — evaluate without
     licence keys or talking to sales — becomes: without talking to sales and without paying, after
     registering once.
+  - **A developer licence is throttled and marked.** Under a manifest signed by the developer key, the
+    kernel enforces the workload envelope at `HARD` whatever `enforcementRules` say: a request beyond
+    `maxThroughputRps` is refused before its handler runs, a connection beyond `maxConnections` is
+    refused at accept, and every HTTP response carries `Exeris-License: development`, which no
+    configuration disables. Both apply only when a requirement is declared; a Community-only classpath
+    is fully ungated under any manifest. The ceiling (50 requests per second, 10 connections), the 30-day validity
+    and the issuance limits are ADR-088's, amendment of the same date. This is a scoped exception to §3,
+    where the envelope is `AUDIT` because production traffic is never dropped: the developer key never
+    entitles a production environment, so the traffic it throttles is traffic it was not entitled to
+    serve. Every other key keeps §3 unchanged.
   - **Residual limits**, stated as Trade-offs: offline verification cannot stop a manifest copied to
-    another installation, because instance limits are `SOFT` and the envelope `AUDIT`; and
+    another installation, because instance limits are `SOFT` and the envelope `AUDIT`, and a developer
+    licence on a host that declares `development` boots there, throttled, marked and short-lived; and
     source-available code can be modified to remove the check, which the licence of ADR-023 answers.
 
 ## Cross-references

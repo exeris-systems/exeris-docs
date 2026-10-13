@@ -338,16 +338,17 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
   valid only within the scope of the key that signed it:
   - **Entry shape.** An entry of `TrustedIssuerKeyStore` holds the keyId, the 32-byte Ed25519 public key,
     the environments the key may authorize (values of §1 `execution.environments`), a maximum validity or
-    none, and the entitlement classes it may entitle (`commercial`, `enterprise-private`). The store is
+    none, a workload ceiling or none, and the entitlement classes it may entitle (`commercial`,
+    `enterprise-private`). The store is
     fixed at build time, as before: immutable, no mutator, and obligation 5 stands — a key and its scope
     enter only through a source change and a release.
   - **Three key families.**
 
-    | keyId | Environments | Maximum validity | Classes | Custody |
-    |:--|:--|:--|:--|:--|
-    | `exeris-prod-<year>-k<N>` | all six | none | `commercial` | Offline. The private key is an encrypted file (age with scrypt, or equivalent) on offline media, decrypted only to sign. A hardware token holding the Ed25519 key over PKCS#11 or OpenPGP replaces the file later, with no kernel change. |
-    | `exeris-dev-<year>-k<N>` | `development` | 90 days | `commercial` | Online, held by the private control plane (ADR-098) to issue self-service developer licences. A cloud KMS replaces it later, with no kernel change. |
-    | `exeris-ent-<year>-k<N>` | all six | none | `commercial`, `enterprise-private` | Offline, as for prod, on separate media under a separate secret. |
+    | keyId | Environments | Maximum validity | Workload ceiling | Classes | Custody |
+    |:--|:--|:--|:--|:--|:--|
+    | `exeris-prod-<year>-k<N>` | all six | none | none | `commercial` | Offline. The private key is an encrypted file (age with scrypt, or equivalent) on offline media, decrypted only to sign. A hardware token holding the Ed25519 key over PKCS#11 or OpenPGP replaces the file later, with no kernel change. |
+    | `exeris-dev-<year>-k<N>` | `development` | 30 days | 50 requests per second, 10 connections | `commercial` | Online, held by the private control plane (ADR-098) to issue self-service developer licences. A cloud KMS replaces it later, with no kernel change. |
+    | `exeris-ent-<year>-k<N>` | all six | none | none | `commercial`, `enterprise-private` | Offline, as for prod, on separate media under a separate secret. |
 
   - **The dev scope is `development` alone.** §1 records evaluation, development and test under
     `development`, so a developer's machine and a CI job are inside it. `staging` is not: it is the
@@ -359,8 +360,20 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
     `execution.validUntil` plus `execution.gracePeriodDays`. Under a key with a maximum,
     `issuer.issuedAt` is required, `execution.validFrom` may not precede it, and a manifest without
     `execution.validUntil` (`licenseMode: PERPETUAL_INTERNAL`) is refused. Measured from signing rather
-    than from `validFrom`, the bound means a developer manifest that leaks stops booting at most 90 days
+    than from `validFrom`, the bound means a developer manifest that leaks stops booting at most 30 days
     after it was signed.
+  - **Workload ceiling.** A manifest signed by a key with a ceiling must carry
+    `execution.workloadEnvelope` with `maxThroughputRps` and `maxConnections` at or below the ceiling and
+    `growthAllowancePercent` of `0`; an absent envelope reads as unlimited and is refused. The dev
+    ceiling is 50 requests per second and 10 concurrent connections: enough to develop and test against,
+    too little to serve production. Under a dev-key manifest the kernel enforces the envelope at `HARD`
+    whatever `enforcementRules` say — a request beyond the rate is refused before its handler runs, and a
+    connection beyond the ceiling is refused at accept — and every HTTP response carries the header
+    `Exeris-License: development`, which no configuration disables and no handler can remove; a classpath that declares no
+    `EntitlementRequirement` stays fully ungated, ceiling and watermark included. This is a
+    scoped exception to ADR-089 §3, where the envelope is `AUDIT` so that production traffic is never
+    dropped: the dev key never entitles a production environment, so the traffic it throttles is not
+    traffic it was entitled to serve (ADR-089, amendment of the same date).
   - **The class of a capability comes from the artifact.** The kernel reads no registry at run time, so
     each `EntitlementRequirement` states the class of the identifiers it returns (ADR-089, amendment of
     the same date), and the kernel checks that the signing key may entitle the class of every declared
@@ -374,14 +387,16 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
     `exeris-tooling` checks it against the registry at build time. A modified artifact can declare a
     weaker class, but it can as easily register no requirement at all; ADR-023's licence answers both.
   - **A scope breach is `HARD`.** A manifest whose `execution.environments` names an environment outside
-    its key's scope, whose window exceeds its key's maximum, or whose kernel declares a requirement of a
+    its key's scope, whose window exceeds its key's maximum, whose envelope exceeds its key's ceiling, or
+    whose kernel declares a requirement of a
     class its key may not entitle is refused with an `EX-LIC` code of its own. `enforcementRules` do not
     soften it: they are signed by the key whose authority is in question.
   - **Epochs and rotation.** `<year>` is the year a key's epoch begins and `k<N>` its sequence within its
     family and year, so a replacement issued in the same year is `k2`. A version line keeps an epoch's
     public key for as long as manifests signed with it must boot (item 2). A compromised key is removed
     alone, in a patch release: manifests signed with the other keys keep booting, and a lost dev key
-    forges nothing outside `development`, and no manifest that boots for longer than 90 days.
+    forges nothing outside `development`, nothing that boots for longer than 30 days, and nothing above
+    the dev workload ceiling.
   - **`exeris-root-2026-k1` is retired.** No private key for it is held and no manifest signed with it
     exists, so it leaves the trust store. The §1 example now carries `exeris-ent-2026-k1`, because it
     entitles `exeris-caps-bot-fingerprinting`, which is `enterprise-private`; the §4 code and Engineering
@@ -390,7 +405,11 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
     private issuance repository, not in `exeris-tooling`; Engineering Protocol item 3 moves there. The CLI
     refuses to sign outside the chosen key's scope, reading each identifier's class from
     `cap-license-registry.md`, so the kernel's check catches an issuer defect rather than being the first
-    to see one. A developer licence is issued before any boot and verified offline, so nothing waits on
+    to see one. Issuance limits are the control plane's rule, not the kernel's: a verified account, and an
+    organisation, hold at most a configurable number of active developer licences (defaults 3 and 25),
+    and each licence is bound to the account through `contract.id`, which carries an opaque account
+    reference and a sequence number and no personal data; §1 has no licensee field and none is added.
+    A developer licence is issued before any boot and verified offline, so nothing waits on
     the control plane (ADR-098 obligation 7c).
 
 - **2026-10-13 — Step 1 halts in every environment where an entitlement is declared.** The 2026-10-06
@@ -427,6 +446,6 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
      * Test 2: Whitespace and key reordering (RFC 8785 invariance) produces identical signature and passes verification.
      * Test 3: Unregistered `keyId` throws `EX-LIC-0002`.
      * Test 4: Manifest expired beyond `gracePeriodDays` throws `EX-LIC-0003`.
-     * _(Amended 2026-10-13: Tests 5–7 — a manifest outside its key's environment scope, beyond its key's maximum validity, or entitling a class its key may not entitle, is refused — see Amendments.)_
+     * _(Amended 2026-10-13: Tests 5–8 — a manifest outside its key's environment scope, beyond its key's maximum validity, above its key's workload ceiling, or entitling a class its key may not entitle, is refused — see Amendments.)_
 5. **Cross-Repo Stubs:**
    * Land `docs/adr/ADR-088.link.md` in `exeris-kernel` and `exeris-tooling`.
