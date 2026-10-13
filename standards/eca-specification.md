@@ -14,7 +14,7 @@ Formal architectural and normative specification for legal, commercial, cryptogr
 
 Binding per ADR-085 §M.38.
 
-**Where this does not apply, and what it costs.** It governs what an entitlement permits and how that permission is proved, not how a capability is built or a SKU assembled — `capability-conventions.md` and `sku-conventions.md` own those, and a rule about repository shape does not belong here however close it reads. It says nothing about pricing: the commercial terms sit in the private business registry, and this page names them by what they decide rather than restating them. The cost of proving entitlement offline is that revocation is not immediate — a manifest is valid until its epoch key rotates or its term ends, and there is no call home to shorten that. That is the trade the air-gap requirement buys.
+**Where this does not apply, and what it costs.** It governs what an entitlement permits and how that permission is proved, not how a capability is built or a SKU assembled — `capability-conventions.md` and `sku-conventions.md` own those, and a rule about repository shape does not belong here however close it reads. It says nothing about pricing: the commercial terms sit in the private business registry, and this page names them by what they decide rather than restating them. The cost of proving entitlement offline is that revocation is not immediate — a manifest is valid until its signing key leaves the trust store or its term ends, and there is no call home to shorten that. That is the trade the air-gap requirement buys.
 
 Binding per [ADR-023](../adr/ADR-023-capability-licensing-taxonomy.md) (Licensing Taxonomy), [ADR-024](../adr/ADR-024-capability-composition-model.md) (Capability Composition), [ADR-053](../adr/ADR-053-sku-composition-manifest-format.md) (SKU Composition Manifest), and the R&D cooperation model (IP sovereignty), a business decision kept in the private registry.
 
@@ -74,13 +74,13 @@ The runtime state is mathematically constrained by the attestation, which is in 
 
 ### 1.3 Offline Trust Boundary & Revocation Strategy
 
-The Exeris Kernel strictly enforces **Zero Phone-Home Compliance**. The runtime never connects to external networks to validate licensing status. Trust is rooted in the Exeris Root CA public key embedded directly in `exeris-kernel-core`.
+The Exeris Kernel strictly enforces **Zero Phone-Home Compliance**. The runtime never connects to external networks to validate licensing status. Trust is rooted in a set of scoped Exeris issuer public keys embedded directly in `exeris-kernel-core`; each key may sign only within its scope — the environments it may authorize, a maximum validity, and the entitlement classes it may entitle ([ADR-088](../adr/ADR-088-cryptographic-license-manifest-and-offline-verification.md), amendment of 2026-10-13).
 
 Offline contract lifecycles are governed by five mechanisms:
 
 1. **Natural Expiration:** Subscriptions carry an explicit `validUntil` ISO-8601 timestamp. Past this window, the runtime transitions to a deterministic grace period or halts.
 2. **Manifest Replacement:** A newer signed manifest installed in place supersedes the previous one. The runtime resolves a single `license-manifest.json` and verifies whatever it finds ([ADR-088](../adr/ADR-088-cryptographic-license-manifest-and-offline-verification.md) §5), so replacement is an operational act rather than a protocol, and it carries no offline rollback protection: refusing an older, broader manifest would need a high-water mark that survives a restart, which the Phase 0 pipeline has no store for. Named here rather than closed with a sequence field that nothing would read.
-3. **Root Key Epoch Rotation:** Exeris root keys rotate on planned 24-month epochs. Pinned detached licenses preserve historical epoch keys.
+3. **Issuer Key Epoch Rotation:** Exeris issuer keys rotate on planned epochs, named `exeris-<family>-<year>-k<N>` for the `prod`, `dev` and `ent` families. Pinned detached licenses preserve historical epoch keys, and a compromised key is removed alone in a patch release.
 4. **Offline Revocation Lists (CRL):** In extreme legal termination scenarios, signed cryptographic CRL artifacts are incorporated into substrate release streams and security patches.
 5. **Deterministic Grace Period:** A configurable window (`gracePeriodDays`, default: 14) during which expired production systems emit high-priority audit warnings to standard logging and JFR rings without immediately halting critical business traffic.
 
@@ -94,7 +94,7 @@ Exeris Tier 2 commercial capabilities and Tier 3 Platform SKUs are published und
 
 * ECSL is **not** an OSI-approved open-source license. It is a **Source-Available Commercial License**.
 * Code is publicly visible across public repositories to uphold the *Glass Box Thesis* this section states: customers audit source code, verify benchmark assertions, and inspect security routines prior to purchase.
-* **Non-Production Use** (evaluation, academic study, local debugging, pre-production testing) is royalty-free and unrestricted.
+* **Non-Production Use** (evaluation, academic study, local debugging, pre-production testing) is royalty-free and unrestricted. Booting a commercial artifact still needs a signed manifest in every environment: for development, a free developer licence; for staging and cold standby, the customer's manifest, which lists them at no fee (§4.3).
 * **Production Use** requires an active commercial entitlement and a matching signed manifest.
 * Machine metadata standard: `SPDX-License-Identifier: LicenseRef-Exeris-ECSL-1.0`.
 
@@ -191,8 +191,8 @@ PRODUCTION -----------+--- Active Disaster Recovery (Hot/Warm standby serving tr
                       +--- Production Load Simulation (Traffic on live data planes)
 ```
 
-1. **Evaluation / Development / Test / Staging:** Dedicated exclusively to verification, testing, and pre-release validation. May run unstamped builds without a commercial manifest.
-2. **Cold Standby (Disaster Recovery):** Replicated storage and dormant compute nodes that process no live network traffic. Permitted without additional subscription fees across all commercial tiers.
+1. **Evaluation / Development / Test / Staging:** Dedicated exclusively to verification, testing, and pre-release validation. Royalty-free. A kernel that carries a commercial artifact boots here only under a signed manifest: evaluation, development and test — the manifest value `development` — under a free developer licence, signed by the developer key, valid for at most 30 days, throttled at `HARD` to 50 requests per second and 10 connections, and marked by `Exeris-License: development` on every HTTP response; staging under the customer's manifest. A Community-only kernel needs none (ADR-088 and ADR-089, amendments of 2026-10-13).
+2. **Cold Standby (Disaster Recovery):** Replicated storage and dormant compute nodes that process no live network traffic. Permitted without additional subscription fees across all commercial tiers; a node that boots a commercial artifact does so under the customer's manifest listing `dr-cold`.
 3. **Hot Standby / Active DR:** Redundant nodes actively running parallel state machines, in-memory caches, or processing live traffic splits. Counted towards active instance or throughput quotas as specified in the Order Form.
 
 ---
@@ -213,7 +213,7 @@ with nothing keeping them equal.
 
 1. **Canonicalization:** The JSON payload (excluding the `signature` block) is normalized strictly according to **RFC 8785 (JSON Canonicalization Scheme - JCS)**.
 2. **Signature:** Generated using **Ed25519** over the UTF-8 bytes of the canonical JSON string.
-3. **Verification:** `exeris-kernel-core` resolves the public key identified by `issuer.keyId` from its internal keystore and validates the signature during Phase 0 bootstrap before initializing off-heap memory or network sockets.
+3. **Verification:** `exeris-kernel-core` resolves the public key identified by `issuer.keyId` from its internal keystore, together with that key's scope, validates the signature, and refuses a manifest outside the scope, during Phase 0 bootstrap before initializing off-heap memory or network sockets.
 
 ---
 
@@ -225,14 +225,14 @@ To safeguard the Glass Box developer experience, build tooling (`exeris-tooling`
 
 `Source Code` → `mvn clean compile` → `Local Artifact` (Always permitted for evaluation)
 
-* Developers may clone public repositories, compile code, execute unit/integration tests, and run local prototypes without any license manifest.
+* Developers may clone public repositories, compile code and package it without any license manifest. Running a test or a prototype that boots a kernel with a commercial artifact on its classpath needs a manifest — a free developer licence limited to `development` (ADR-089, amendment of 2026-10-13).
 * When targeting a production release profile (`-Pproduction`), `exeris-tooling` verifies:
   1. The presence of a valid `license-manifest.json`.
   2. That all composed capabilities declared via `@Requires` satisfy:
      `Capabilities_declared ⊆ Capabilities_entitled`
 
      Both sets hold Maven artifactIds — `exeris-caps-<kebab-name>` for a capability, `exeris-sku-<kebab-name>` for an SKU — the identifier form ADR-088 §1 fixes (amendment of 2026-10-13). Community artifacts register no entitlement requirement and contribute nothing to the declared set (ADR-089, amendment of 2026-10-13).
-* An unstamped artifact that carries entitlement-requiring code fails at bootstrap if booted in a production-class environment (Production, Active Disaster Recovery, Production Load Simulation — §4.3). An artifact with no such code — the Community edition — boots in every environment without a manifest (§4.1; ADR-088 and ADR-089, amendments of 2026-10-06).
+* An artifact that carries entitlement-requiring code fails at bootstrap without a manifest in every environment (`EX-LIC-0005`), and with one, unless the manifest authorizes the environment, entitles every required capability, and was signed by a key whose scope covers both. An artifact with no such code — the Community edition — boots in every environment without a manifest (§4.1; ADR-088 and ADR-089, amendments of 2026-10-06 and 2026-10-13).
 
 ### 6.2 Enforcement Levels (`HARD`, `SOFT`, `AUDIT`)
 
@@ -247,6 +247,7 @@ Constraint enforcement is decoupled from raw network blocking:
 3. **`AUDIT` Enforcement (Continuous Metering):**
    * Trigger: Traffic bursts exceed `maxThroughputRps` or connections exceed `maxConnections`.
    * Action: System serves traffic without dropping packets. Telemetry records the peak envelope in local metrics for subsequent commercial true-up reconciliation.
+   * Exception: under a developer licence — a manifest signed by the developer key, which never entitles a production environment — the envelope is enforced at `HARD` whatever `enforcementRules` say: a request beyond `maxThroughputRps` is refused before its handler runs and a connection beyond `maxConnections` is refused at accept (ADR-088 and ADR-089, amendments of 2026-10-13).
 
 ### 6.3 Typed Runtime Model: `ExecutionContract`
 

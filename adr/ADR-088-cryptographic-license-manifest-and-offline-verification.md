@@ -88,7 +88,7 @@ The manifest is an UTF-8 encoded JSON document conforming to `https://specs.exer
   },
   "issuer": {
     "authority": "Exeris License Issuer CA",
-    "keyId": "exeris-root-2026-k1",
+    "keyId": "exeris-ent-2026-k1",
     "issuedAt": "2026-09-12T12:00:00Z"
   },
   "signature": {
@@ -153,7 +153,8 @@ We select **Ed25519** (Edwards-curve Digital Signature Algorithm over Curve25519
    }
    ```
    The map is immutable and has no mutator: a trust root enters it only through a source change and a release, never at runtime. Each value is the public half of a key generated in the issuer's key ceremony. A published test vector — the RFC 8032 §7.1 keys among them — has a known private key and must never be embedded, because anyone could then sign a manifest the kernel accepts.
-2. **Epoch Key Lifecycles & Perpetual Detachment:** Exeris rotates license signing keys across defined **24-month epochs**. When a customer executes Code Detachment under Schedule C (`licenseMode: PERPETUAL_INTERNAL`), historical epoch keys remain embedded in the pinned version line forever, guaranteeing that detached systems boot offline indefinitely without expiring trust roots.
+   _(Amended 2026-10-13: each entry pins a key with a scope the kernel enforces — the environments it may authorize, a maximum validity, the entitlement classes it may entitle — under three key families, and `exeris-root-2026-k1` is retired — see Amendments.)_
+2. **Epoch Key Lifecycles & Perpetual Detachment:** Exeris rotates license signing keys across defined **24-month epochs**. When a customer executes Code Detachment under Schedule C (`licenseMode: PERPETUAL_INTERNAL`), historical epoch keys remain embedded in the pinned version line forever, guaranteeing that detached systems boot offline indefinitely without expiring trust roots. _(Amended 2026-10-13: a keyId reads `exeris-<family>-<year>-k<N>`, and a compromised key is removed alone in a patch release — see Amendments.)_
 3. **Offline Revocation Lists (CRL):** In strict air-gapped environments where online revocation checks are impossible, compromised or breached manifests are blacklisted via SHA-256 digests in regular security patch updates (`BlockedManifestRegistry`).
 
 ### 5. Phase 0 Bootstrap Verification Pipeline
@@ -191,7 +192,7 @@ During Phase 0 (`FOUNDATION: Contract & Memory`) of `KernelBootstrap`, the runti
 [Store in KernelProviders.EXECUTION_CONTRACT]
 ```
 
-_Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a missing manifest halts only in a production-class environment and only when code on the classpath declares that it needs an entitlement._
+_Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a missing manifest halts only in a production-class environment and only when code on the classpath declares that it needs an entitlement._ _(Amended 2026-10-13: when an entitlement is declared, a missing manifest halts in every environment; and step 3 resolves a key together with its scope, which the manifest must fall within — see Amendments.)_
 
 **Concrete obligations:**
 
@@ -199,7 +200,7 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
 2. **Standard JDK Cryptography:** Signature verification must use the standard JDK and nothing else: `java.security.Signature.getInstance("Ed25519")` API over `NamedParameterSpec.ED25519`.
 3. **Strict Tamper Detection:** A single bit modification in `license-manifest.json` outside the detached signature value must cause signature verification to fail immediately.
 4. **Pre-Allocation Phase 0 Gate:** Manifest verification must execute in Phase 0 of `KernelBootstrap` prior to off-heap memory segmentation, network socket binding, or capability initialization.
-5. **No Runtime Key Ingestion:** Public keys for verifying Exeris commercial licenses must not be read from dynamic remote network endpoints or unverified local files; they are permanently pinned in the immutable `TrustedIssuerKeyStore`.
+5. **No Runtime Key Ingestion:** Public keys for verifying Exeris commercial licenses must not be read from dynamic remote network endpoints or unverified local files; they are permanently pinned in the immutable `TrustedIssuerKeyStore`. _(Amended 2026-10-13: each key's scope is pinned with it, under the same rule — see Amendments.)_
 
 ---
 
@@ -231,7 +232,7 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
 
 ### 📋 What is NOT in scope
 
-* **Private Key Storage and Issuance Infrastructure:** The internal PKI, air-gapped Hardware Security Modules (HSMs), and operational signing pipelines used by Exeris to issue customer manifests are governed by internal security procedures.
+* **Private Key Storage and Issuance Infrastructure:** The internal PKI, air-gapped Hardware Security Modules (HSMs), and operational signing pipelines used by Exeris to issue customer manifests are governed by internal security procedures. _(Amended 2026-10-13: the custody class of each key family is decided here; the procedures stay internal — see Amendments.)_
 * **Runtime Capability Mapping:** The mapping of entitled capabilities to classloader modules and enforcement actions (`HARD`, `SOFT`, `AUDIT`) is governed by ADR-089.
 * **Pricing and SKU Definitions:** The commercial terms and packaging reflected in `contract` and `entitlement` are a business matter, governed by the commercial entitlement and schedule taxonomy in the private business decision registry and deliberately not restated here.
 
@@ -244,7 +245,7 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
 
 * **Assumes:** All target JDK distributions (OpenJDK, Temurin, Corretto, GraalVM) maintain native support for standard `Ed25519` via Java Security Provider SPI.
 * **Reversed by:** Evidence that a critical enterprise customer operates on an exotic JDK distribution lacking native Ed25519 support, or mathematical compromise of the Edwards-curve discrete logarithm problem.
-* **Risk:** Loss or compromise of an active Exeris Issuer private key. Mitigated by the 24-month signing epoch decided above, cold storage HSM keys, and offline blacklist distribution in patch releases.
+* **Risk:** Loss or compromise of an active Exeris Issuer private key. Mitigated by the 24-month signing epoch decided above, cold storage HSM keys, and offline blacklist distribution in patch releases. _(Amended 2026-10-13: mitigated by scoped keys, so a lost key forges only within its scope and is removed alone; the offline keys are held in encrypted files until hardware tokens replace them — see Amendments.)_
 
 ---
 
@@ -266,11 +267,14 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
     `execution.environments`; undeclared means `development`. The kernel profile, which governs what an
     error discloses, plays no part.
   - `production`, `production-load-sim` and `dr-hot` are the production classes (`eca-specification.md`
-    §4.3); the other three never require a manifest.
+    §4.3); the other three never require a manifest. _(Superseded 2026-10-13: a declared requirement
+    needs a manifest in every environment.)_
   - Code that needs an entitlement declares it through the `EntitlementRequirement` SPI (ADR-089,
     amendment of the same date). A missing manifest halts with `EX-LIC-0005` only in a production class
     and only when at least one requirement is declared; otherwise the kernel boots under the Community
-    fallback, which authorizes every environment and entitles no capability.
+    fallback, which authorizes every environment and entitles no capability. _(Superseded 2026-10-13: it
+    halts in every environment when a requirement is declared; with none, the Community fallback
+    stands.)_
   - A manifest that is present is verified in every environment.
 
 - **2026-10-06 — A manifest is read strictly, and an omitted enforcement rule does not weaken it.** §1
@@ -327,6 +331,94 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
   the shape of an identifier and not its prefix: the `exeris-caps-` / `exeris-sku-` prefix is checked
   at review, not by the kernel.
 
+- **2026-10-13 — The trust store holds scoped issuer keys, and the single root is retired.** §4 pinned
+  each issuer key by its keyId alone, so any trusted key could sign any manifest: every environment,
+  every capability, any term. A key held online to issue developer licences would then forge production
+  and enterprise manifests the day it leaked. Each trusted key now carries a scope, and a manifest is
+  valid only within the scope of the key that signed it:
+  - **Entry shape.** An entry of `TrustedIssuerKeyStore` holds the keyId, the 32-byte Ed25519 public key,
+    the environments the key may authorize (values of §1 `execution.environments`), a maximum validity or
+    none, a workload ceiling or none, and the entitlement classes it may entitle (`commercial`,
+    `enterprise-private`). The store is
+    fixed at build time, as before: immutable, no mutator, and obligation 5 stands — a key and its scope
+    enter only through a source change and a release.
+  - **Three key families.**
+
+    | keyId | Environments | Maximum validity | Workload ceiling | Classes | Custody |
+    |:--|:--|:--|:--|:--|:--|
+    | `exeris-prod-<year>-k<N>` | all six | none | none | `commercial` | Offline. The private key is an encrypted file (age with scrypt, or equivalent) on offline media, decrypted only to sign. A hardware token holding the Ed25519 key over PKCS#11 or OpenPGP replaces the file later, with no kernel change. |
+    | `exeris-dev-<year>-k<N>` | `development` | 30 days | 50 requests per second, 10 connections | `commercial` | Online, held by the private control plane (ADR-098) to issue self-service developer licences. A cloud KMS replaces it later, with no kernel change. |
+    | `exeris-ent-<year>-k<N>` | all six | none | none | `commercial`, `enterprise-private` | Offline, as for prod, on separate media under a separate secret. |
+
+  - **The dev scope is `development` alone.** §1 records evaluation, development and test under
+    `development`, so a developer's machine and a CI job are inside it. `staging` is not: it is the
+    pre-release stage of a deployment that runs in production, and a self-service key that could
+    authorize it would hand out a free entitlement for a release pipeline. `staging` and `dr-cold` are
+    listed in the customer's manifest, signed by a prod or ent key; listing them carries no fee
+    (`eca-specification.md` §4.3).
+  - **Maximum validity** runs from `issuer.issuedAt` to the last instant the manifest boots,
+    `execution.validUntil` plus `execution.gracePeriodDays`. Under a key with a maximum,
+    `issuer.issuedAt` is required, `execution.validFrom` may not precede it, and a manifest without
+    `execution.validUntil` (`licenseMode: PERPETUAL_INTERNAL`) is refused. Measured from signing rather
+    than from `validFrom`, the bound means a developer manifest that leaks stops booting at most 30 days
+    after it was signed.
+  - **Workload ceiling.** A manifest signed by a key with a ceiling must carry
+    `execution.workloadEnvelope` with `maxThroughputRps` and `maxConnections` at or below the ceiling and
+    `growthAllowancePercent` of `0`; an absent envelope reads as unlimited and is refused. The dev
+    ceiling is a policy value of 50 requests per second and 10 concurrent connections. Under a dev-key manifest the kernel enforces the envelope at `HARD`
+    whatever `enforcementRules` say — a request beyond the rate is refused before its handler runs, and a
+    connection beyond the ceiling is refused at accept — and every HTTP response carries the header
+    `Exeris-License: development`, which no configuration disables and no handler can remove; a classpath that declares no
+    `EntitlementRequirement` stays fully ungated, ceiling and watermark included. This is a
+    scoped exception to ADR-089 §3, where the envelope is `AUDIT` so that production traffic is never
+    dropped: the dev key never entitles a production environment, so the traffic it throttles is not
+    traffic it was entitled to serve (ADR-089, amendment of the same date).
+  - **The class of a capability comes from the artifact.** The kernel reads no registry at run time, so
+    each `EntitlementRequirement` states the class of the identifiers it returns (ADR-089, amendment of
+    the same date), and the kernel checks that the signing key may entitle the class of every declared
+    requirement — whether or not the manifest lists the identifier. The values are ADR-023's licence
+    taxonomy for a capability artifact, a technical class its build carries, not contract vocabulary.
+    The rejected alternative is a scope that lists permitted identifier prefixes: an artifactId does not
+    encode its class — the one `enterprise-private` capability is `exeris-caps-bot-fingerprinting`, with
+    the prefix every commercial capability has — so the scope would have to list identifiers, a copy of
+    [`cap-license-registry.md`](../cap-license-registry.md) inside the kernel that needs a release for
+    every capability added. The declaration keeps the class beside the code it describes, and
+    `exeris-tooling` checks it against the registry at build time. A modified artifact can declare a
+    weaker class, but it can as easily register no requirement at all; ADR-023's licence answers both.
+  - **A scope breach is `HARD`.** A manifest whose `execution.environments` names an environment outside
+    its key's scope, whose window exceeds its key's maximum, whose envelope exceeds its key's ceiling, or
+    whose kernel declares a requirement of a
+    class its key may not entitle is refused with an `EX-LIC` code of its own. `enforcementRules` do not
+    soften it: they are signed by the key whose authority is in question.
+  - **Epochs and rotation.** `<year>` is the year a key's epoch begins and `k<N>` its sequence within its
+    family and year, so a replacement issued in the same year is `k2`. A version line keeps an epoch's
+    public key for as long as manifests signed with it must boot (item 2). A compromised key is removed
+    alone, in a patch release: manifests signed with the other keys keep booting, and a lost dev key
+    forges nothing outside `development`, nothing that boots for longer than 30 days, and nothing above
+    the dev workload ceiling.
+  - **`exeris-root-2026-k1` is retired.** No private key for it is held and no manifest signed with it
+    exists, so it leaves the trust store. The §1 example now carries `exeris-ent-2026-k1`, because it
+    entitles `exeris-caps-bot-fingerprinting`, which is `enterprise-private`; the §4 code and Engineering
+    Protocol item 1 name the retired root and carry inline pointers.
+  - **Issuance is private.** The issuer CLI and the control plane's developer-licence signer live in a
+    private issuance repository, not in `exeris-tooling`; Engineering Protocol item 3 moves there. The CLI
+    refuses to sign outside the chosen key's scope, reading each identifier's class from
+    `cap-license-registry.md`, so the kernel's check catches an issuer defect rather than being the first
+    to see one. Issuance limits are the control plane's rule, not the kernel's: a verified account, and an
+    organisation, hold at most a configurable number of active developer licences (defaults 3 and 25),
+    and each licence is bound to the account through `contract.id`, which carries an opaque account
+    reference and a sequence number and no personal data; §1 has no licensee field and none is added.
+    A developer licence is issued before any boot and verified offline, so nothing waits on
+    the control plane (ADR-098 obligation 7c).
+
+- **2026-10-13 — Step 1 halts in every environment where an entitlement is declared.** The 2026-10-06
+  amendment of step 1 halted a boot without a manifest only in a production class. ADR-089's amendment of
+  this date supersedes that: when at least one `EntitlementRequirement` is declared, a missing manifest
+  halts with `EX-LIC-0005` in every environment, and a classpath that declares none boots under the
+  Community fallback in every environment. A manifest that is present is verified in every environment,
+  including its key's scope. The two bullets of the 2026-10-06 entry that said otherwise are marked
+  superseded.
+
 ## Cross-references
 
 * [`standards/eca-specification.md`](../standards/eca-specification.md) — Exeris Contract Architecture §5 (Cryptographic Manifest Specification).
@@ -341,17 +433,18 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
 
 1. **`exeris-kernel-core` Cryptographic Engine:**
    * Implement `eu.exeris.kernel.core.contract.crypto.JsonCanonicalizer` strictly following RFC 8785 without third-party dependencies.
-   * Implement `eu.exeris.kernel.core.contract.crypto.TrustedIssuerKeyStore` containing the static public key array for `exeris-root-2026-k1`.
+   * Implement `eu.exeris.kernel.core.contract.crypto.TrustedIssuerKeyStore` containing the static public key array for `exeris-root-2026-k1`. _(Amended 2026-10-13: the scoped entries of the `exeris-prod-`, `exeris-dev-` and `exeris-ent-` families; `exeris-root-2026-k1` is retired — see Amendments.)_
    * Implement `eu.exeris.kernel.core.contract.crypto.LicenseManifestVerifier` invoking `java.security.Signature.getInstance("Ed25519")`.
 2. **Phase 0 Bootstrap Integration:**
    * Wire `LicenseManifestVerificationStep` into `KernelBootstrap.bootstrapFoundation()` before memory pool configuration.
 3. **`exeris-tooling` Manifest Generator:**
-   * Add `exeris-manifest-tool` CLI module capable of parsing commercial entitlement YAMLs, canonicalizing via RFC 8785, and signing via an Ed25519 private key.
+   * Add `exeris-manifest-tool` CLI module capable of parsing commercial entitlement YAMLs, canonicalizing via RFC 8785, and signing via an Ed25519 private key. _(Amended 2026-10-13: issuance lives in a private issuance repository, not in `exeris-tooling` — see Amendments.)_
 4. **TCK Assertion Suite:**
    * Implement `AbstractLicenseManifestCryptoTck` in `exeris-kernel`:
      * Test 1: Bit-flip in capability list causes immediate signature validation failure.
      * Test 2: Whitespace and key reordering (RFC 8785 invariance) produces identical signature and passes verification.
      * Test 3: Unregistered `keyId` throws `EX-LIC-0002`.
      * Test 4: Manifest expired beyond `gracePeriodDays` throws `EX-LIC-0003`.
+     * _(Amended 2026-10-13: Tests 5–8 — a manifest outside its key's environment scope, beyond its key's maximum validity, above its key's workload ceiling, or entitling a class its key may not entitle, is refused — see Amendments.)_
 5. **Cross-Repo Stubs:**
    * Land `docs/adr/ADR-088.link.md` in `exeris-kernel` and `exeris-tooling`.
