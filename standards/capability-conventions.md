@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-09-16
+last-verified: 2026-10-13
 ---
 
 # Capability Conventions
@@ -20,6 +20,7 @@ A capability is a self-contained, composable unit of platform functionality gove
 1. **Repository naming and Maven coordinates.** `[L1: pom enforcer]`
    - Repository name: `exeris-caps-<kebab-name>`.
    - Coordinates: `groupId=eu.exeris.caps`, `artifactId=exeris-caps-<kebab-name>`.
+   - The artifactId is the capability's identifier wherever an entitlement names it: in a licence manifest's `entitlement.capabilities`, in the set the capability's `EntitlementRequirement` returns, and in the declared set tooling checks for a production build ([ADR-088](../adr/ADR-088-cryptographic-license-manifest-and-offline-verification.md) and [ADR-089](../adr/ADR-089-capability-entitlement-enforcement-and-runtime-contract.md), amendments of 2026-10-13). It is the artifactId alone, without the groupId. A `community` capability registers no `EntitlementRequirement`.
    - Version follows the active ecosystem line (e.g. `0.1.0-SNAPSHOT` or release tag).
 2. **Package root and boundary isolation (The Wall).** `[L1: exeris-tooling CapTierWall]`
    - The package root must be `eu.exeris.caps.<sanitized_name>`. The segment immediately following `eu.exeris.caps.` identifies the capability name owned by this build.
