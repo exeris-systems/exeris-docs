@@ -303,7 +303,8 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
   - A capability is identified by its artifactId, `exeris-caps-<kebab-name>`
     ([`capability-conventions.md`](../standards/capability-conventions.md) rule 1); an SKU by its
     artifactId, `exeris-sku-<kebab-name>` ([`sku-conventions.md`](../standards/sku-conventions.md)
-    rule 1). These are the row keys of [`cap-license-registry.md`](../cap-license-registry.md).
+    rule 1). A capability's artifactId is its row key in
+    [`cap-license-registry.md`](../cap-license-registry.md); the registry lists capabilities only.
   - The artifactId alone, never `groupId:artifactId`. The groupId is fixed per artefact kind
     (`eu.exeris.caps`, `eu.exeris.sku`) and the prefix already names the kind. The kernel's
     `ExecutionContract.CAPABILITY_ID_PATTERN` accepts `exeris-caps-cors-policy` and rejects
@@ -318,7 +319,11 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
   - A Community artifact registers no requirement, so its identifier never has to appear in a
     manifest.
 
-  The §1 example lists artifactIds. `CAPABILITY_ID_PATTERN` admits dotted names as well, so it checks
+  The §1 example lists artifactIds. Its `entitlement.capabilities` maps as follows: `gateway.core` →
+  `exeris-caps-gateway-core`, `gateway.routing` → `exeris-caps-request-routing`, `gateway.rate-limit`
+  → `exeris-caps-rate-limiting`, `security.jwt` → `exeris-caps-jwt-validation`, `security.tls` →
+  `exeris-caps-tls-termination`, `security.bot-fingerprinting` → `exeris-caps-bot-fingerprinting`; the
+  SKU's own `exeris-sku-api-gateway` is added, because an SKU that registers a requirement is listed. `CAPABILITY_ID_PATTERN` admits dotted names as well, so it checks
   the shape of an identifier and not its prefix: the `exeris-caps-` / `exeris-sku-` prefix is checked
   at review, not by the kernel.
 
