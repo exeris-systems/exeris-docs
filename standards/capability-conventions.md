@@ -68,6 +68,12 @@ A capability is a self-contained, composable unit of platform functionality gove
      - `README.md` (conforming to `readme-skeleton.md`)
      - `AGENTS.md` (conforming to `agents-md-schema.md`)
      - `CLAUDE.md` (referencing Cap-Tier Wall rules and two-pass build)
+9. **Service contract versions.** `[L2]`
+   - A capability that has not been released declares every service contract at `0.1.0`: `@Provides(service = ..., version = "0.1.0")`. It never declares a contract at `1.0.0` or higher.
+   - A consumer of a pre-release contract declares the range `[0.1.0,0.2.0)`.
+   - Before the first release, a breaking change to a contract does not bump its version. The contract stays at `0.1.0`: nothing can resolve an unpublished contract, so no consumer exists for a bump to protect.
+   - The rule expires with the capability's first resolvable published artefact. From then on each contract follows 0.x semver: a breaking change bumps the minor version (`0.1.0` → `0.2.0`), an additive change bumps the patch version (`0.1.0` → `0.1.1`), and a consumer range spans one minor line (`[0.2.0,0.3.0)`).
+   - `1.0.0` is a release gate, decided per capability. It is never a starting point.
 
 ---
 
@@ -113,3 +119,4 @@ Before opening a pull request or tagging a release on any capability:
 6. Does `mvn verify` pass cleanly on a fresh build after seeding with `-Dexeris.codegen.skip=true`?
 7. Does the `LICENSE` file match the assigned tier in [`cap-license-registry.md`](../cap-license-registry.md)?
 8. Are `AGENTS.md`, `CLAUDE.md`, and `README.md` present and compliant with repository hygiene standards?
+9. While the capability is unreleased, does every `@Provides` declare `0.1.0` and every `@Requires` on an unreleased contract declare `[0.1.0,0.2.0)`?

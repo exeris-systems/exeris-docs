@@ -64,6 +64,9 @@ A Platform SKU is a named, version-pinned, commercial-licensed composition of Ti
      - `README.md` (conforming to `readme-skeleton.md`)
      - `AGENTS.md` (conforming to `agents-md-schema.md`)
      - `CLAUDE.md`
+9. **SKU version.** `[L2]`
+   - An SKU that has not been released starts at `0.1.0`, never at `1.0.0` or higher. `1.0.0` is a release gate, decided per SKU. It is never a starting point.
+   - The versions of the service contracts an SKU composes follow [`capability-conventions.md`](capability-conventions.md) rule 9.
 
 ---
 
