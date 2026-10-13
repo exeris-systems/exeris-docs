@@ -365,8 +365,7 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
   - **Workload ceiling.** A manifest signed by a key with a ceiling must carry
     `execution.workloadEnvelope` with `maxThroughputRps` and `maxConnections` at or below the ceiling and
     `growthAllowancePercent` of `0`; an absent envelope reads as unlimited and is refused. The dev
-    ceiling is 50 requests per second and 10 concurrent connections: enough to develop and test against,
-    too little to serve production. Under a dev-key manifest the kernel enforces the envelope at `HARD`
+    ceiling is a policy value of 50 requests per second and 10 concurrent connections. Under a dev-key manifest the kernel enforces the envelope at `HARD`
     whatever `enforcementRules` say — a request beyond the rate is refused before its handler runs, and a
     connection beyond the ceiling is refused at accept — and every HTTP response carries the header
     `Exeris-License: development`, which no configuration disables and no handler can remove; a classpath that declares no
