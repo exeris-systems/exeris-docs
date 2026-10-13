@@ -45,11 +45,11 @@ The runtime evaluates pure technical entitlements, remaining completely agnostic
 
 We explicitly decouple source compilation from production deployment authorization:
 
-* Developers can always clone, compile, test, and package source-available capabilities without a license manifest.
+* Developers can always clone, compile, test, and package source-available capabilities without a license manifest. _(Amended 2026-10-13: compiling and packaging need none; booting a kernel with a commercial artifact on its classpath, a test that boots one included, needs a manifest — for development, a free developer licence — see Amendments.)_
 * Stamping a build artifact for production target execution requires a valid, cryptographically verified `license-manifest.json`.
 * The tooling pipeline (`exeris-tooling`) validates that all composed capabilities declared via `@Requires` satisfy:
   `Capabilities_declared ⊆ Capabilities_entitled`
-* An unstamped artifact booted in an environment marked as `production` fails at bootstrap. _(Amended 2026-10-06: only an artifact that declares an `EntitlementRequirement`, and in any of the three production classes — see Amendments.)_
+* An unstamped artifact booted in an environment marked as `production` fails at bootstrap. _(Amended 2026-10-06: only an artifact that declares an `EntitlementRequirement`, and in any of the three production classes — see Amendments.)_ _(Amended 2026-10-13: such an artifact fails without a manifest in every environment — see Amendments.)_
 
 ### 2. Typed Runtime Contract: `ExecutionContract`
 
@@ -107,7 +107,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 **Concrete obligations:**
 
 1. **Tooling Capability Set Assertion:** `exeris-tooling` must extract all resolved capability identifiers from the composed `@CapabilityModule` DAG and assert `Capabilities_declared ⊆ Capabilities_entitled` whenever the build profile specifies a production target (`-Pproduction`). Missing entitlements must cause compilation to fail with an actionable diagnostic. _(Amended 2026-10-13: the identifiers are Maven artifactIds, the same strings the manifest and `EntitlementRequirement` carry — see Amendments.)_
-2. **Phase 0 Bootstrap Verification:** `exeris-kernel-core`'s `KernelBootstrap` must resolve and validate `license-manifest.json` during Phase 0 (`FOUNDATION: Contract & Memory`) _(amended 2026-10-06: a `KernelBootstrap` step ahead of FOUNDATION, not a node in it — see Amendments)_. **This amends the canonical Bootstrap DAG**, which defines FOUNDATION as memory only and places cryptography in the parallel SERVICES phase (`high-level-architecture.md` §2, sourced from `exeris-kernel/docs/subsystems/bootstrap.md`). The amendment is deliberate — an entitlement that is checked after off-heap allocation has already been spent is checked too late — and it is a change to that diagram rather than a reading of it, so both pages owe an update; Engineering Protocol item 6 carries the obligation. If the manifest is missing, corrupt, or signature verification fails in an environment configured as `production`, the process must terminate before binding network sockets. _(Amended 2026-10-06: "in an environment configured as `production`" reads as the three production classes, and a missing manifest halts only when an `EntitlementRequirement` is declared.)_
+2. **Phase 0 Bootstrap Verification:** `exeris-kernel-core`'s `KernelBootstrap` must resolve and validate `license-manifest.json` during Phase 0 (`FOUNDATION: Contract & Memory`) _(amended 2026-10-06: a `KernelBootstrap` step ahead of FOUNDATION, not a node in it — see Amendments)_. **This amends the canonical Bootstrap DAG**, which defines FOUNDATION as memory only and places cryptography in the parallel SERVICES phase (`high-level-architecture.md` §2, sourced from `exeris-kernel/docs/subsystems/bootstrap.md`). The amendment is deliberate — an entitlement that is checked after off-heap allocation has already been spent is checked too late — and it is a change to that diagram rather than a reading of it, so both pages owe an update; Engineering Protocol item 6 carries the obligation. If the manifest is missing, corrupt, or signature verification fails in an environment configured as `production`, the process must terminate before binding network sockets. _(Amended 2026-10-06: "in an environment configured as `production`" reads as the three production classes, and a missing manifest halts only when an `EntitlementRequirement` is declared.)_ _(Amended 2026-10-13: in every environment, not only the production classes — see Amendments.)_
 3. **Zero Phone-Home Invariant:** No enforcement routine in `exeris-kernel-core`, `exeris-tooling`, or any capability module may initiate an outbound network connection to verify license status. All verification is strictly local and asymmetric.
 4. **Offline Keystore Binding:** The public keys of the Exeris License CA must be embedded in `exeris-kernel-core` at build time. Historical epoch keys must remain accessible to validate version-pinned `PERPETUAL_INTERNAL` detached deployments.
 5. **Separation from APM Telemetry:** In-process JFR licensing events (`eu.exeris.telemetry.license.EnforcementEvent`; _amended 2026-10-06: `eu.exeris.kernel.contract.Enforcement`_) are strictly customer-controlled operational records. They must never be forwarded to third-party or Exeris servers without explicit customer configuration.
@@ -118,7 +118,7 @@ Enforcement actions are partitioned into three orthogonal levels:
 
 ### ✅ Positive Outcomes
 
-* **[+] Glass Box Developer Ergonomics Preserved:** Developers work locally without friction, licenses, or fake mocks. Friction only appears when preparing production releases.
+* **[+] Glass Box Developer Ergonomics Preserved:** Developers work locally without friction, licenses, or fake mocks. Friction only appears when preparing production releases. _(Amended 2026-10-13: a developer booting a commercial artifact holds a free developer licence, obtained by registering — see Amendments and the Trade-offs below.)_
 * **[+] Decoupled Architecture:** The kernel is completely insulated from legal agreement names; commercial contracts can change terms without requiring code refactoring.
 * **[+] Operational Safety in Production:** Mission-critical traffic is never discarded due to commercial overages; `AUDIT` enforcement keeps systems online while tracking metrics for settlement.
 * **[+] Air-Gapped High Security:** The platform operates flawlessly in classified defense, sovereign cloud, and banking networks without external telemetry connections.
@@ -127,6 +127,9 @@ Enforcement actions are partitioned into three orthogonal levels:
 
 * **[-] Build Complexity:** Build tooling must maintain awareness of target profiles (`dev` vs `production`) to distinguish unstamped developer jars from production deliverables.
 * **[-] Reconciliation Latency:** Under `AUDIT` enforcement, customer throughput overages are reconciled asynchronously through periodic reports rather than enforced in real time.
+* **[-] A Copied Manifest Boots Elsewhere:** _(Added 2026-10-13, see Amendments.)_ Verification is offline, so a manifest that boots one installation boots any other that declares an environment it authorizes and carries the artifacts it entitles. `authorizedInstances` is `SOFT` and the workload envelope `AUDIT` (§3): a copy is found by audit and reconciliation, not refused at boot. The same holds for a developer licence on a host that declares `development` while serving production traffic — the kernel takes the environment from configuration and cannot tell the two apart; the 90-day bound of the developer key limits how long such a licence boots, not whether it does.
+* **[-] Source-Available Code Can Drop the Check:** _(Added 2026-10-13, see Amendments.)_ Anyone holding the source can build a kernel or an artifact without the gate, or with a requirement that declares nothing. No runtime mechanism prevents it, and none is attempted (Non-Goals); the licence of ADR-023 is the backstop.
+* **[-] A Commercial Artifact Has No Anonymous Boot:** _(Added 2026-10-13, see Amendments.)_ Booting one needs a manifest in every environment, so a developer registers once and renews a developer licence at least every 90 days, and CI holds a token to obtain one.
 
 ### 🔄 Alternatives Considered and Rejected
 
@@ -172,11 +175,13 @@ Enforcement actions are partitioned into three orthogonal levels:
     `production`, `production-load-sim` and `dr-hot` require an entitlement. The environment is declared
     through the configuration key `environment` and defaults to `development`; the kernel profile is
     not consulted.
-  - In a production class, a missing manifest with any requirement declared halts with `EX-LIC-0005`;
+  - In a production class, a missing manifest with any requirement declared halts with `EX-LIC-0005`
+    _(superseded 2026-10-13: in every environment)_;
     with a manifest, the contract must authorize the environment and every required capability, each
     through `assertEnvironment` / `assertCapability` at its enforcement level. This is the first runtime
     caller of capability enforcement; a requirement that is not declared is not enforced by the kernel.
   - Outside the production classes nothing is gated, and a manifest that is present is still verified.
+    _(Superseded 2026-10-13: a declared requirement is gated in every environment.)_
 
 - **2026-10-06 — The contract types are SPI types.** `ExecutionContract`, `WorkloadEnvelope`,
   `EnforcementLevel` and `ExecutionEnvironment` are in `eu.exeris.kernel.spi.contract`, and
@@ -216,6 +221,39 @@ Enforcement actions are partitioned into three orthogonal levels:
     same set.
   - `allowsCapability` and `assertCapability` take the same string, and a match is exact string
     equality.
+
+- **2026-10-13 — A commercial artifact needs a manifest in every environment.** The 2026-10-06 amendment
+  gated only the production classes: "outside the production classes nothing is gated". The environment
+  is a configuration key the operator sets, so a commercial capability ran without any manifest wherever
+  that key named `development`, `staging` or `dr-cold` — the gate was as strong as the one line that
+  names the environment. That rule is superseded:
+  - When at least one `EntitlementRequirement` is declared, a missing manifest halts the boot with
+    `EX-LIC-0005` in every environment. With a manifest, the kernel checks in every environment that the
+    contract authorizes the declared environment (`assertEnvironment`) and entitles every required
+    capability (`assertCapability`), each at its enforcement level, and that the scope of the key that
+    signed it covers the manifest and the class of every requirement (ADR-088, amendment of the same
+    date), always at `HARD`.
+  - A classpath that declares no requirement — the Community edition — is ungated in every environment,
+    as `eca-specification.md` §4.1 requires: it needs no manifest, and one that is present is still
+    verified.
+  - **A requirement states its class.** `EntitlementRequirement` gains a method returning the class of
+    the identifiers it returns, `commercial` or `enterprise-private`, with no default, so no
+    implementation is silently given the weaker class. An artifact whose identifiers differ in class
+    registers one requirement per class; one identifier declared under two classes is a requirement that
+    breaks its contract, `EX-LIC-0008`. The values are ADR-023's taxonomy for a capability artifact, the
+    technical class its build carries, so the runtime stays agnostic of legal vocabulary, as the Decision
+    requires: the kernel compares a class with a key's scope and reads no schedule, order form or SKU
+    name. Obligation 1's tooling check also compares each declared class with the artifact's row in
+    [`cap-license-registry.md`](../cap-license-registry.md).
+  - **Developer licences.** Development of a commercial artifact needs a manifest, and one is free: a
+    short-lived manifest limited to `development`, signed by the developer key of ADR-088, issued by the
+    private control plane (ADR-098) to a developer after registration, and to CI through a token. How the
+    control plane authenticates the requester is out of scope here. Context item 1 — evaluate without
+    licence keys or talking to sales — becomes: without talking to sales and without paying, after
+    registering once.
+  - **Residual limits**, stated as Trade-offs: offline verification cannot stop a manifest copied to
+    another installation, because instance limits are `SOFT` and the envelope `AUDIT`; and
+    source-available code can be modified to remove the check, which the licence of ADR-023 answers.
 
 ## Cross-references
 
