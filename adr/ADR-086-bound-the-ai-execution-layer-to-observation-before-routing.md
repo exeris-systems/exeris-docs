@@ -191,10 +191,10 @@ The layer adds no enforcement layer to ADR-085 §J. It observes L0–L2 and cons
   Measured on 2026-10-14 on one planned group — three Claude 5.5 arms of one task under a
   subscription credential (G-002, T-001; runs 01M4WDDWFAM0XKQHNEH3KQS48Q,
   01M4WDDY2GYYAWA8PTJM8VJW97 and 01M4WDDZNXBT7BHGQF4REQ973R): Claude Code wrote every cache entry
-  with the 1-hour TTL, and the Haiku 5.5 arm sent more than half of its requests above the vendor's
-  prompt-size tier boundary. Derived from that row's totals at the 5-minute rate and the lower tier,
-  its figure came out several times lower than derived per request — a difference produced by the
-  arithmetic alone, before any question about the list itself. The figures belong to the derivation's
+  with the 1-hour TTL, and some of the Haiku 5.5 arm's requests crossed the vendor's prompt-size
+  tier boundary. A figure derived from that row's totals at the 5-minute rate and the lower tier
+  diverges from the one derived per request — a difference produced by the arithmetic alone, before
+  any question about the list itself. The figures belong to the derivation's
   output for those runs, not to this record (`claims-and-evidence.md` rule 6); the run ids are named
   so that they are checkable once the rows are in the inbox.
 
