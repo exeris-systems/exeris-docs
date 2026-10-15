@@ -179,9 +179,13 @@ Resolving the base from the caller's checkout instead was considered: it validat
     with `docs-review.yml`.
   - **The required-check ruleset carries the new name, and a repository requires one name, never
     both.** There is one ruleset, `exeris-code-verdict`, and it requires `review / verdict`. Its
-    `include` lists only the repositories whose `guardrails.yml` calls `review.yml` from a job
-    `review`, and so publish that check; a repository is added to it in the change that renames its
-    job. A repository that has not moved has no required review check until it does.
+    It is the only source of the required review check for every publishing repository; no
+    per-repository branch protection carries it. `include` lists only the repositories whose
+    `guardrails.yml` calls `review.yml` from a job `review`, and a repository is added to it after
+    the change that renames its job has merged, because a listed repository whose caller still
+    reports the old name could never merge. The end state lists every repository whose
+    `guardrails.yml` sets `publish: true`; until a repository is listed it has no required review
+    check.
 
   Alternatives considered and rejected: calling `publish-verdict.yml` from `review.yml`, which keeps
   one copy of the publishing jobs and makes the name `review / <job> / verdict`, three segments,
