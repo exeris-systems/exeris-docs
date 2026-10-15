@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-10-14
+last-verified: 2026-10-15
 ---
 
 # Capability Licence Registry
@@ -41,9 +41,9 @@ Only `enterprise-private` implies a private repository.
 | Licence | Caps |
 |---|---|
 | `community` | 4 |
-| `commercial` | 55 |
+| `commercial` | 56 |
 | `enterprise-private` | 1 |
-| **total** | **60** |
+| **total** | **61** |
 
 The single `enterprise-private` cap is `bot-fingerprinting`, and the reason is structural rather
 than commercial: it depends on a kernel-tier SPI extension that ships in `exeris-kernel-enterprise`.
@@ -98,6 +98,7 @@ Every cap is `poc` today: no cap repository has a release tag or a published art
 | `exeris-caps-policy-chain` | `commercial` | public | specified | poc |
 | `exeris-caps-backend-health` | `commercial` | public | specified | poc |
 | `exeris-caps-admin-control-plane` | `commercial` | public | specified | poc |
+| `exeris-caps-gateway-observability` | `commercial` | public | specified | poc |
 
 ### Layer 3 — Gateway policies
 
@@ -184,6 +185,10 @@ Every cap is `poc` today: no cap repository has a release tag or a published art
 - **`exeris-caps-bank-aggregator`** is recorded in HLA §3.2 as *"commercial (BudgetHQ → promotable)"*
   — it originates in the BudgetHQ Family product and is a candidate for promotion into the shared
   cap layer. Counted as `commercial`; the promotion is not yet a decision.
+- **`exeris-caps-gateway-observability`** sits in layer 2 because it provides a service that other gateway
+  caps and the SKU call (`GatewayObservabilityService`) and contributes nothing to `PolicyChain`. It is
+  distinct from the layer-7 community `observability-bridge`, which forwards cap telemetry to the
+  ADR-018 wire format; this cap holds the gateway's own request metrics, access log and trace context.
 - **`exeris-caps-cors-policy`** is the first cap repository. It provides a transport-blind decision
   function and needs no kernel SPI, which makes it the cheapest possible exercise of the full
   build-time path.
@@ -202,5 +207,5 @@ Every cap is `poc` today: no cap repository has a release tag or a published art
 The tables above are parsed from HLA §3.2 — cap name from the first column, licence from the last,
 grouped by the `**Layer N — …**` headings. `Build` and `Status` are not in §3.2: they are set from
 the state of each repository and its published artefacts, and a consumer reads them by header name. Re-derive after any §3.2 edit rather than hand-patching a
-row, and re-check the totals against HLA §6.2's 4 / 55 / 1 split; a mismatch means one of the
+row, and re-check the totals against HLA §6.2's 4 / 56 / 1 split; a mismatch means one of the
 two documents moved without the other.
