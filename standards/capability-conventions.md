@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-10-13
+last-verified: 2026-10-15
 ---
 
 # Capability Conventions
@@ -28,7 +28,7 @@ A capability is a self-contained, composable unit of platform functionality gove
    - Implementation types belong strictly under `eu.exeris.caps.<sanitized_name>.internal` (or subpackages).
    - **No sibling `internal` access:** Reading any class inside a sibling's `internal` package fails the build.
    - **No Spring, Netty, Servlet or Reactor imports:** Any direct or transitive bytecode reference to `org.springframework.*`, `io.netty.*`, `jakarta.servlet.*` or `reactor.*` fails the build via the Class-File API scan (ADR-055).
-   - **No kernel-core or driver imports:** A capability may reference only `eu.exeris.kernel.spi.*`, never kernel internals or concrete execution drivers.
+   - **No kernel internals or driver dependencies:** A capability may reference `eu.exeris.kernel.spi.*` and the public (non-`internal`) API of `exeris-kernel-core`, never `eu.exeris.kernel.**.internal.**` and never a kernel driver (`exeris-kernel-community`, an enterprise driver) outside test scope (ADR-024, 2026-10-15 amendment).
 3. **Module declaration class.** `[L1: exeris-processor]`
    - Exactly one class at the package root (`<Name>Module.java`) annotated with `@CapabilityModule`.
    - Services offered must be declared via `@Provides(service = ..., version = ...)`.

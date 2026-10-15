@@ -4,7 +4,7 @@ type: adr
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-10-07
+last-verified: 2026-10-15
 slug: adr/ADR-024
 ---
 
@@ -84,7 +84,7 @@ ADR-006 establishes the substrate-tier Wall: `exeris-kernel-spi` and `exeris-ker
 
 - **No cap imports `org.springframework.*`, `io.netty.*`, `reactor.*`, `jakarta.servlet.*`, or any host-runtime-specific package.** Caps consume kernel SPIs and other caps via `@Requires`; host-runtime selection happens at SKU manifest time at Tier 1, never inside a cap. This is what keeps `exeris-spring-runtime` an independent Tier 1 product whose absence does not break any cap (per ADR-021 amendment 2026-05-13 and the `exeris-spring-runtime/CLAUDE.md` "Who consumes this repo" section).
 - **No cap reaches into another cap's private classes.** Only types annotated as `@Provides`d services are visible across the cap boundary. The convention is the same `eu.exeris.caps.<cap-name>.api.*` (visible) vs `eu.exeris.caps.<cap-name>.internal.*` (private) split that the kernel uses for SPI vs Core.
-- **No cap reaches into kernel private packages.** `eu.exeris.kernel.*.internal.*` and `eu.exeris.kernel.core.internal.*` are off-limits — only the SPI surface (`eu.exeris.kernel.spi.*`) is callable from cap code.
+- **No cap reaches into kernel private packages.** `eu.exeris.kernel.*.internal.*` and `eu.exeris.kernel.core.internal.*` are off-limits — only the SPI surface (`eu.exeris.kernel.spi.*`) is callable from cap code. *(Second half superseded: cap code may also use the public, non-`internal` API of `exeris-kernel-core`, and may not depend on a kernel driver outside test scope — see the 2026-10-15 amendment below.)*
 
 The cap-tier Wall is validated by the same `exeris-tooling` pipeline that performs `@Requires` resolution. A cap repository whose ArchUnit-style guard fails is rejected before its artefact is published; an SKU manifest that contains a cap with disabled or stale Wall guards is rejected by the kernel at boot. *(Second clause superseded. The kernel rejects nothing: it is cap-blind and reads no manifest (revised obligation 9). The Wall is enforced by a build-time bytecode scan in the tooling — `CapTierWall`, run by the `exeris:verify-capabilities` goal at `process-classes` — per [ADR-055](https://github.com/exeris-systems/exeris-tooling/blob/main/docs/adr/ADR-055-cap-tier-wall-guard.md) (`exeris-tooling`, 2026-07-30), which makes per-repository ArchUnit guards defence-in-depth rather than the primary gate. The boot-time refusal that remains is the SDK-side stamp assertion of revised obligations 8a′ / 8b.)*
 
@@ -299,6 +299,53 @@ regression.
   was chosen from.
 - The 2026-06-25 amendment above — the "deploy-time control plane" row of its table and its
   obligation 8c are the text this amendment supersedes.
+
+## What a Cap May Call in the Kernel — SPI and the Public API of Core (2026-10-15 amendment)
+
+The kernel bullet of the cap-tier Wall above says that only the SPI surface (`eu.exeris.kernel.spi.*`)
+is callable from cap code. That is narrower than the Wall's own purpose and narrower than what the
+toolchain emits. This amendment restates the bullet; the rest of the Wall (host-runtime packages,
+sibling caps' private classes) and the validation predicates stand.
+
+**Why the SPI-only half is wrong.** `exeris-kernel-core` is a consumable library, not a private
+implementation: its public packages (for example the HTTP client in `eu.exeris.kernel.core.http.client`)
+are tier-neutral, and both the Community and the Enterprise drivers build on it, so a cap that calls them
+is no more tied to a driver than one that calls the SPI. The generated code already does it: the
+`exeris-tooling` emitters write imports from `eu.exeris.kernel.core.http.client` (`KernelWebClient`,
+`KernelWebClient.WebClientException`; `KernelClientGenerator`), `eu.exeris.kernel.core.bootstrap`
+(`KernelBootstrap`), `eu.exeris.kernel.core.http.routing` (`HttpRouter`) and
+`eu.exeris.kernel.core.persistence` (`TransactionOrchestrator`) (`KernelApplicationGenerator`), beside
+`eu.exeris.kernel.spi.*` throughout, and `RequiredCompileArtifacts` puts `exeris-kernel-core` on the
+compile classpath of every generated application next to `exeris-kernel-spi`. A rule that forbade Core
+would contradict what the toolchain itself emits.
+
+**Revised rule (supersedes the kernel bullet's second half):**
+
+- **A cap may call `exeris-kernel-spi` (`eu.exeris.kernel.spi.*`) and the public API of
+  `exeris-kernel-core` (`eu.exeris.kernel.core.*` outside any `internal` package).**
+- **A cap may not reference a package with an `internal` segment under `eu.exeris.kernel.`**, in the SPI,
+  Core or any other kernel module (`eu.exeris.kernel.**.internal.**`). `CapTierWall` enforces this as
+  its `KERNEL_INTERNAL` rule: it matches any type under the `eu.exeris.kernel.` root with a whole
+  `internal` package segment, in the class's constant pool, descriptors, generic signatures and
+  annotations.
+- **A cap may not depend on a kernel driver outside test scope** — `exeris-kernel-community` or an
+  enterprise driver. Driver selection belongs to the SKU, at SKU manifest time, as the Wall's first
+  bullet already says of host runtimes. A test-scoped driver is allowed so that a cap can be exercised
+  against a real substrate. `CapTierWall` is a reference scan and does not check a cap's dependency
+  declarations, so this clause is stated and not yet machine-enforced.
+
+The substrate-tier Wall (ADR-006) is unchanged: SPI and Core stay Spring-free, and a public Core type
+a cap calls is Spring-free by that rule.
+
+### Cross-references for this amendment
+
+- [ADR-006](ADR-006-spring-free-kernel-boundary.md) (Spring-Free Kernel Boundary) — Core is Spring-free,
+  which is what makes its public API safe for a cap to call.
+- [ADR-055](https://github.com/exeris-systems/exeris-tooling/blob/main/docs/adr/ADR-055-cap-tier-wall-guard.md)
+  (Cap-Tier Wall Guard) — `CapTierWall` and its `KERNEL_INTERNAL` rule.
+- [Cap author guide](../cap-author-guide.md) and
+  [`standards/capability-conventions.md`](../standards/capability-conventions.md) — the restated rule as
+  authors and reviewers read it.
 
 ## Cross-references
 

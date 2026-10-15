@@ -4,7 +4,7 @@ type: howto
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-10-13
+last-verified: 2026-10-15
 ---
 
 # Capability Author Guide
@@ -294,7 +294,8 @@ only when the module actually is a cap (non-empty `capability_*.json`).
 | Rule | Why |
 |---|---|
 | `org.springframework.*`, `io.netty.*`, `reactor.*`, `jakarta.servlet.*` | Host selection belongs to the SKU, not a cap |
-| `eu.exeris.kernel.**.internal.**` | Only the SPI surface is callable |
+| `eu.exeris.kernel.**.internal.**` | Only the SPI and the public API of `exeris-kernel-core` are callable |
+| A dependency on a kernel driver (`exeris-kernel-community`, an enterprise driver) outside test scope | Driver selection belongs to the SKU, not a cap |
 | `eu.exeris.caps.<other>.**.internal.**` | Cross-cap access goes through `@Provides` |
 
 A violation fails the build listing **every** offence at once, deterministically ordered:
