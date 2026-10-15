@@ -4,7 +4,7 @@ type: explanation
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-10-07
+last-verified: 2026-10-15
 ---
 
 # Exeris: B2B Technical Whitepaper
@@ -139,7 +139,7 @@ This taxonomy is formalized in **ADR-023 (Capability Licensing Taxonomy, accepte
 |  | `exeris-caps-idempotency` | commercial | Cross-cutting — not confined to one SKU family (HLA §3.2 layer 7) |
 |  | `exeris-caps-usage-metering` | commercial | Cross-cutting — not confined to one SKU family (HLA §3.2 layer 7) |
 
-One capability repository exists today — `exeris-caps-cors-policy` (`community`, Apache 2.0), at **scaffolded** status per [`cap-license-registry.md`](cap-license-registry.md). Every other capability repository is in **specified** status. Implementation cadence is driven by the SKU roadmap in §7. The Capability Composition Model is governed by **ADR-024** (accepted 2026-05-13, amended through 2026-07-21), the licensing taxonomy by **ADR-023** (accepted 2026-05-13), and the SKU composition manifest format by **ADR-053** (JSON, 2026-07-21); the codegen pipeline (ADR-015) and the kernel bootstrap lifecycle contract are the implementation substrate those ADRs bind.
+Eleven capability repositories exist today, all at **scaffolded** status per [`cap-license-registry.md`](cap-license-registry.md), the first being `exeris-caps-cors-policy` (`community`, Apache 2.0). Every other capability is in **specified** status and none has a release. Implementation cadence is driven by the SKU roadmap in §7. The Capability Composition Model is governed by **ADR-024** (accepted 2026-05-13, amended through 2026-07-21), the licensing taxonomy by **ADR-023** (accepted 2026-05-13), and the SKU composition manifest format by **ADR-053** (JSON, 2026-07-21); the codegen pipeline (ADR-015) and the kernel bootstrap lifecycle contract are the implementation substrate those ADRs bind.
 
 **Compositional reuse is structural, not aspirational.** `exeris-caps-contact-graph` is a single cap consumed by Context-Centric CRM, OMS (customer/recipient model), PIM (B2B trading-partner model), and BudgetHQ (account-owner model). `exeris-caps-ocr-pipeline` is consumed by IDP and by BudgetHQ's receipt-scan capability — the same cap, not a fork. This is what makes Tier 2 a genuine ecosystem: a customer at the Platform tier can pull `contact-graph` + `product-catalog` + `pricing-engine` + `inventory-tracking` + `order-lifecycle` + `payment-gateway` + the SB platform layer and assemble a bespoke ERP composition that no Exeris-shipped SKU enumerates.
 
