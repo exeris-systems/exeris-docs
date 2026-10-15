@@ -4,7 +4,7 @@ type: explanation
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-10-07
+last-verified: 2026-10-15
 ---
 
 # Layer build order — what is actually unblocked, and what is waiting on whom
@@ -28,11 +28,11 @@ them are edges *between* repositories.
 | Layer | Waiting on | Kind of blockage |
 |:---|:---|:---|
 | **Platform backend as an Exeris application**, and its generated front | nothing | — |
-| **Control plane** — operator identity, delivery, cloud/git integrations | the six Tier 2 caps [ADR-098](adr/ADR-098-split-the-platform-control-plane-on-the-time-axis.md) composes it from and the six layer-5 caps of the Identity SKU ([ADR-099](adr/ADR-099-compose-identity-as-a-tier-3-platform-sku.md)) that provides operator identity, all `specified` in [`cap-license-registry.md`](cap-license-registry.md) | other repositories' code |
+| **Control plane** — operator identity, delivery, cloud/git integrations | the six Tier 2 caps [ADR-098](adr/ADR-098-split-the-platform-control-plane-on-the-time-axis.md) composes it from and the six layer-5 caps of the Identity SKU ([ADR-099](adr/ADR-099-compose-identity-as-a-tier-3-platform-sku.md)) that provides operator identity; the Identity caps are `scaffolded` and none is released, per [`cap-license-registry.md`](cap-license-registry.md) | other repositories' code |
 | **`relationships` in `exeris/domainDescribe`** | an ADR — ADR-025 pins that method's wire shape for the agent bridge | process latency, not implementation |
 | **Studio live editing** | kernel 0.12 (ADR-084, WebSocket provider SPI) | another repository's release |
 | **Presentation IR / the CMS lane** | the presentation RFC's build gate (emitter + corpus) | partly self-created — see below |
-| **Real SKU composition in Studio** | `exeris-caps-*` repositories; the first, `exeris-caps-cors-policy`, was scaffolded 2026-08-16 and committed its cap manifest 2026-08-18, ahead of ADR-024's H1-2027 target | distant |
+| **Real SKU composition in Studio** | `exeris-caps-*` repositories; eleven exist, all `scaffolded` per [`cap-license-registry.md`](cap-license-registry.md), the first being `exeris-caps-cors-policy` (scaffolded 2026-08-16, cap manifest committed 2026-08-18), ahead of ADR-024's H1-2027 target | distant |
 
 ## Why the first row is first
 
