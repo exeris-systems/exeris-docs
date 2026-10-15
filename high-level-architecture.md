@@ -78,7 +78,7 @@ C4Container
 
     Container_Boundary(caps, "Tier 2 — Capability Ecosystem") {
         Container(cap_substrate, "Substrate caps", "gateway-core, service-boundary-core", "Family-level substrate caps.")
-        Container(cap_policy, "Policy + SB platform + AI caps", "rate-limiting, jwt-validation, etc.", "60 caps across seven layers.<br/>References SPIs only.")
+        Container(cap_policy, "Policy + SB platform + AI caps", "rate-limiting, jwt-validation, etc.", "61 caps across seven layers.<br/>References SPIs only.")
     }
 
     Container_Boundary(skus, "Tier 3 — Platform SKUs") {
@@ -230,6 +230,7 @@ This extension landed as **ADR-023 (Capability Licensing Taxonomy, accepted 2026
 | `exeris-caps-policy-chain` | `PolicyChain` (ordered policy execution) | `gateway-core` | commercial |
 | `exeris-caps-backend-health` | `BackendHealthMonitor` (active + passive probes) | `gateway-core`, `upstream-pool` | commercial |
 | `exeris-caps-admin-control-plane` | `AdminControlPlane` (admin API for runtime config) | `gateway-core` | commercial |
+| `exeris-caps-gateway-observability` | `GatewayObservabilityService` (request metrics, access log, W3C trace context, Prometheus / JSON / dashboard export) | *(none declared)* | commercial |
 
 **Layer 3 — Gateway policies** (each contributes to `PolicyChain`).
 
@@ -469,10 +470,10 @@ Tier 2 introduces a third licensing value beyond ADR-020's `public` / `enterpris
 | License | Cap count | Examples |
 |---|---|---|
 | `community` (Apache 2.0 / MIT) | 4 | `exeris-caps-cors-policy`, `exeris-caps-i18n`, `exeris-caps-token-issuer`, `exeris-caps-observability-bridge` |
-| `commercial` (Exeris Commercial License, source-available) | 55 | Gateway substrate + building blocks + remaining Gateway policies, SB substrate + all platform caps (except `i18n`), all domain primitives except `token-issuer`, all AI Abstraction caps, the cross-cutting caps except `observability-bridge` |
+| `commercial` (Exeris Commercial License, source-available) | 56 | Gateway substrate + building blocks + remaining Gateway policies, SB substrate + all platform caps (except `i18n`), all domain primitives except `token-issuer`, all AI Abstraction caps, the cross-cutting caps except `observability-bridge` |
 | `enterprise-private` (closed-source, Enterprise tier subscription only) | 1 | `exeris-caps-bot-fingerprinting` (depends on a kernel-tier SPI extension shipping in `exeris-kernel-enterprise`) |
 
-Total: 60 caps across the seven layers in §3.2.
+Total: 61 caps across the seven layers in §3.2.
 
 Native-bypass transport (QUIC/HTTP/3, `io_uring`, IOCP) is **not** a Tier 2 cap — it ships as part of the `exeris-kernel-enterprise` substrate driver (Tier 1), activated by Maven-coordinate swap. See §6.1 and §4 for the swap mechanism.
 
