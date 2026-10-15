@@ -4,7 +4,7 @@ type: reference
 visibility: public
 owning-repo: exeris-docs
 status: active
-last-verified: 2026-10-13
+last-verified: 2026-10-15
 ---
 
 # SKU Conventions
@@ -38,7 +38,7 @@ A Platform SKU is a named, version-pinned, commercial-licensed composition of Ti
      - **Gateway family:** Request forwarding and policy chains wired via `GatewayCoreModule`, `PolicyChain`, and `RequestRouter`.
 4. **Substrate driver-swap transparency.** `[L1: CapTierWall]`
    - The composition manifest (`composition.json`) and capability code must be **byte-identical** between Community and Enterprise deployments.
-   - SKUs reference only kernel SPIs (`eu.exeris.kernel.spi.*`).
+   - SKUs reference the kernel SPI (`eu.exeris.kernel.spi.*`) and the public (non-`internal`) API of `exeris-kernel-core`, never `eu.exeris.kernel.**.internal.**`. The SKU is where the kernel driver is chosen (ADR-024, 2026-10-15 amendment).
    - Swapping from Community (`exeris-kernel-community`) to Enterprise (`exeris-kernel-enterprise`) is strictly a Maven coordinate substitution or classpath driver selection, never a capability manifest change.
 5. **Licensing and source visibility.** `[L2: registry check]`
    - The composition manifest itself ships under the Exeris Commercial License (`commercial`).
