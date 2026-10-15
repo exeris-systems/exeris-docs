@@ -178,11 +178,10 @@ Resolving the base from the caller's checkout instead was considered: it validat
     two copies of the publishing jobs exist a check holds them to one text, and the file is removed
     with `docs-review.yml`.
   - **The required-check ruleset carries the new name, and a repository requires one name, never
-    both.** During the migration there are two rulesets, one per name: the one on the old name lists
-    the repositories whose job is still `docs-review`, the one on the new name lists those whose job
-    is `review`, and between them they list every repository whose caller sets `publish: true`. A
-    repository moves from one to the other in the change that renames its job. When the last has
-    moved, the old ruleset is deleted.
+    both.** There is one ruleset, `exeris-code-verdict`, and it requires `review / verdict`. Its
+    `include` lists only the repositories whose `guardrails.yml` calls `review.yml` from a job
+    `review`, and so publish that check; a repository is added to it in the change that renames its
+    job. A repository that has not moved has no required review check until it does.
 
   Alternatives considered and rejected: calling `publish-verdict.yml` from `review.yml`, which keeps
   one copy of the publishing jobs and makes the name `review / <job> / verdict`, three segments,
