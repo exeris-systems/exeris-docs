@@ -99,9 +99,9 @@ Enforcement actions are partitioned into three orthogonal levels:
 
 | Level | Failure Action | Applies To | Rationale |
 | :--- | :--- | :--- | :--- |
-| **`HARD`** | Throws `ContractBreachException` and terminates the JVM immediately. _(Amended 2026-10-06: aborts the boot; the kernel never exits the JVM.)_ | Unlicensed commercial capabilities, unauthorized environment class, signature invalidity, detached version mismatch. | Structural breach of copyright and contract; system has no right to execute. |
+| **`HARD`** | Throws `ContractBreachException` and terminates the JVM immediately. _(Amended 2026-10-06: aborts the boot; the kernel never exits the JVM.)_ | Unlicensed commercial capabilities, unauthorized environment class, signature invalidity, detached version mismatch. _(Amended 2026-10-22: a declared environment outside the signing key's scope is `HARD` whatever the manifest's rules say — see Amendments.)_ | Structural breach of copyright and contract; system has no right to execute. |
 | **`SOFT`** | Logs structured error to `STDERR`, attaches high-priority event to in-process JFR ring, system remains operational. | Node count exceeds `authorizedInstances` during emergency failover; manifest enters `gracePeriodDays` window. | Operational resilience: transient infrastructure anomalies or invoice delays must not cause cascading downtime. |
-| **`AUDIT`** | Telemetry records continuous metrics in local buffers for reconciliation; traffic is served with zero dropped packets. | Throughput bursts beyond `maxThroughputRps`, concurrent connections beyond `maxConnections`. _(Amended 2026-10-13: under a developer-key manifest the envelope is `HARD` — see Amendments.)_ | Commercial monetization: capacity overages are financial reconciliation matters (true-up), not availability faults. |
+| **`AUDIT`** | Telemetry records continuous metrics in local buffers for reconciliation; traffic is served with zero dropped packets. | Throughput bursts beyond `maxThroughputRps`, concurrent connections beyond `maxConnections`. _(Amended 2026-10-13: under a developer-key manifest the envelope is `HARD` — see Amendments.)_ _(Amended 2026-10-22: a manifest signed by a key without a workload ceiling may not set the envelope rule to `HARD` — see Amendments.)_ | Commercial monetization: capacity overages are financial reconciliation matters (true-up), not availability faults. |
 
 
 **Concrete obligations:**
@@ -232,7 +232,7 @@ Enforcement actions are partitioned into three orthogonal levels:
     contract authorizes the declared environment (`assertEnvironment`) and entitles every required
     capability (`assertCapability`), each at its enforcement level, and that the scope of the key that
     signed it covers the manifest and the class of every requirement (ADR-088, amendment of the same
-    date), always at `HARD`.
+    date), always at `HARD`. _(Amended 2026-10-22: the scope also covers the declared environment, at `HARD` whatever `enforcementRules` say — see Amendments.)_
   - A classpath that declares no requirement — the Community edition — is ungated in every environment,
     as `eca-specification.md` §4.1 requires: it needs no manifest, and one that is present is still
     verified.
@@ -260,11 +260,27 @@ Enforcement actions are partitioned into three orthogonal levels:
     and the issuance limits are ADR-088's, amendment of the same date. This is a scoped exception to §3,
     where the envelope is `AUDIT` because production traffic is never dropped: the developer key never
     entitles a production environment, so the traffic it throttles is traffic it was not entitled to
-    serve. Every other key keeps §3 unchanged.
+    serve. Every other key keeps §3 unchanged. _(Amended 2026-10-22: under a developer-key manifest the `capability` and `environment` rules must be `HARD`, and a manifest signed by any other key may not set the envelope rule to `HARD` — see Amendments.)_
   - **Residual limits**, stated as Trade-offs: offline verification cannot stop a manifest copied to
     another installation, because instance limits are `SOFT` and the envelope `AUDIT`, and a developer
     licence on a host that declares `development` boots there, throttled, marked and short-lived; and
     source-available code can be modified to remove the check, which the licence of ADR-023 answers.
+
+- **2026-10-22 — The declared environment must fall within the signing key's scope.** The check of the
+  2026-10-13 entry reads the manifest's `execution.environments` against the key's scope; the environment
+  the kernel declares was checked only through `assertEnvironment` at the level the manifest sets. When
+  the declared environment is outside the scope of the key that signed the manifest, the boot is refused
+  at `HARD` with its own code, whatever `enforcementRules` say. So a developer-key manifest never boots as
+  `production`, `environment: SOFT` included. In the §3 table the `HARD` row's "unauthorized environment
+  class" covers this case, and no manifest rule lowers it. ADR-088 states the rule and its code.
+
+- **2026-10-22 — Under a developer key, the capability and environment rules must be `HARD`.** A manifest
+  signed by a key with a workload ceiling must set the `capability` and `environment` rules of
+  `enforcementRules` to `HARD`; a lower level is refused at boot with a code of its own. Otherwise a
+  developer licence set to `AUDIT` would let a development boot run unlisted commercial capabilities. The
+  envelope is a different case: it is `HARD` under the developer key by the kernel's rule, and a manifest
+  signed by a key without a ceiling may not set it to `HARD` (ADR-088, amendment of the same date), so §3's
+  `AUDIT` for production traffic holds for every key that may serve production.
 
 ## Cross-references
 
