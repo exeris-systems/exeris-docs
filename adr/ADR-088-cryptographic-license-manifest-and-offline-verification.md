@@ -364,7 +364,7 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
     after it was signed.
   - **Workload ceiling.** A manifest signed by a key with a ceiling must carry
     `execution.workloadEnvelope` with `maxThroughputRps` and `maxConnections` at or below the ceiling and
-    `growthAllowancePercent` of `0`; an absent envelope reads as unlimited and is refused. The dev
+    `growthAllowancePercent` of `0`; an absent envelope reads as unlimited and is refused. _(Amended 2026-10-22: an absent `growthAllowancePercent` reads as `0`, while an absent `maxThroughputRps` or `maxConnections` is refused; a key without a ceiling may not set the envelope rule to `HARD`, and a key with one must set the capability and environment rules to `HARD` — see Amendments.)_ The dev
     ceiling is a policy value of 50 requests per second and 10 concurrent connections. Under a dev-key manifest the kernel enforces the envelope at `HARD`
     whatever `enforcementRules` say — a request beyond the rate is refused before its handler runs, and a
     connection beyond the ceiling is refused at accept — and every HTTP response carries the header
@@ -389,7 +389,7 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
     its key's scope, whose window exceeds its key's maximum, whose envelope exceeds its key's ceiling, or
     whose kernel declares a requirement of a
     class its key may not entitle is refused with an `EX-LIC` code of its own. `enforcementRules` do not
-    soften it: they are signed by the key whose authority is in question.
+    soften it: they are signed by the key whose authority is in question. _(Amended 2026-10-22: the declared runtime environment is a fifth scope check, and each breach has its own code with one layout per code — see Amendments.)_
   - **Epochs and rotation.** `<year>` is the year a key's epoch begins and `k<N>` its sequence within its
     family and year, so a replacement issued in the same year is `k2`. A version line keeps an epoch's
     public key for as long as manifests signed with it must boot (item 2). A compromised key is removed
@@ -418,6 +418,43 @@ _Step 1's two "If absent" branches are amended (2026-10-06, see Amendments): a m
   Community fallback in every environment. A manifest that is present is verified in every environment,
   including its key's scope. The two bullets of the 2026-10-06 entry that said otherwise are marked
   superseded.
+
+- **2026-10-22 — The declared runtime environment must fall within the signing key's scope.** The scope
+  check of the 2026-10-13 entry covers the environments the manifest lists. The environment the kernel
+  declares at run time is a separate input, and it was checked only through the `environment` rule of
+  `enforcementRules`, whose level the manifest sets. A developer-key manifest that set that rule to `SOFT`
+  would then boot as `production` after one warning, against the rule that the developer key never
+  authorizes a production environment. The rule is:
+  - When the environment the kernel declares is outside the signing key's environment scope, the boot is
+    refused at `HARD` with a code of its own, whatever `enforcementRules` say and whether or not the
+    manifest lists that environment.
+  - A developer-key manifest therefore never boots as anything but `development`, `environment: SOFT`
+    included.
+  - The check runs whenever a manifest is present, in every environment, with or without a declared
+    requirement.
+
+- **2026-10-22 — A key without a workload ceiling may not set the workload envelope rule to `HARD`.** A
+  manifest signed by a prod or ent key that sets the `workloadEnvelope` rule of `enforcementRules` to
+  `HARD` is a v1 schema violation: the manifest is rejected with `EX-LIC-0001`, never coerced to `AUDIT`
+  and never enforced. ADR-089 §3 and its Alternatives reject dropping production traffic for any
+  entitlement that may serve production, and the 2026-10-06 entry reads a manifest strictly, so a
+  level the kernel would not honour is refused rather than ignored. The envelope is `HARD` only under a
+  key with a ceiling, where the kernel sets it and the manifest cannot.
+
+- **2026-10-22 — Under a key with a workload ceiling, the capability and environment rules must be `HARD`.**
+  For a manifest signed by a key with a ceiling (the developer family), the `capability` and `environment`
+  rules of `enforcementRules` must each be `HARD`, whether stated or defaulted by the 2026-10-06 entry. A
+  lower level is refused at boot at `HARD` with a code of its own. Without it a developer licence with
+  those rules at `AUDIT` would let a development boot run commercial capabilities that the manifest does
+  not list, and the ceiling and the watermark would be the only limits left. A key without a ceiling keeps
+  the levels its manifest sets.
+
+- **2026-10-22 — Each scope breach has its own `EX-LIC` code.** A code has one argument layout, so the
+  breaches that differ in what they report do not share one. In the kernel's error-code registry, the
+  environment breach is `EX-LIC-0009`, validity `EX-LIC-0010`, workload ceiling `EX-LIC-0011`, entitlement
+  class `EX-LIC-0012`, and the enforcement level of a ceiling-key manifest `EX-LIC-0013`. The declared
+  runtime environment outside the key's scope reports under the environment code. The layouts are in the
+  kernel's error-code registry, not repeated here, so a layout changes in one place.
 
 ## Cross-references
 
