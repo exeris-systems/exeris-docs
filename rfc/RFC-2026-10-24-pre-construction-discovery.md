@@ -3,7 +3,7 @@ title: "RFC-2026-10-24: Where does pre-construction discovery live, and what doe
 type: rfc
 visibility: public
 owning-repo: exeris-docs
-status: accepted
+status: active
 last-verified: 2026-10-27
 ---
 
