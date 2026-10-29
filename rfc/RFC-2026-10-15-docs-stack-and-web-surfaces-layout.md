@@ -3,19 +3,19 @@ title: "RFC-2026-10-15: The docs stack and the web-surfaces layout"
 type: rfc
 visibility: public
 owning-repo: exeris-docs
-status: draft
-last-verified: 2026-10-15
+status: active
+last-verified: 2026-10-29
 ---
 
 # RFC-2026-10-15: The docs stack and the web-surfaces layout — should docs.exeris.eu stay on Docusaurus, and how are the sites that make up the public web presence split across domains and repositories?
 
 | Field             | Value |
 |:------------------|:------|
-| **Status**        | **DRAFT** |
+| **Status**        | **ACCEPTED** |
 | **Author(s)**     | arkstack-dev |
 | **Date Opened**   | 2026-10-15 |
-| **Date Closed**   | — |
-| **Target ADR(s)** | TBD — one ADR amending [ADR-085](../adr/ADR-085-documentation-architecture-and-repo-hygiene-standards.md) §A.4 (generator), plus one fixing the domain split |
+| **Date Closed**   | 2026-10-29 |
+| **Target ADR(s)** | The [ADR-085](../adr/ADR-085-documentation-architecture-and-repo-hygiene-standards.md) amendment of 2026-10-29 (§A.2–A.5, §B.6); the domain split is recorded below and has no ADR of its own |
 | **Affected Repos**| `exeris-docs` (ADR-085, a new `standards/messaging.md`), `exeris-web` (becomes a workspace), `exeris-benchmarks` (the lab's data source), `exeris-tooling` and `exeris-sdk` (the extraction path), the organisation `.github` repository (the community page's source) |
 | **Reviewers**     | — |
 
@@ -213,10 +213,10 @@ This RFC proposes no SPI, wire format or consumer contract; there is no testable
 
 | Field            | Value |
 |:-----------------|:------|
-| **Outcome**      | — |
-| **Date**         | — |
-| **Resulting ADR(s)** | — |
-| **Notes**        | — |
+| **Outcome**      | Accepted: Option B with the workspace layout |
+| **Date**         | 2026-10-29 |
+| **Resulting ADR(s)** | The ADR-085 amendment of 2026-10-29: `docs.exeris.eu` is the docs application of `exeris-web`, and the list of published files is its `projects/docs/sources.json` |
+| **Notes**        | The lab is at `lab.exeris.eu`, with a summary page at `exeris.eu/lab`. The docs read each source at `main` until the 1.0 releases, and at release tags, one version of the site per release, from then. The project blog is a later app in the same workspace; its relation to `blog.arkstack.dev` is undecided. The spike below was replaced by building the docs app: it renders the kernel, SDK, tooling and platform documents with links resolved through the list, without a version selector, which waits for 1.0. |
 
 ## Open questions / follow-ups
 

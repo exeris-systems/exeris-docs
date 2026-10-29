@@ -31,7 +31,7 @@ The cost of doing nothing is compounding: every new repo copies a slightly diffe
 
 ## 🏁 The Decision
 
-**Documentation stays federated in each repository's `docs/` tree, is aggregated by a Docusaurus build in `exeris-docs` and published at `docs.exeris.eu` on Cloudflare Pages; every doc carries a validated frontmatter block; commits, PRs, Javadoc, ADRs and agent files follow the standards in `exeris-docs/standards/`; structure is gated in CI, prose by review.**
+**Documentation stays federated in each repository's `docs/` tree, is aggregated by ~~a Docusaurus build in `exeris-docs`~~ the docs application of the `exeris-web` workspace *(amended 2026-10-29 — see `## Amendments`)* and published at `docs.exeris.eu`; every doc carries a validated frontmatter block; commits, PRs, Javadoc, ADRs and agent files follow the standards in `exeris-docs/standards/`; structure is gated in CI, prose by review.**
 
 The site is a projection. Source of truth remains annotated Markdown in Git, read directly by humans on GitHub and by agents through `exeris-ai-bridge`; the site never holds content that is not in a repo.
 
@@ -40,14 +40,14 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 ### A. Where documentation lives and how the site is built
 
 1. **Each repo owns `docs/`.** Narrative and record docs for a repo live under `<repo>/docs/` (exeris-docs, having no code, keeps `adr/`, `rfc/`, `standards/`, `templates/` and its canonical documents at root). No repo copies another repo's documents; cross-repo references use ADR-020 link stubs or links.
-2. **The federation build mirrors the sibling layout.** `exeris-docs/site/` holds the Docusaurus configuration and a `sources.yml` listing, per repo: the Git URL, the **source branch**, and a whitelist of root files to include (`README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `ROADMAP.md`, `MIGRATION*.md`). The build clones each public source into `content/<repo-name>/` preserving the inner path, so relative links resolve unchanged.
-3. **Public sources only.** `sources.yml` may list only repos whose visibility is `public` under ADR-020. A private repo name in that file fails the build.
-4. **Generator and host.** Docusaurus with `markdown.format: 'detect'`; a local-search plugin; `onBrokenLinks` and `onBrokenMarkdownLinks` set to `throw` (see Engineering Protocol for the ramp). Hosted on Cloudflare Pages with per-PR preview deployments, at `docs.exeris.eu`. Switching host requires no ADR; switching hostname does.
-5. **Astro Starlight is the named alternative** if a full-corpus build exceeds 10 minutes in CI; MkDocs, Zensical and Antora are not to be adopted without a superseding ADR.
+2. ~~**The federation build mirrors the sibling layout.** `exeris-docs/site/` holds the Docusaurus configuration and a `sources.yml` listing, per repo: the Git URL, the **source branch**, and a whitelist of root files to include (`README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `ROADMAP.md`, `MIGRATION*.md`). The build clones each public source into `content/<repo-name>/` preserving the inner path, so relative links resolve unchanged.~~ *(superseded 2026-10-29 — see `## Amendments`)* **The site publishes what one list names.** [`projects/docs/sources.json`](https://github.com/exeris-systems/exeris-web/blob/main/projects/docs/sources.json) in `exeris-web` lists, per source repository, the ref it is read at — the commit `main` points to until the 1.0 releases, a release tag from then (§L.36) — and every published file by path, in the sections the site shows. A root file is published only when it is listed, as a README is today. The build reads each listed file at that commit and publishes it when its frontmatter says `visibility: public` and `status: active`, or, for a file listed as a README, without frontmatter. A relative link to a published file becomes that page's route; any other relative link becomes the file's GitHub URL at the commit read. The 2026-09-05 obligation to rewrite an absolute organisation URL to an internal route applies to this build.
+3. **Public sources only.** ~~`sources.yml`~~ `sources.json` *(amended 2026-10-29)* may list only repos whose visibility is `public` under ADR-020. A private repo name in that file fails the build: the build reads file contents without credentials.
+4. **Generator and host.** ~~Docusaurus with `markdown.format: 'detect'`; a local-search plugin; `onBrokenLinks` and `onBrokenMarkdownLinks` set to `throw` (see Engineering Protocol for the ramp). Hosted on Cloudflare Pages with per-PR preview deployments, at `docs.exeris.eu`.~~ *(superseded 2026-10-29 — see `## Amendments`)* An Angular application in the `exeris-web` workspace (`projects/docs`), prerendered to static HTML, served from Cloudflare at `docs.exeris.eu`, and built under the same gates as `exeris.eu`: output verification, the security headers and no third-party requests. Markdown is rendered at build time through a sanitiser allow-list; a page loads no HTML string. A broken-link gate and full-text search are owed by that application before this protocol closes (item 7). Switching host requires no ADR; switching hostname does.
+5. ~~**Astro Starlight is the named alternative** if a full-corpus build exceeds 10 minutes in CI; MkDocs, Zensical and Antora are not to be adopted without a superseding ADR.~~ *(superseded 2026-10-29 — see `## Amendments`)* Replacing the generator is an amendment of §A.4.
 
 ### B. Format and metadata
 
-6. **Markdown is the only documentation source format.** No AsciiDoc, no generator-specific MDX components in files that live in repos (`.mdx` is permitted only inside `exeris-docs/site/`).
+6. **Markdown is the only documentation source format.** No AsciiDoc, no generator-specific MDX components in files that live in repos ~~(`.mdx` is permitted only inside `exeris-docs/site/`)~~ *(amended 2026-10-29: no `.mdx` anywhere; the site renders Markdown only — see `## Amendments`)*.
 7. **Every file under `docs/` and every canonical exeris-docs document carries a frontmatter block** validated in CI:
 
    ```yaml
@@ -173,6 +173,27 @@ The site is a projection. Source of truth remains annotated Markdown in Git, rea
 - Business ADRs (`BUS-NNN`) and portfolio-product internal namespaces.
 
 ## Amendments
+
+- **2026-10-29 — §A.2–A.5 and §B.6: `docs.exeris.eu` is the docs application of `exeris-web`, not
+  a Docusaurus build in `exeris-docs/site/`.** RFC-2026-10-15 is accepted with Option B: the docs
+  site is an app in the `exeris-web` workspace, where the gates that bind a figure to a claim and
+  keep readiness wording honest already run, so documentation is published under the same checks
+  as the landing. `site/` never held a tracked file. What moves: the list of published files is
+  `exeris-web`'s `projects/docs/sources.json`, which `exeris-web` maintains; it lists each file by
+  path rather than whitelisting root files per repository, and a file is published only when it is
+  listed and its frontmatter says `visibility: public` and `status: active`, so a repository
+  decides whether a page is public and `exeris-web` decides whether it is on the site. Until the
+  1.0 releases each source is read at the commit `main` points to; from 1.0, at release tags with
+  one version of the site per release, which is §L.36's trigger unchanged. What does not move:
+  §A.1, §A.3 (now enforced by reading file contents without credentials), the hostname, §B.7's
+  frontmatter, and the obligations of the 2026-09-05 amendment and item 7, which now fall on the
+  docs application: rewriting absolute organisation URLs to internal routes, and a broken-link
+  gate. Clone-and-mirror is not used, so a relative link resolves through the list: to a page when
+  its target is published, to GitHub at the commit read otherwise. Alternative considered and
+  rejected: Option A, Docusaurus as written, which keeps a second toolchain and a publishing path
+  with no claims gate in exchange for versioning, a sidebar and search that the docs app builds
+  itself. `standards/docs-style-guide.md` rules 1 and 8 and `standards/checklists/release-notes.md`
+  item 9 follow.
 
 - **2026-10-02 — §F.21c names the UI kit `@exeris/ui-kit`.** The gated TypeScript surface §F.21c
   lists moved from GitHub Packages, as `@exeris-systems/ui-kit`, to the public npm registry under the
