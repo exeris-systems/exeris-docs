@@ -17,5 +17,5 @@ last-verified: 2026-10-07
 6. **Numbers.** Any figure in the notes → report path + state; nothing from the Withdrawn list in `exeris-benchmarks/docs/CLAIMS.md`.
 7. **Narrative vs list.** Do the hand-written notes tell the story and the CHANGELOG list the facts — without duplicating each other?
 8. **Version.** `release(x.y.z):` commit, `-SNAPSHOT` bumped on `development/*`, Maven Central POM licence block present.
-9. **Docs.** Do the docs the release changes have `last-verified` bumped, and does the site build from the release branch named in `sources.yml`?
+9. **Docs.** Do the docs the release changes have `last-verified` bumped, and, from 1.0, does `exeris-web`'s `projects/docs/sources.json` read this repository at the release's tag?
 10. **Consumers.** Did the ai-bridge, Elevated, and any repo pinning this version get a heads-up line in *Cross-repo impact*?
